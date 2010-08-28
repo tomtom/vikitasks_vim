@@ -3,10 +3,9 @@
 " @GIT:         http://github.com/tomtom/vimtlib/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-05-23.
-" @Revision:    218
+" @Last Change: 2010-08-23.
+" @Revision:    221
 " GetLatestVimScripts: 0 0 :AutoInstall: vikitasks.vim
-" @TPluginBefore vikitasks\.vim @trag
 " Search for task lists and display them in a list
 
 

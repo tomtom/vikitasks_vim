@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-06-21.
-" @Revision:    0.0.613
+" @Last Change: 2010-08-28.
+" @Revision:    0.0.614
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -64,7 +64,7 @@ function! s:VikitasksRx(inline, sometasks, letters, levels) "{{{3
     let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
                 \ '#\(T: \+.\{-}'. a:letters .'.\{-}:\|'. 
                 \ '['. a:levels .']\?['. a:letters .']['. a:levels .']\?'.
-                \ '\( \+\(_\|[0-9%-]\+\)\)\?\) %s'
+                \ '\( \+\(_\|[0-9%-]\+\)\)\?\)\(\s%s\|$\)'
     return val
 endf
 
