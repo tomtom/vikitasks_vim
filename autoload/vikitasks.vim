@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-08-28.
-" @Revision:    0.0.614
+" @Last Change: 2010-09-13.
+" @Revision:    0.0.628
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -56,6 +56,10 @@ TLet g:vikitasks#cache = tlib#cache#Filename('vikitasks', 'files', 1)
 call add(g:tlib#cache#dont_purge, '[\/]vikitasks[\/]files$')
 
 " Definition of the tasks that should be included in the Alarms list.
+" Fields:
+"   all_tasks  ... If non-null, also display tasks with no due-date
+"   tasks      ... Either 'tasks' or 'sometasks'
+"   constraint ... See |:VikiTasks|
 TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'constraint': 14}
 
 " If true, the end-date of date ranges (FROM..TO) is significant.
@@ -355,7 +359,7 @@ function! s:MyFiles() "{{{3
     " TLogVAR files
     let files += s:Files()
     " TLogVAR files
-    if tlib#var#Get('vikitasks#intervikis', 'bg', 0)
+    if tlib#var#Get('vikitasks#intervikis', 'bg', 0) > 0
         call s:AddInterVikis(files)
     endif
     " TLogVAR files
