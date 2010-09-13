@@ -26,6 +26,8 @@ let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
 
 " If non-null, automatically add the homepages of your intervikis to 
 " |g:vikitasks#files|.
+" If the value is 2, scan all files (taking into account the interviki 
+" suffix) in the interviki's top directory.
 " Can be buffer-local.
 TLet g:vikitasks#intervikis = 0
 
@@ -373,16 +375,24 @@ endf
 function! s:AddInterVikis(files) "{{{3
     " TLogVAR a:files
     let ivignored = tlib#var#Get('vikitasks#intervikis_ignored', 'bg', [])
+    let glob = tlib#var#Get('vikitasks#intervikis', 'bg', 0) == 2
     for iv in viki#GetInterVikis()
         if index(ivignored, matchstr(iv, '^\u\+')) == -1
             " TLogVAR iv
             let def = viki#GetLink(1, '[['. iv .']]', 0, '')
             " TLogVAR def
-            let hp = def[1]
-            " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
-            if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
-                call add(a:files, hp)
+            if glob
+                let suffix = viki#InterVikiSuffix(iv)
+                let files = split(glob(tlib#file#Join([def[1]], '*'. suffix)), '\n')
+            else
+                let files = [def[1]]
             endif
+            for hp in files
+                " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
+                if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
+                    call add(a:files, hp)
+                endif
+            endfor
         endif
     endfor
 endf
