@@ -16,6 +16,13 @@ if !exists('g:loaded_tlib') || g:loaded_tlib < 39
         finish
     endif
 endif
+if !exists('g:loaded_viki') || g:loaded_viki < 319
+    runtime plugin/viki.vim
+    if !exists('g:loaded_viki') || g:loaded_viki < 319
+        echoerr 'viki >= 3.19 is required'
+        finish
+    endif
+endif
 if !exists('g:loaded_trag') || g:loaded_trag < 8
     runtime plugin/trag.vim
     if !exists('g:loaded_trag') || g:loaded_trag < 8
