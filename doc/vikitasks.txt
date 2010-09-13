@@ -201,6 +201,8 @@ g:vikitasks#files_ignored      (default: [])
 g:vikitasks#intervikis         (default: 0)
     If non-null, automatically add the homepages of your intervikis to 
     |g:vikitasks#files|.
+    If the value is 2, scan all files (taking into account the interviki 
+    suffix) in the interviki's top directory.
     Can be buffer-local.
 
                                                     *g:vikitasks#intervikis_ignored*
@@ -234,6 +236,10 @@ g:vikitasks#cache              (default: tlib#cache#Filename('vikitasks', 'files
                                                     *g:vikitasks#alarms*
 g:vikitasks#alarms             (default: {'all_tasks': 0, 'tasks': 'sometasks', 'constraint': 14})
     Definition of the tasks that should be included in the Alarms list.
+    Fields:
+      all_tasks  ... If non-null, also display tasks with no due-date
+      tasks      ... Either 'tasks' or 'sometasks'
+      constraint ... See |:VikiTasks|
 
                                                     *g:vikitasks#use_end_date*
 g:vikitasks#use_end_date       (default: 1)
