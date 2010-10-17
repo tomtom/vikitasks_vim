@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-09-13.
-" @Revision:    0.0.628
+" @Last Change: 2010-10-17.
+" @Revision:    0.0.642
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -65,6 +65,9 @@ TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'constraint': 1
 " If true, the end-date of date ranges (FROM..TO) is significant.
 TLet g:vikitasks#use_end_date = 1
 
+" Interpret entries with an unspecified date ("_") as current tasks.
+TLet g:vikitasks#use_unspecified_dates = 0
+
 
 function! s:VikitasksRx(inline, sometasks, letters, levels) "{{{3
     let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
@@ -81,7 +84,7 @@ exec 'TRagDefKind tasks viki /'. s:tasks_rx .'/'
 delf s:VikitasksRx
 
 
-let s:date_rx = '\C^\s*#[A-Z0-9]\+ \(\d\+-\d\+-\d\+\)\(\.\.\(\(\d\+-\d\+-\d\+\)\)\)\?'
+let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
 
 
 " :nodoc:
@@ -189,7 +192,7 @@ function! s:FilterTasks(tasks, args) "{{{3
     endif
 
     if !get(a:args, 'all_tasks', 0)
-        call filter(a:tasks, '!empty(s:GetTaskDueDate(v:val.text, 0))')
+        call filter(a:tasks, '!empty(s:GetTaskDueDate(v:val.text, 0, g:vikitasks#use_unspecified_dates))')
         " TLogVAR len(a:tasks)
         let constraint = get(a:args, 'constraint', '.')
         " TLogVAR constraint
@@ -264,7 +267,7 @@ function! s:MakePattern(pattern) "{{{3
 endf
 
 
-function! s:GetTaskDueDate(task, use_end_date) "{{{3
+function! s:GetTaskDueDate(task, use_end_date, use_unspecified) "{{{3
     let m = matchlist(a:task, s:date_rx)
     if a:use_end_date && g:vikitasks#use_end_date
         let rv = get(m, 3, '')
@@ -273,6 +276,9 @@ function! s:GetTaskDueDate(task, use_end_date) "{{{3
     endif
     if empty(rv)
         let rv = get(m, 1, '')
+    endif
+    if rv == '_' && !a:use_unspecified
+        let rv = ''
     endif
     " TLogVAR a:task, m, rv
     return rv
@@ -284,7 +290,7 @@ function! s:GetCurrentTask(qfl, daysdiff) "{{{3
     let i = 1
     let today = strftime('%Y-%m-%d')
     for qi in a:qfl
-        let qid = s:GetTaskDueDate(qi.text, 1)
+        let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates)
         " TLogVAR qid, today
         if !empty(qid) && tlib#date#DiffInDays(qid, today, 1) <= a:daysdiff
             let i += 1
@@ -299,8 +305,8 @@ endf
 function! s:SortTasks(a, b) "{{{3
     let a = a:a.text
     let b = a:b.text
-    let ad = s:GetTaskDueDate(a, 1)
-    let bd = s:GetTaskDueDate(b, 1)
+    let ad = s:GetTaskDueDate(a, 1, g:vikitasks#use_unspecified_dates)
+    let bd = s:GetTaskDueDate(b, 1, g:vikitasks#use_unspecified_dates)
     if ad && !bd
         return -1
     elseif !ad && bd
@@ -405,9 +411,11 @@ endf
 function! s:Select(text, from, to) "{{{3
     let sfrom = strftime('%Y-%m-%d', a:from)
     let sto = strftime('%Y-%m-%d', a:to)
-    let date1 = s:GetTaskDueDate(a:text, 0)
-    let date2 = s:GetTaskDueDate(a:text, 1)
-    if date1 == date2
+    let date1 = s:GetTaskDueDate(a:text, 0, g:vikitasks#use_unspecified_dates)
+    let date2 = s:GetTaskDueDate(a:text, 1, g:vikitasks#use_unspecified_dates)
+    if date1 == '_'
+        let rv = 1
+    elseif date1 == date2
         let rv = date1 >= sfrom && date1 <= sto
     else
         let rv = (date1 >= sfrom && date1 <= sto) || (date2 >= sfrom && date2 <= sto)
