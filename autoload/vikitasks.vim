@@ -3,12 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-10-17.
-" @Revision:    0.0.642
-
-let s:save_cpo = &cpo
-set cpo&vim
-" call tlog#Log('Load: '. expand('<sfile>')) " vimtlib-sfile
+" @Last Change: 2010-11-02.
+" @Revision:    0.0.653
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -433,8 +429,23 @@ function! vikitasks#AddBuffer(buffer, ...) "{{{3
     let files = s:Files()
     if filereadable(fname) && index(files, fname) == -1
         call add(files, fname)
-        let save = !vikitasks#ScanCurrentBuffer(fname)
-        if save
+        if save && !vikitasks#ScanCurrentBuffer(fname)
+            call s:SaveInfo(files, s:Tasks())
+        endif
+    endif
+endf
+
+
+" Unregister BUFFER as a file that should be scanned for task lists.
+function! vikitasks#RemoveBuffer(buffer, ...) "{{{3
+    TVarArg ['save', 1]
+    " TLogVAR a:buffer, save
+    let fname = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
+    let files = s:Files()
+    let fidx  = index(files, fname)
+    if fidx != -1
+        call remove(files, fidx)
+        if save && !vikitasks#ScanCurrentBuffer(fname)
             call s:SaveInfo(files, s:Tasks())
         endif
     endif
@@ -500,11 +511,11 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     if &buftype =~ '\<nofile\>' || (!empty(s:files_ignored) && filename =~ s:files_ignored) || !filereadable(filename) || isdirectory(filename) || empty(filename)
         return 0
     endif
-    let tasks = s:Tasks()
-    let ntasks = len(tasks)
+    let tasks0 = s:Tasks()
+    let ntasks = len(tasks0)
     let tasks = []
     let buftasks = {}
-    for task in s:Tasks()
+    for task in tasks0
         " TLogVAR task
         if s:CanonicFilename(task.filename) == filename
             " TLogVAR task.lnum, task
@@ -521,6 +532,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     let def = {'inline': 0, 'sometasks': 0, 'letters': 'A-Z', 'levels': '0-9'}
     let @r = rx
     let update = 0
+    let tasks_found = 0
     let lnum = 1
     " echom "DBG ". string(keys(buftasks))
     if use_buffer
@@ -528,6 +540,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     else
         let lines = readfile(filename)
     endif
+    " call filter(tasks, 'v:val.filename != filename')
     for line in lines
         let text = tlib#string#Strip(line)
         if line =~ '^%\s*vikitasks:'
@@ -552,6 +565,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
             let rx = s:VikitasksRx(def.inline, def.sometasks, def.letters, def.levels)
         elseif line =~ rx
             " TLogVAR text
+            let tasks_found = 1
             if get(get(buftasks, lnum, {}), 'text', '') != text
                 " TLogVAR lnum
                 " echom "DBG ". get(buftasks,lnum,'')
@@ -573,10 +587,10 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
         " TLogVAR update
         call vikitasks#AddBuffer(filename, 0)
         call s:SaveInfo(s:Files(), tasks)
+    elseif !tasks_found
+        call vikitasks#RemoveBuffer(filename, 0)
+        call s:SaveInfo(s:Files(), tasks)
     endif
     return update
 endf
 
-
-let &cpo = s:save_cpo
-unlet s:save_cpo
