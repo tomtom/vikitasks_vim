@@ -83,26 +83,28 @@ Also available via git: http://github.com/tomtom/vikitasks_vim/
 ========================================================================
 Contents~
 
-        g:vikitasks_startup_alarms .......... |g:vikitasks_startup_alarms|
-        g:vikitasks_scan_events ............. |g:vikitasks_scan_events|
-        :VikiTasks .......................... |:VikiTasks|
-        :VikiTasksAdd ....................... |:VikiTasksAdd|
-        :VikiTasksFiles ..................... |:VikiTasksFiles|
-        :VikiTasksAlarms .................... |:VikiTasksAlarms|
-        g:vikitasks#files ................... |g:vikitasks#files|
-        g:vikitasks#files_ignored ........... |g:vikitasks#files_ignored|
-        g:vikitasks#intervikis .............. |g:vikitasks#intervikis|
-        g:vikitasks#intervikis_ignored ...... |g:vikitasks#intervikis_ignored|
-        g:vikitasks#qfl_viewer .............. |g:vikitasks#qfl_viewer|
-        g:vikitasks#rx_letters .............. |g:vikitasks#rx_letters|
-        g:vikitasks#rx_levels ............... |g:vikitasks#rx_levels|
-        g:vikitasks#cache ................... |g:vikitasks#cache|
-        g:vikitasks#alarms .................. |g:vikitasks#alarms|
-        g:vikitasks#use_end_date ............ |g:vikitasks#use_end_date|
-        g:vikitasks#use_unspecified_dates ... |g:vikitasks#use_unspecified_dates|
-        vikitasks#Tasks ..................... |vikitasks#Tasks()|
-        vikitasks#AddBuffer ................. |vikitasks#AddBuffer()|
-        vikitasks#EditFiles ................. |vikitasks#EditFiles()|
+        g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
+        g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
+        :VikiTasks ............................ |:VikiTasks|
+        :VikiTasksAdd ......................... |:VikiTasksAdd|
+        :VikiTasksFiles ....................... |:VikiTasksFiles|
+        :VikiTasksAlarms ...................... |:VikiTasksAlarms|
+        g:vikitasks#files ..................... |g:vikitasks#files|
+        g:vikitasks#files_ignored ............. |g:vikitasks#files_ignored|
+        g:vikitasks#intervikis ................ |g:vikitasks#intervikis|
+        g:vikitasks#intervikis_ignored ........ |g:vikitasks#intervikis_ignored|
+        g:vikitasks#qfl_viewer ................ |g:vikitasks#qfl_viewer|
+        g:vikitasks#rx_letters ................ |g:vikitasks#rx_letters|
+        g:vikitasks#rx_levels ................. |g:vikitasks#rx_levels|
+        g:vikitasks#cache ..................... |g:vikitasks#cache|
+        g:vikitasks#alarms .................... |g:vikitasks#alarms|
+        g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
+        g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
+        g:vikitasks#remove_unreadable_files ... |g:vikitasks#remove_unreadable_files|
+        vikitasks#Tasks ....................... |vikitasks#Tasks()|
+        vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
+        vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
+        vikitasks#EditFiles ................... |vikitasks#EditFiles()|
 
 
 ========================================================================
@@ -250,6 +252,10 @@ g:vikitasks#use_end_date       (default: 1)
 g:vikitasks#use_unspecified_dates (default: 0)
     Interpret entries with an unspecified date ("_") as current tasks.
 
+                                                    *g:vikitasks#remove_unreadable_files*
+g:vikitasks#remove_unreadable_files (default: 1)
+    If true, remove unreadable files from the tasks list.
+
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''})
     If files is non-empty, use these files (glob patterns actually) 
@@ -258,6 +264,10 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
                                                     *vikitasks#AddBuffer()*
 vikitasks#AddBuffer(buffer, ...)
     Register BUFFER as a file that should be scanned for task lists.
+
+                                                    *vikitasks#RemoveBuffer()*
+vikitasks#RemoveBuffer(buffer, ...)
+    Unregister BUFFER as a file that should be scanned for task lists.
 
                                                     *vikitasks#EditFiles()*
 vikitasks#EditFiles()
