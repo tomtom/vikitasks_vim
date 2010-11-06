@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-11-02.
-" @Revision:    0.0.653
+" @Last Change: 2010-11-06.
+" @Revision:    0.0.664
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -63,6 +63,9 @@ TLet g:vikitasks#use_end_date = 1
 
 " Interpret entries with an unspecified date ("_") as current tasks.
 TLet g:vikitasks#use_unspecified_dates = 0
+
+" If true, remove unreadable files from the tasks list.
+TLet g:vikitasks#remove_unreadable_files = 1
 
 
 function! s:VikitasksRx(inline, sometasks, letters, levels) "{{{3
@@ -169,12 +172,28 @@ function! s:TasksList(qfl, args) "{{{3
 endf
 
 
+function! s:FileReadable(filename, cache) "{{{3
+    let readable = get(a:cache, a:filename, -1)
+    if readable >= 0
+        return readable
+    else
+        let a:cache[a:filename] = filereadable(a:filename)
+        return a:cache[a:filename]
+    endif
+endf
+
+
 function! s:FilterTasks(tasks, args) "{{{3
     " TLogVAR a:args
 
     let rx = get(a:args, 'rx', '')
     if !empty(rx)
         call filter(a:tasks, 'v:val.text =~ rx')
+    endif
+
+    if g:vikitasks#remove_unreadable_files
+        let filenames = {}
+        call filter(a:tasks, 's:FileReadable(v:val.filename, filenames)')
     endif
 
     let which_tasks = get(a:args, 'tasks', 'tasks')
