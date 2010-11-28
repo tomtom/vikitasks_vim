@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-11-06.
-" @Revision:    0.0.664
+" @Last Change: 2010-11-27.
+" @Revision:    0.0.667
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -307,7 +307,7 @@ function! s:GetCurrentTask(qfl, daysdiff) "{{{3
     for qi in a:qfl
         let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates)
         " TLogVAR qid, today
-        if !empty(qid) && tlib#date#DiffInDays(qid, today, 1) <= a:daysdiff
+        if !empty(qid) && qid != '_' && tlib#date#DiffInDays(qid, today, 1) <= a:daysdiff
             let i += 1
         else
             break

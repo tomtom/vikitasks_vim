@@ -3,9 +3,9 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-10-24.
-" @Revision:    225
-" GetLatestVimScripts: 0 0 :AutoInstall: vikitasks.vim
+" @Last Change: 2010-11-06.
+" @Revision:    226
+" GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
 
