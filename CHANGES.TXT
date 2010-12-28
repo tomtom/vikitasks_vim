@@ -1,0 +1,11 @@
+version: "0.03"
+  - g:vikitasks#remove_unreadable_files: Remove unreadable files
+  - FIX: remove buffers with no tasks from the list
+  - g:vikitasks#use_unspecified_dates: Interpret entries with an unspecified date ("_") as current tasks
+  - g:vikitasks_startup_alarms doesn't assume a special case for gtk
+  - Load viki if it wasn't loaded yet
+  - If g:vikitasks#intervikis == 2, scan all interviki pages (not just the homepage)
+  - Run VimEnter command immediately if !has('vim_stating')
+  - FIX: rx didn't match entries with no text
+  MD5 checksum: 206ae2edae833588398aebc24bada2c3
+
