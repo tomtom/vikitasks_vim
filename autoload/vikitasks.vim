@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-11-27.
-" @Revision:    0.0.667
+" @Last Change: 2010-12-28.
+" @Revision:    0.0.675
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -67,6 +67,15 @@ TLet g:vikitasks#use_unspecified_dates = 0
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
 
+" The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
+" :read: TLet g:vikitasks#inputlist_params = {...}
+TLet g:vikitasks#inputlist_params = {
+            \ 'trag_list_syntax': 'viki',
+            \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
+            \ 'trag_short_filename': 1,
+            \ 'scratch': '__VikiTasks__'
+            \ }
+
 
 function! s:VikitasksRx(inline, sometasks, letters, levels) "{{{3
     let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
@@ -109,16 +118,16 @@ function! vikitasks#GetArgs(bang, list) "{{{3
 endf
 
 
-" :display: vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''})
+" :display: vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
 " If files is non-empty, use these files (glob patterns actually) 
 " instead of those defined in |g:vikitasks#files|.
 function! vikitasks#Tasks(...) "{{{3
-    TVarArg ['args', {}]
+    TVarArg ['args', {}], ['suspend', 0]
 
     if get(args, 'cached', 1)
 
         let qfl = copy(s:Tasks())
-        call s:TasksList(qfl, args)
+        call s:TasksList(qfl, args, suspend)
 
     else
 
@@ -154,7 +163,7 @@ function! vikitasks#Tasks(...) "{{{3
             endfor
             call s:SaveInfo(s:Files(), tasks)
 
-            call s:TasksList(qfl, args)
+            call s:TasksList(qfl, args, suspend)
         else
             echom "VikiTasks: No task files"
         endif
@@ -163,12 +172,12 @@ function! vikitasks#Tasks(...) "{{{3
 endf
 
 
-function! s:TasksList(qfl, args) "{{{3
+function! s:TasksList(qfl, args, suspend) "{{{3
     call s:FilterTasks(a:qfl, a:args)
     call sort(a:qfl, "s:SortTasks")
     call setqflist(a:qfl)
     let i = s:GetCurrentTask(a:qfl, 0)
-    call s:View(i, 0)
+    call s:View(i, a:suspend)
 endf
 
 
@@ -248,14 +257,10 @@ endf
 
 function! s:View(index, suspend) "{{{3
     if empty(g:vikitasks#qfl_viewer)
-        let w = {}
+        let w = deepcopy(g:vikitasks#inputlist_params)
         if a:index > 1
             let w.initial_index = a:index
         endif
-        let w.trag_list_syntax = 'viki'
-        let w.trag_list_syntax_nextgroup = '@vikiPriorityListTodo'
-        let w.trag_short_filename = 1
-        let w.scratch = '__VikiTasks__'
         call trag#QuickList(w, a:suspend)
     else
         exec g:vikitasks#qfl_viewer

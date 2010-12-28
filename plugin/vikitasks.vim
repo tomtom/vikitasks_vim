@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-11-06.
-" @Revision:    226
+" @Last Change: 2010-12-28.
+" @Revision:    227
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -94,7 +94,8 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 " <   Show all current cached tasks (today or with a deadline in the 
 " past) in a specified list of files: >
 "         VikiTasks current Notes*.txt
-command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]))
+command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
+command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
 cabbr vikitasks VikiTasks
 
 
