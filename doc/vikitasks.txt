@@ -88,6 +88,7 @@ Contents~
         g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
         g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
         :VikiTasks ............................ |:VikiTasks|
+        :VikiTasksStatic ...................... |:VikiTasksStatic|
         :VikiTasksAdd ......................... |:VikiTasksAdd|
         :VikiTasksFiles ....................... |:VikiTasksFiles|
         :VikiTasksAlarms ...................... |:VikiTasksAlarms|
@@ -103,6 +104,8 @@ Contents~
         g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
         g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
         g:vikitasks#remove_unreadable_files ... |g:vikitasks#remove_unreadable_files|
+        g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
+        g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
         vikitasks#Tasks ....................... |vikitasks#Tasks()|
         vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
         vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
@@ -171,6 +174,9 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     past) in a specified list of files: >
             VikiTasks current Notes*.txt
 <
+
+                                                    *:VikiTasksStatic*
+:VikiTasksStatic
 
                                                     *:VikiTasksAdd*
 :VikiTasksAdd
@@ -258,8 +264,15 @@ g:vikitasks#use_unspecified_dates (default: 0)
 g:vikitasks#remove_unreadable_files (default: 1)
     If true, remove unreadable files from the tasks list.
 
+                                                    *g:vikitasks#inputlist_params*
+g:vikitasks#inputlist_params   (default: {...})
+    The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
+
+                                                    *g:vikitasks#inputlist_params*
+g:vikitasks#inputlist_params   (default: {)
+
                                                     *vikitasks#Tasks()*
-vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''})
+vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
     If files is non-empty, use these files (glob patterns actually) 
     instead of those defined in |g:vikitasks#files|.
 

@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2010-12-28.
-" @Revision:    0.0.675
+" @Last Change: 2011-12-25.
+" @Revision:    0.0.678
 
 
 " A list of glob patterns (or files) that will be searched for task 

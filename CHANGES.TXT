@@ -1,3 +1,19 @@
+CHANGES:
+
+0.1
+- Initial release
+
+0.2
+- :VikiTasks now takes a pattern as optional second argument. This 
+change makes the :VikiTasksGrep command obsolete, which was removed.
+- Moved the definition of some variables from plugin/vikitasks.vim to autoload/vikitasks.vim
+- Scan buffers on save
+- Require tlib 0.37
+- The arguments for :VikiTasks have changed
+
+0.3
+- vikitasks pseudo-mode-line: % vikitasks: letters=A-C:levels=1-3
+
 version: "0.03"
   - g:vikitasks#remove_unreadable_files: Remove unreadable files
   - FIX: remove buffers with no tasks from the list
@@ -5,7 +21,7 @@ version: "0.03"
   - g:vikitasks_startup_alarms doesn't assume a special case for gtk
   - Load viki if it wasn't loaded yet
   - If g:vikitasks#intervikis == 2, scan all interviki pages (not just the homepage)
-  - Run VimEnter command immediately if !has('vim_stating')
+  - Run VimEnter command immediately if !has('vim_starting')
   - FIX: rx didn't match entries with no text
   MD5 checksum: 206ae2edae833588398aebc24bada2c3
 

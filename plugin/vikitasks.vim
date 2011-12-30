@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2011-03-17.
-" @Revision:    228
+" @Last Change: 2011-12-25.
+" @Revision:    229
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -127,21 +127,3 @@ augroup END
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
-finish
-
-CHANGES:
-
-0.1
-- Initial release
-
-0.2
-- :VikiTasks now takes a pattern as optional second argument. This 
-change makes the :VikiTasksGrep command obsolete, which was removed.
-- Moved the definition of some variables from plugin/vikitasks.vim to autoload/vikitasks.vim
-- Scan buffers on save
-- Require tlib 0.37
-- The arguments for :VikiTasks have changed
-
-0.3
-- vikitasks pseudo-mode-line: % vikitasks: letters=A-C:levels=1-3
-
