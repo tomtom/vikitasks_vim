@@ -25,3 +25,10 @@ version: "0.03"
   - FIX: rx didn't match entries with no text
   MD5 checksum: 206ae2edae833588398aebc24bada2c3
 
+version: "0.04"
+  - s:GetCurrentTask(): skip pending tasks (date = '_')
+  - VikiTasksStatic (by tub78)
+  - .gitignore
+  - Don't check for has('vim_starting')
+  MD5 checksum: 2f8c5fc7e4399d35f9f0a8b9a4ea9fef
+
