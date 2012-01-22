@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2011-12-25.
-" @Revision:    0.0.678
+" @Last Change: 2012-01-22.
+" @Revision:    0.0.679
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -69,6 +69,7 @@ TLet g:vikitasks#remove_unreadable_files = 1
 
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
+" :nodoc:
 TLet g:vikitasks#inputlist_params = {
             \ 'trag_list_syntax': 'viki',
             \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',

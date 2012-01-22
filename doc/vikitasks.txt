@@ -105,7 +105,6 @@ Contents~
         g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
         g:vikitasks#remove_unreadable_files ... |g:vikitasks#remove_unreadable_files|
         g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
-        g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
         vikitasks#Tasks ....................... |vikitasks#Tasks()|
         vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
         vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
@@ -267,9 +266,6 @@ g:vikitasks#remove_unreadable_files (default: 1)
                                                     *g:vikitasks#inputlist_params*
 g:vikitasks#inputlist_params   (default: {...})
     The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
-
-                                                    *g:vikitasks#inputlist_params*
-g:vikitasks#inputlist_params   (default: {)
 
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
