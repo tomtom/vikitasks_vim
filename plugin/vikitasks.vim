@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-01-21.
-" @Revision:    230
+" @Last Change: 2012-02-17.
+" @Revision:    232
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -13,13 +13,6 @@ if !exists('g:loaded_tlib') || g:loaded_tlib < 39
     runtime plugin/02tlib.vim
     if !exists('g:loaded_tlib') || g:loaded_tlib < 39
         echoerr 'tlib >= 0.39 is required'
-        finish
-    endif
-endif
-if !exists('g:loaded_viki') || g:loaded_viki < 319
-    runtime plugin/viki.vim
-    if !exists('g:loaded_viki') || g:loaded_viki < 319
-        echoerr 'viki >= 3.19 is required'
         finish
     endif
 endif

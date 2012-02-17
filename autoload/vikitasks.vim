@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2012-02-17.
-" @Revision:    0.0.720
+" @Revision:    0.0.726
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -71,11 +71,14 @@ TLet g:vikitasks#use_unspecified_dates = 0
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
 
+" If true, provide tighter integration with the vim viki plugin.
+TLet g:vikitasks#use_viki = exists('g:loaded_viki')
+
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
 " :nodoc:
 TLet g:vikitasks#inputlist_params = {
-            \ 'trag_list_syntax': 'viki',
+            \ 'trag_list_syntax': g:vikitasks#use_viki ? 'viki' : '',
             \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
             \ 'trag_short_filename': 1,
             \ 'scratch': '__VikiTasks__'
@@ -92,7 +95,11 @@ endf
 
 let s:sometasks_rx = s:VikitasksRx(1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
 let s:tasks_rx = s:VikitasksRx(0, 0, 'A-Z', '0-9')
-exec 'TRagDefKind tasks viki /'. s:tasks_rx .'/'
+if g:vikitasks#use_viki
+    exec 'TRagDefKind tasks viki /'. s:tasks_rx .'/'
+else
+    exec 'TRagDefKind tasks * /'. s:tasks_rx .'/'
+endif
 
 delf s:VikitasksRx
 
@@ -146,7 +153,7 @@ function! vikitasks#Tasks(...) "{{{3
 
     else
 
-        if &filetype != 'viki' && !viki#HomePage()
+        if g:vikitasks#use_viki && &filetype != 'viki' && !viki#HomePage()
             echoerr "VikiTasks: Not a viki buffer and cannot open the homepage"
             return
         endif
@@ -432,28 +439,30 @@ endf
 
 
 function! s:AddInterVikis(files) "{{{3
-    " TLogVAR a:files
-    let ivignored = tlib#var#Get('vikitasks#intervikis_ignored', 'bg', [])
-    let glob = tlib#var#Get('vikitasks#intervikis', 'bg', 0) == 2
-    for iv in viki#GetInterVikis()
-        if index(ivignored, matchstr(iv, '^\u\+')) == -1
-            " TLogVAR iv
-            let def = viki#GetLink(1, '[['. iv .']]', 0, '')
-            " TLogVAR def
-            if glob
-                let suffix = viki#InterVikiSuffix(iv)
-                let files = split(glob(tlib#file#Join([def[1]], '*'. suffix)), '\n')
-            else
-                let files = [def[1]]
-            endif
-            for hp in files
-                " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
-                if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
-                    call add(a:files, hp)
+    if g:vikitasks#use_viki
+        " TLogVAR a:files
+        let ivignored = tlib#var#Get('vikitasks#intervikis_ignored', 'bg', [])
+        let glob = tlib#var#Get('vikitasks#intervikis', 'bg', 0) == 2
+        for iv in viki#GetInterVikis()
+            if index(ivignored, matchstr(iv, '^\u\+')) == -1
+                " TLogVAR iv
+                let def = viki#GetLink(1, '[['. iv .']]', 0, '')
+                " TLogVAR def
+                if glob
+                    let suffix = viki#InterVikiSuffix(iv)
+                    let files = split(glob(tlib#file#Join([def[1]], '*'. suffix)), '\n')
+                else
+                    let files = [def[1]]
                 endif
-            endfor
-        endif
-    endfor
+                for hp in files
+                    " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
+                    if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
+                        call add(a:files, hp)
+                    endif
+                endfor
+            endif
+        endfor
+    endif
 endf
 
 
