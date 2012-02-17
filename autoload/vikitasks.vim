@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2012-02-17.
-" @Revision:    0.0.713
+" @Revision:    0.0.720
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -48,7 +48,7 @@ TLet g:vikitasks#rx_levels = '1-5'
 
 " If non-empty, vikitasks will insert a break line when displaying a 
 " list in the background.
-TLet g:vikitasks#today = 'TODAY'
+TLet g:vikitasks#today = 'DUE'
 
 " Cache file name.
 " By default, use |tlib#cache#Filename()| to determine the file name.
@@ -200,7 +200,7 @@ endf
 function! s:Setqflist(qfl, today) "{{{3
     " TLogVAR a:today
     if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today < len(a:qfl) - 1
-        let break = repeat('--', (&columns - 20 - len(g:vikitasks#today)) / 4)
+        let break = repeat('^', (&columns - 20 - len(g:vikitasks#today)) / 2)
         let text = join([break, g:vikitasks#today, break])
         let qfl = insert(a:qfl, {'text': text}, a:today - 1)
         call setqflist(qfl)
