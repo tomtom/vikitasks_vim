@@ -105,6 +105,7 @@ function! vikitasks#GetArgs(bang, list) "{{{3
     let args = {}
     let args.cached = !a:bang
     let a0 = get(a:list, 0, '.')
+    let files_idx = 2
     if a0 =~ '^[@:]'
         let args.all_tasks = 1
         let args.tasks = 'tasks'
@@ -115,10 +116,11 @@ function! vikitasks#GetArgs(bang, list) "{{{3
         let args.constraint = a0
         if !empty(a:list)
             call remove(a:list, 0)
+            let files_idx -= 1
         endif
     endif
     let args.rx = s:MakePattern(get(a:list, 0, '.'))
-    let args.files = a:list[2:-1]
+    let args.files = a:list[files_idx : -1]
     return args
 endf
 
