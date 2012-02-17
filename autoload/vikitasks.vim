@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2012-02-17.
-" @Revision:    0.0.705
+" @Revision:    0.0.713
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -134,6 +134,14 @@ function! vikitasks#Tasks(...) "{{{3
     if get(args, 'cached', 1)
 
         let qfl = copy(s:Tasks())
+        let files = get(args, 'files', [])
+        if !empty(files)
+            for file in files
+                let file_rx = substitute(file, '\*', '.\\{-}', 'g')
+                let file_rx = substitute(file_rx, '?', '.', 'g')
+                call filter(qfl, '(has_key(v:val, "filename") ? v:val.filename : bufname(v:val.bufnr)) =~ file_rx')
+            endfor
+        endif
         call s:TasksList(qfl, args, suspend)
 
     else
