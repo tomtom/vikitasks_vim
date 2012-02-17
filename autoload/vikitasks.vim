@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-01-22.
-" @Revision:    0.0.679
+" @Last Change: 2012-02-17.
+" @Revision:    0.0.705
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -45,6 +45,10 @@ TLet g:vikitasks#rx_letters = 'A-W'
 " A user-defined value must be set in |vimrc| before the plugin is 
 " loaded.
 TLet g:vikitasks#rx_levels = '1-5'
+
+" If non-empty, vikitasks will insert a break line when displaying a 
+" list in the background.
+TLet g:vikitasks#today = 'TODAY'
 
 " Cache file name.
 " By default, use |tlib#cache#Filename()| to determine the file name.
@@ -174,11 +178,25 @@ endf
 
 
 function! s:TasksList(qfl, args, suspend) "{{{3
-    call s:FilterTasks(a:qfl, a:args)
-    call sort(a:qfl, "s:SortTasks")
-    call setqflist(a:qfl)
-    let i = s:GetCurrentTask(a:qfl, 0)
+    let qfl = a:qfl
+    call s:FilterTasks(qfl, a:args)
+    call sort(qfl, "s:SortTasks")
+    let i = s:GetCurrentTask(qfl, 0)
+    call s:Setqflist(qfl, a:suspend ? i : -1)
     call s:View(i, a:suspend)
+endf
+
+
+function! s:Setqflist(qfl, today) "{{{3
+    " TLogVAR a:today
+    if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today < len(a:qfl) - 1
+        let break = repeat('--', (&columns - 20 - len(g:vikitasks#today)) / 4)
+        let text = join([break, g:vikitasks#today, break])
+        let qfl = insert(a:qfl, {'text': text}, a:today - 1)
+        call setqflist(qfl)
+    else
+        call setqflist(a:qfl)
+    endif
 endf
 
 
@@ -510,7 +528,7 @@ function! vikitasks#Alarm(...) "{{{3
     call s:FilterTasks(tasks, alarms)
     if !empty(tasks)
         " TLogVAR tasks
-        call setqflist(tasks)
+        call s:Setqflist(tasks, s:GetCurrentTask(tasks, 0))
         call s:View(0, 1)
         redraw
     endif
