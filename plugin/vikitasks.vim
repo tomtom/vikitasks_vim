@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-02-17.
-" @Revision:    232
+" @Last Change: 2012-02-20.
+" @Revision:    233
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -109,7 +109,11 @@ command! -count VikiTasksAlarms call vikitasks#Alarm(<count>)
 augroup VikiTasks
     autocmd!
     if g:vikitasks_startup_alarms
-        autocmd VimEnter *  call vikitasks#Alarm()
+        if has('vim_starting')
+            autocmd VimEnter *  call vikitasks#Alarm()
+        else
+            call vikitasks#Alarm()
+        endif
     endif
     if !empty(g:vikitasks_scan_events)
         exec 'autocmd '. g:vikitasks_scan_events .' * if exists("b:vikiEnabled") && b:vikiEnabled | call vikitasks#ScanCurrentBuffer(expand("<afile>:p")) | endif'
