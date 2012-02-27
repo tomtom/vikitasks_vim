@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-02-17.
-" @Revision:    0.0.726
+" @Last Change: 2012-02-27.
+" @Revision:    0.0.794
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -30,6 +30,20 @@ TLet g:vikitasks#intervikis = 0
 " A list of ignored intervikis.
 " Can be buffer-local.
 TLet g:vikitasks#intervikis_ignored = []
+
+" If you use todo.txt (http://todotxt.com), set this variable to the 
+" full name of base directory where todo.txt is kept.
+" For display, lines in todo.txt are converted to viki task list syntax.
+TLet g:vikitasks#todotxt_dir = ''
+
+" If true, provide tighter integration with the vim viki plugin.
+TLet g:vikitasks#sources = {
+            \ 'viki': exists('g:loaded_viki'),
+            \ 'todotxt': !empty(g:vikitasks#todotxt_dir)
+            \ }
+
+" Default category/priority when converting tasks without priorities.
+TLet g:vikitasks#default_priority = 'F'
 
 " The viewer for the quickfix list. If empty, use |:TRagcw|.
 TLet g:vikitasks#qfl_viewer = ''
@@ -71,40 +85,44 @@ TLet g:vikitasks#use_unspecified_dates = 0
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
 
-" If true, provide tighter integration with the vim viki plugin.
-TLet g:vikitasks#use_viki = exists('g:loaded_viki')
-
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
 " :nodoc:
 TLet g:vikitasks#inputlist_params = {
-            \ 'trag_list_syntax': g:vikitasks#use_viki ? 'viki' : '',
+            \ 'trag_list_syntax': g:vikitasks#sources.viki ? 'viki' : '',
             \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
             \ 'trag_short_filename': 1,
             \ 'scratch': '__VikiTasks__'
             \ }
 
 
-function! s:VikitasksRx(inline, sometasks, letters, levels) "{{{3
-    let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
-                \ '#\(T: \+.\{-}'. a:letters .'.\{-}:\|'. 
-                \ '['. a:levels .']\?['. a:letters .']['. a:levels .']\?'.
-                \ '\( \+\(_\|[0-9%-]\+\)\)\?\)\(\s%s\|$\)'
+function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
+    if a:filetype == 'todotxt'
+        let val = '\C^\zs\(x\s\+\)\?\([0-9-]\+\s\+\)\?\([0-9-]\+\s\+\)\?\(('. a:letters .')\s\+\)\?.\+$'
+    else
+        let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
+                    \ '#\(T: \+.\{-}'. a:letters .'.\{-}:\|'. 
+                    \ '['. a:levels .']\?['. a:letters .']['. a:levels .']\?'.
+                    \ '\( \+\(_\|[0-9%-]\+\)\)\?\)\(\s%s\|$\)'
+    endif
     return val
 endf
 
-let s:sometasks_rx = s:VikitasksRx(1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
-let s:tasks_rx = s:VikitasksRx(0, 0, 'A-Z', '0-9')
-if g:vikitasks#use_viki
-    exec 'TRagDefKind tasks viki /'. s:tasks_rx .'/'
-else
-    exec 'TRagDefKind tasks * /'. s:tasks_rx .'/'
+let s:sometasks_viki_rx = s:TaskLineRx('viki', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
+let s:tasks_viki_rx = s:TaskLineRx('viki', 0, 0, 'A-Z', '0-9')
+if g:vikitasks#sources.viki
+    exec 'TRagDefKind tasks viki /'. s:tasks_viki_rx .'/'
 endif
-
-delf s:VikitasksRx
+if g:vikitasks#sources.todotxt
+    let s:sometasks_todotxt_rx = s:TaskLineRx('todotxt', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
+    let s:tasks_todotxt_rx = s:TaskLineRx('todotxt', 0, 0, 'A-Z', '0-9')
+    exec 'TRagDefKind tasks todotxt /'. s:tasks_todotxt_rx .'/'
+endif
+exec 'TRagDefKind tasks * /'. s:tasks_viki_rx .'/'
 
 
 let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
+let s:filetypes = {}
 
 
 " :nodoc:
@@ -153,7 +171,7 @@ function! vikitasks#Tasks(...) "{{{3
 
     else
 
-        if g:vikitasks#use_viki && &filetype != 'viki' && !viki#HomePage()
+        if g:vikitasks#sources.viki && &filetype != 'viki' && !viki#HomePage()
             echoerr "VikiTasks: Not a viki buffer and cannot open the homepage"
             return
         endif
@@ -176,11 +194,15 @@ function! vikitasks#Tasks(...) "{{{3
             " TLogVAR qfl
             " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
 
-            " TLogVAR qfl
             let tasks = copy(qfl)
             for i in range(len(tasks))
                 let bufnr = tasks[i].bufnr
-                let tasks[i].filename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
+                let filename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
+                let tasks[i].filename = filename
+                let filetype = get(s:filetypes, filename, '')
+                if filetype != 'viki'
+                    let tasks[i].text = s:Convert(tasks[i].text, filetype)
+                endif
                 call remove(tasks[i], 'bufnr')
             endfor
             call s:SaveInfo(s:Files(), tasks)
@@ -417,12 +439,15 @@ endf
 
 
 function! s:MyFiles() "{{{3
+    let s:filetypes = {}
     let files = copy(tlib#var#Get('vikitasks#files', 'bg', []))
     " TLogVAR files
     let files += s:Files()
     " TLogVAR files
-    if tlib#var#Get('vikitasks#intervikis', 'bg', 0) > 0
-        call s:AddInterVikis(files)
+    if g:vikitasks#sources.viki
+        if tlib#var#Get('vikitasks#intervikis', 'bg', 0) > 0
+            call s:AddInterVikis(files)
+        endif
     endif
     " TLogVAR files
     if !empty(s:files_ignored)
@@ -432,6 +457,21 @@ function! s:MyFiles() "{{{3
     if !has('fname_case') || !&shellslash
         call map(files, 's:CanonicFilename(v:val)')
     endif
+    " TLogVAR g:vikitasks#sources.todotxt
+    if g:vikitasks#sources.todotxt
+        let todotxt = tlib#file#Join([g:vikitasks#todotxt_dir, 'todo.txt'])
+        if !has('fname_case') || !&shellslash
+            let todotxt = s:CanonicFilename(todotxt)
+        endif
+        if filereadable(todotxt)
+            call add(files, todotxt)
+            let s:filetypes[todotxt] = 'todotxt'
+            if !has_key(g:trag_filenames, todotxt)
+                let g:trag_filenames[todotxt] = 'todotxt'
+            endif
+            " TLogVAR todotxt
+        endif
+    endif
     let files = tlib#list#Uniq(files)
     " TLogVAR files
     return files
@@ -439,7 +479,7 @@ endf
 
 
 function! s:AddInterVikis(files) "{{{3
-    if g:vikitasks#use_viki
+    if g:vikitasks#sources.viki
         " TLogVAR a:files
         let ivignored = tlib#var#Get('vikitasks#intervikis_ignored', 'bg', [])
         let glob = tlib#var#Get('vikitasks#intervikis', 'bg', 0) == 2
@@ -554,8 +594,26 @@ function! vikitasks#Alarm(...) "{{{3
 endf
 
 
-function! s:TasksRx(which_tasks) "{{{3
-    return printf(s:{a:which_tasks}_rx, '.*')
+function! s:TasksRx(which_tasks, ...) "{{{3
+    TVarArg ['filetype', 'viki']
+    return printf(s:{a:which_tasks}_{filetype}_rx, '.*')
+endf
+
+
+function! s:Convert(line, filetype) "{{{3
+    " <+TODO+>
+    if a:filetype == 'todotxt'
+        let line = substitute(a:line, '^\C(\([A-Z]\))\ze\s\+', '#\1', '')
+        if line !~# '^#\u'
+            let line = '#'. g:vikitasks#default_priority .' '. line
+        endif
+        let line = substitute(line, '^#\u\d*\s\(_\|[0-9-]\+\(\.\.[0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s\(@\S\+\)\ze\+\(\s\|$\)', '\4 \3', 'g')
+        let line = substitute(line, '^#\u\d*\s\(_\|[0-9-]\+\(\.\.[0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s+\(\S\+\)\ze\+\(\s\|$\)', ':\4 \3', 'g')
+        " TLogVAR line
+        return line
+    else
+        return a:line
+    endif
 endf
 
 
@@ -577,6 +635,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     let ntasks = len(tasks0)
     let tasks = []
     let buftasks = {}
+    let filetype = get(s:filetypes, filename, 'viki')
     for task in tasks0
         " TLogVAR task
         if s:CanonicFilename(task.filename) == filename
@@ -590,7 +649,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
         unlet task
     endfor
     " TLogVAR len(tasks)
-    let rx = s:TasksRx('tasks')
+    let rx = s:TasksRx('tasks', filetype)
     let def = {'inline': 0, 'sometasks': 0, 'letters': 'A-Z', 'levels': '0-9'}
     let @r = rx
     let update = 0
@@ -604,7 +663,9 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     endif
     " call filter(tasks, 'v:val.filename != filename')
     for line in lines
-        let text = tlib#string#Strip(line)
+        if filetype != 'viki'
+            let line = s:Convert(line, filetype)
+        endif
         if line =~ '^%\s*vikitasks:'
             let paramss = matchstr(line, '^%\s*vikitasks:\s*\zs.*$')
             " TLogVAR paramss
@@ -624,8 +685,9 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
                 endtry
                 unlet! var val
             endif
-            let rx = s:VikitasksRx(def.inline, def.sometasks, def.letters, def.levels)
+            let rx = s:TaskLineRx(filetype, def.inline, def.sometasks, def.letters, def.levels)
         elseif line =~ rx
+            let text = tlib#string#Strip(line)
             " TLogVAR text
             let tasks_found = 1
             if get(get(buftasks, lnum, {}), 'text', '') != text

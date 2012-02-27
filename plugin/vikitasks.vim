@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-02-20.
-" @Revision:    233
+" @Last Change: 2012-02-27.
+" @Revision:    235
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -16,17 +16,17 @@ if !exists('g:loaded_tlib') || g:loaded_tlib < 39
         finish
     endif
 endif
-if !exists('g:loaded_trag') || g:loaded_trag < 8
+if !exists('g:loaded_trag') || g:loaded_trag < 10
     runtime plugin/trag.vim
-    if !exists('g:loaded_trag') || g:loaded_trag < 8
-        echoerr 'trag >= 0.8 is required'
+    if !exists('g:loaded_trag') || g:loaded_trag < 10
+        echoerr 'trag >= 0.10 is required'
         finish
     endif
 endif
 if &cp || exists("loaded_vikitasks")
     finish
 endif
-let loaded_vikitasks = 4
+let loaded_vikitasks = 5
 
 let s:save_cpo = &cpo
 set cpo&vim
