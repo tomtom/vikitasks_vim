@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-02-27.
-" @Revision:    0.0.794
+" @Last Change: 2012-02-28.
+" @Revision:    0.0.811
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -98,7 +98,7 @@ TLet g:vikitasks#inputlist_params = {
 
 function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
     if a:filetype == 'todotxt'
-        let val = '\C^\zs\(x\s\+\)\?\([0-9-]\+\s\+\)\?\([0-9-]\+\s\+\)\?\(('. a:letters .')\s\+\)\?.\+$'
+        let val = '\C^\zs\(('. a:letters .')\s\+\|x\s\+\)\?\([0-9-]\+\s\+\)\{,2}.\+$'
     else
         let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
                     \ '#\(T: \+.\{-}'. a:letters .'.\{-}:\|'. 
@@ -607,8 +607,17 @@ function! s:Convert(line, filetype) "{{{3
         if line !~# '^#\u'
             let line = '#'. g:vikitasks#default_priority .' '. line
         endif
-        let line = substitute(line, '^#\u\d*\s\(_\|[0-9-]\+\(\.\.[0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s\(@\S\+\)\ze\+\(\s\|$\)', '\4 \3', 'g')
-        let line = substitute(line, '^#\u\d*\s\(_\|[0-9-]\+\(\.\.[0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s+\(\S\+\)\ze\+\(\s\|$\)', ':\4 \3', 'g')
+        for [rx, subst] in [
+                    \ ['^#\u\d*\s\([0-9-]\+\s\([0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s\(@\S\+\)\ze\+\(\s\|$\)', '\4 \3'],
+                    \ ['^#\u\d*\s\([0-9-]\+\s\([0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s+\(\S\+\)\ze\+\(\s\|$\)', ':\4 \3']
+                    \ ]
+            let line0 = ''
+            while line0 != line
+                let line0 = line
+                let line  = substitute(line, rx, subst, 'g')
+            endwh
+        endfor
+        let line = substitute(line, '^#\u\d*\s\zs\(.\{-}\s\)\?t:\([0-9-]\+\)\ze\(\s\|$\)', '\2 \1', 'g')
         " TLogVAR line
         return line
     else
