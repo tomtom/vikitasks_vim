@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-02-28.
-" @Revision:    0.0.811
+" @Last Change: 2012-03-08.
+" @Revision:    0.0.813
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -466,8 +466,8 @@ function! s:MyFiles() "{{{3
         if filereadable(todotxt)
             call add(files, todotxt)
             let s:filetypes[todotxt] = 'todotxt'
-            if !has_key(g:trag_filenames, todotxt)
-                let g:trag_filenames[todotxt] = 'todotxt'
+            if !trag#HasFiletype(todotxt)
+                call trag#SetFiletype('todotxt', todotxt)
             endif
             " TLogVAR todotxt
         endif
