@@ -612,9 +612,11 @@ function! s:Convert(line, filetype) "{{{3
                     \ ['^#\u\d*\s\([0-9-]\+\s\([0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s+\(\S\+\)\ze\+\(\s\|$\)', ':\4 \3']
                     \ ]
             let line0 = ''
-            while line0 != line
+            let iterations = 5
+            while line0 != line && iterations > 0
                 let line0 = line
                 let line  = substitute(line, rx, subst, 'g')
+                let iterations -= 1
             endwh
         endfor
         let line = substitute(line, '^#\u\d*\s\zs\(.\{-}\s\)\?t:\([0-9-]\+\)\ze\(\s\|$\)', '\2 \1', 'g')
