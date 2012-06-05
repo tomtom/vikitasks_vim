@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-03-08.
-" @Revision:    0.0.813
+" @Last Change: 2012-06-05.
+" @Revision:    0.0.824
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -26,6 +26,9 @@ let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
 " suffix) in the interviki's top directory.
 " Can be buffer-local.
 TLet g:vikitasks#intervikis = 0
+
+" If true, completely ignore completed tasks.
+TLet g:vikitasks#ignore_completed_tasks = 1
 
 " A list of ignored intervikis.
 " Can be buffer-local.
@@ -103,7 +106,7 @@ function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
         let val = '\C^[[:blank:]]'. (a:inline ? '*' : '\+') .'\zs'.
                     \ '#\(T: \+.\{-}'. a:letters .'.\{-}:\|'. 
                     \ '['. a:levels .']\?['. a:letters .']['. a:levels .']\?'.
-                    \ '\( \+\(_\|[0-9%-]\+\)\)\?\)\(\s%s\|$\)'
+                    \ '\( \+\(_\|x\?[0-9%-]\+\)\)\?\)\(\s%s\|$\)'
     endif
     return val
 endf
@@ -121,7 +124,7 @@ endif
 exec 'TRagDefKind tasks * /'. s:tasks_viki_rx .'/'
 
 
-let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
+let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(x\?\)\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
 let s:filetypes = {}
 
 
@@ -146,6 +149,7 @@ function! vikitasks#GetArgs(bang, list) "{{{3
     endif
     let args.rx = s:MakePattern(get(a:list, 0, '.'))
     let args.files = a:list[files_idx : -1]
+    let args.ignore_completed = g:vikitasks#ignore_completed_tasks
     return args
 endf
 
@@ -263,6 +267,11 @@ function! s:FilterTasks(tasks, args) "{{{3
         call filter(a:tasks, 's:FileReadable(v:val.filename, filenames)')
     endif
 
+    let ignore_completed = get(a:args, 'ignore_completed', g:vikitasks#ignore_completed_tasks)
+    if ignore_completed
+        call filter(a:tasks, 'empty(get(matchlist(v:val.text, s:date_rx), 1, ""))')
+    endif
+
     let which_tasks = get(a:args, 'tasks', 'tasks')
     " TLogVAR which_tasks
     if which_tasks == 'sometasks'
@@ -348,12 +357,12 @@ endf
 function! s:GetTaskDueDate(task, use_end_date, use_unspecified) "{{{3
     let m = matchlist(a:task, s:date_rx)
     if a:use_end_date && g:vikitasks#use_end_date
-        let rv = get(m, 3, '')
+        let rv = get(m, 4, '')
     else
         let rv = ''
     endif
     if empty(rv)
-        let rv = get(m, 1, '')
+        let rv = get(m, 2, '')
     endif
     if rv == '_' && !a:use_unspecified
         let rv = ''
