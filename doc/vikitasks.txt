@@ -95,10 +95,15 @@ Contents~
         g:vikitasks#files ..................... |g:vikitasks#files|
         g:vikitasks#files_ignored ............. |g:vikitasks#files_ignored|
         g:vikitasks#intervikis ................ |g:vikitasks#intervikis|
+        g:vikitasks#ignore_completed_tasks .... |g:vikitasks#ignore_completed_tasks|
         g:vikitasks#intervikis_ignored ........ |g:vikitasks#intervikis_ignored|
+        g:vikitasks#todotxt_dir ............... |g:vikitasks#todotxt_dir|
+        g:vikitasks#sources ................... |g:vikitasks#sources|
+        g:vikitasks#default_priority .......... |g:vikitasks#default_priority|
         g:vikitasks#qfl_viewer ................ |g:vikitasks#qfl_viewer|
         g:vikitasks#rx_letters ................ |g:vikitasks#rx_letters|
         g:vikitasks#rx_levels ................. |g:vikitasks#rx_levels|
+        g:vikitasks#today ..................... |g:vikitasks#today|
         g:vikitasks#cache ..................... |g:vikitasks#cache|
         g:vikitasks#alarms .................... |g:vikitasks#alarms|
         g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
@@ -115,7 +120,7 @@ Contents~
 plugin/vikitasks.vim~
 
                                                     *g:vikitasks_startup_alarms*
-g:vikitasks_startup_alarms     (default: !has('clientserver') || len(split(serverlist(), '\n')) <= 1)
+g:vikitasks_startup_alarms     (default: (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0)
     Show alarms on pending tasks.
     If 0, don't display alarms for pending tasks.
     If n > 0, display alarms for pending tasks or tasks with a deadline in n 
@@ -215,10 +220,28 @@ g:vikitasks#intervikis         (default: 0)
     suffix) in the interviki's top directory.
     Can be buffer-local.
 
+                                                    *g:vikitasks#ignore_completed_tasks*
+g:vikitasks#ignore_completed_tasks (default: 1)
+    If true, completely ignore completed tasks.
+
                                                     *g:vikitasks#intervikis_ignored*
 g:vikitasks#intervikis_ignored (default: [])
     A list of ignored intervikis.
     Can be buffer-local.
+
+                                                    *g:vikitasks#todotxt_dir*
+g:vikitasks#todotxt_dir        (default: '')
+    If you use todo.txt (http://todotxt.com), set this variable to the 
+    full name of base directory where todo.txt is kept.
+    For display, lines in todo.txt are converted to viki task list syntax.
+
+                                                    *g:vikitasks#sources*
+g:vikitasks#sources            (default: {)
+    If true, provide tighter integration with the vim viki plugin.
+
+                                                    *g:vikitasks#default_priority*
+g:vikitasks#default_priority   (default: 'F')
+    Default category/priority when converting tasks without priorities.
 
                                                     *g:vikitasks#qfl_viewer*
 g:vikitasks#qfl_viewer         (default: '')
@@ -237,6 +260,11 @@ g:vikitasks#rx_levels          (default: '1-5')
     |:VikiTasks|.
     A user-defined value must be set in |vimrc| before the plugin is 
     loaded.
+
+                                                    *g:vikitasks#today*
+g:vikitasks#today              (default: 'DUE')
+    If non-empty, vikitasks will insert a break line when displaying a 
+    list in the background.
 
                                                     *g:vikitasks#cache*
 g:vikitasks#cache              (default: tlib#cache#Filename('vikitasks', 'files', 1))
