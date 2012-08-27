@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-06-05.
-" @Revision:    0.0.824
+" @Last Change: 2012-08-27.
+" @Revision:    0.0.825
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -499,7 +499,7 @@ function! s:AddInterVikis(files) "{{{3
                 " TLogVAR def
                 if glob
                     let suffix = viki#InterVikiSuffix(iv)
-                    let files = split(glob(tlib#file#Join([def[1]], '*'. suffix)), '\n')
+                    let files = split(glob(tlib#file#Join([def[1]], '**/*'. suffix)), '\n')
                 else
                     let files = [def[1]]
                 endif
