@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-08-27.
-" @Revision:    0.0.825
+" @Last Change: 2012-09-17.
+" @Revision:    0.0.879
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -98,6 +98,19 @@ TLet g:vikitasks#inputlist_params = {
             \ 'scratch': '__VikiTasks__'
             \ }
 
+" Mapleader for some vikitasks related maps.
+TLet g:vikitasks#mapleader = exists('g:vikiMapLeader') ? g:vikiMapLeader : '<LocalLeader>v'
+
+" A vim expression that returns the filename of the archive where 
+" archived tasks should be moved to.
+TLet g:vikitasks#archive_filename_expr = 'expand("%:p:r") ."_archived". g:vikiNameSuffix'
+
+" A list of strings. The header for newly created tasks archives.
+TLet g:vikitasks#archive_header = ['* Archived tasks']
+
+" The date format string (see |strftime()|) for archived entries.
+TLet g:vikitasks#archive_date_fmt = '** %Y-%m-%d'
+
 
 function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
     if a:filetype == 'todotxt'
@@ -111,17 +124,29 @@ function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
     return val
 endf
 
+
+function! s:TasksRx(which_tasks, ...) "{{{3
+    TVarArg ['filetype', 'viki']
+    let fmt = s:{a:which_tasks}_{filetype}_rx
+    if fmt =~ '%s'
+        return printf(fmt, '.*')
+    else
+        return fmt
+    endif
+endf
+
+
 let s:sometasks_viki_rx = s:TaskLineRx('viki', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
 let s:tasks_viki_rx = s:TaskLineRx('viki', 0, 0, 'A-Z', '0-9')
 if g:vikitasks#sources.viki
-    exec 'TRagDefKind tasks viki /'. s:tasks_viki_rx .'/'
+    exec 'TRagDefKind tasks viki /'. s:TasksRx('tasks', 'viki') .'/'
 endif
 if g:vikitasks#sources.todotxt
     let s:sometasks_todotxt_rx = s:TaskLineRx('todotxt', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
     let s:tasks_todotxt_rx = s:TaskLineRx('todotxt', 0, 0, 'A-Z', '0-9')
-    exec 'TRagDefKind tasks todotxt /'. s:tasks_todotxt_rx .'/'
+    exec 'TRagDefKind tasks todotxt /'. s:TasksRx('tasks', 'todotxt') .'/'
 endif
-exec 'TRagDefKind tasks * /'. s:tasks_viki_rx .'/'
+exec 'TRagDefKind tasks * /'. s:TasksRx('tasks', 'viki') .'/'
 
 
 let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(x\?\)\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
@@ -603,12 +628,6 @@ function! vikitasks#Alarm(...) "{{{3
 endf
 
 
-function! s:TasksRx(which_tasks, ...) "{{{3
-    TVarArg ['filetype', 'viki']
-    return printf(s:{a:which_tasks}_{filetype}_rx, '.*')
-endf
-
-
 function! s:Convert(line, filetype) "{{{3
     " <+TODO+>
     if a:filetype == 'todotxt'
@@ -705,7 +724,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
                 endtry
                 unlet! var val
             endif
-            let rx = s:TaskLineRx(filetype, def.inline, def.sometasks, def.letters, def.levels)
+            let rx = printf(s:TaskLineRx(filetype, def.inline, def.sometasks, def.letters, def.levels), '.*')
         elseif line =~ rx
             let text = tlib#string#Strip(line)
             " TLogVAR text
@@ -737,4 +756,77 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     endif
     return update
 endf
+
+
+function! vikitasks#ItemMarkDone(count) "{{{3
+    let rx = s:TasksRx('tasks')
+    " TLogVAR rx
+    for lnum in range(line('.'), line('.') + a:count)
+        let line = getline(lnum)
+        " TLogVAR lnum, line
+        " echom "DBG" string(line =~ rx) string(line !~ '^\C\s*#X')
+        if line =~ rx && line !~ '^\C\s*#X'
+            let line = substitute(line, '^\C\s*#\zs\u', 'X', '')
+            " TLogVAR line
+            call setline(lnum, line)
+        endif
+    endfor
+endf
+
+
+function! vikitasks#ItemArchiveDone() "{{{3
+    if empty(g:vikitasks#archive_filename_expr)
+        echom "vikitasks: Cannot archive tasks: g:vikitasks#archive_filename_expr is empty"
+    else
+        let archive_filename = eval(g:vikitasks#archive_filename_expr)
+        if filereadable(archive_filename)
+            let archived = readfile(archive_filename)
+        else
+            let archived = copy(g:vikitasks#archive_header)
+        endif
+        let to_be_archived = []
+        let clnum = line('.')
+        for lnum in reverse(range(1, line('$')))
+            let line = getline(lnum)
+            if line =~ '\C^\s*#X' || line =~ '\C^\s\+#\(\u\d\|\d\u\)\s\+x[ [:digit:]]'
+                call insert(to_be_archived, line)
+                if lnum <= clnum
+                    norm! k
+                endif
+                exec lnum 'delete'
+            endif
+        endfor
+        if !empty(to_be_archived)
+            if !empty(g:vikitasks#archive_date_fmt)
+                let archived += ['', strftime(g:vikitasks#archive_date_fmt)]
+            endif
+            let archived += to_be_archived
+            call writefile(archived, archive_filename)
+        endif
+    endif
+endf
+
+
+function! vikitasks#ListTaskFiles() "{{{3
+    let files = s:MyFiles()
+    let selected = tlib#input#List('m', 'Select files:', files)
+    for file in selected
+        exec 'edit' fnameescape(file)
+    endfor
+endf
+
+
+function! vikitasks#ItemMarkDueInDays(count) "{{{3
+    for lnum in range(line('.'), line('.') + a:count)
+        throw "TODO: Not yet implemented"
+    endfor
+endf
+
+
+function! vikitasks#ItemMarkDueInWeeks(count) "{{{3
+    for lnum in range(line('.'), line('.') + a:count)
+        throw "TODO: Not yet implemented"
+    endfor
+endf
+
 
