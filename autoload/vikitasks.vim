@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2012-09-17.
-" @Revision:    0.0.879
+" @Last Change: 2012-09-19.
+" @Revision:    0.0.979
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -95,11 +95,30 @@ TLet g:vikitasks#inputlist_params = {
             \ 'trag_list_syntax': g:vikitasks#sources.viki ? 'viki' : '',
             \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
             \ 'trag_short_filename': 1,
-            \ 'scratch': '__VikiTasks__'
+            \ 'scratch': '__VikiTasks__',
+            \ 'key_map': {
+            \     'default': {
+            \         "\<f2>" : {'key': "\<f2>", 'agent': 'vikitasks#AgentKeymap', 'key_name': '<f2>', 'help': 'Switch to vikitasks keymap'},
+            \             24 : {'key': 24, 'agent': 'vikitasks#AgentMarkDone', 'key_name': '<c-x>', 'help': 'Mark done'},
+            \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
+            \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+            \     },
+            \     'vikitasks': extend(copy(g:tlib_keyagents_InputList_s),
+            \         {
+            \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
+            \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
+            \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
+            \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
+            \         }
+            \     )
+            \ }
             \ }
 
 " Mapleader for some vikitasks related maps.
-TLet g:vikitasks#mapleader = exists('g:vikiMapLeader') ? g:vikiMapLeader : '<LocalLeader>v'
+TLet g:vikitasks#mapleader = '<LocalLeader>t'
+
+" If true, add a date tag when marking a task done with |vikitasks#ItemMarkDone()|.
+TLet g:vikitasks#done_add_date = 1
 
 " A vim expression that returns the filename of the archive where 
 " archived tasks should be moved to.
@@ -110,6 +129,18 @@ TLet g:vikitasks#archive_header = ['* Archived tasks']
 
 " The date format string (see |strftime()|) for archived entries.
 TLet g:vikitasks#archive_date_fmt = '** %Y-%m-%d'
+
+" Letters of final categories, i.e. tasks that should not be altered 
+" after assigning them to one of these categories.
+"
+" Tasks in these categories will be considered suitable candidates for 
+" automatic archival by |vikitasks#ItemArchiveFinal()|.
+"
+" By default the following categories are considered final:
+"   X ... done
+"   Y ... cancelled
+"   Z ... ???
+TLet g:vikitasks#final_categories = 'XYZ'
 
 
 function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
@@ -139,17 +170,20 @@ endf
 let s:sometasks_viki_rx = s:TaskLineRx('viki', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
 let s:tasks_viki_rx = s:TaskLineRx('viki', 0, 0, 'A-Z', '0-9')
 if g:vikitasks#sources.viki
-    exec 'TRagDefKind tasks viki /'. s:TasksRx('tasks', 'viki') .'/'
+    exec 'TRagDefKind tasks viki /'. s:tasks_viki_rx .'/'
+    exec 'TRagDefKind sometasks viki /'. s:sometasks_viki_rx .'/'
 endif
 if g:vikitasks#sources.todotxt
     let s:sometasks_todotxt_rx = s:TaskLineRx('todotxt', 1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
     let s:tasks_todotxt_rx = s:TaskLineRx('todotxt', 0, 0, 'A-Z', '0-9')
-    exec 'TRagDefKind tasks todotxt /'. s:TasksRx('tasks', 'todotxt') .'/'
+    exec 'TRagDefKind tasks todotxt /'. s:tasks_todotxt_rx .'/'
+    exec 'TRagDefKind sometasks todotxt /'. s:sometasks_todotxt_rx .'/'
 endif
-exec 'TRagDefKind tasks * /'. s:TasksRx('tasks', 'viki') .'/'
+exec 'TRagDefKind tasks * /'. s:tasks_viki_rx .'/'
+exec 'TRagDefKind sometasks * /'. s:sometasks_viki_rx .'/'
 
 
-let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\(x\?\)\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\s'
+let s:date_rx = '\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\ze\s'
 let s:filetypes = {}
 
 
@@ -159,22 +193,24 @@ function! vikitasks#GetArgs(bang, list) "{{{3
     let args.cached = !a:bang
     let a0 = get(a:list, 0, '.')
     let files_idx = 2
-    if a0 =~ '^[@:]'
-        let args.all_tasks = 1
-        let args.tasks = 'tasks'
-        let args.constraint = '.'
-    else
+    " TLogVAR a0
+    if a0 =~ '^\(t\%[oday]\|c\%[urrent]\|w\%[eek]\|m\%[onth]\|[+-]\?\d\+[dwm]\?\|[.*]\)$'
         let args.all_tasks = a0 =~ '^[.*]$'
-        let args.tasks = a0 == '*' ? 'tasks' : 'sometasks'
+        let args.tasks = a0 =~ '^[*-]' ? 'tasks' : 'sometasks'
         let args.constraint = a0
         if !empty(a:list)
             call remove(a:list, 0)
             let files_idx -= 1
         endif
+    else
+        let args.all_tasks = 1
+        let args.tasks = 'sometasks'
+        let args.constraint = '.'
     endif
     let args.rx = s:MakePattern(get(a:list, 0, '.'))
     let args.files = a:list[files_idx : -1]
     let args.ignore_completed = g:vikitasks#ignore_completed_tasks
+    " TLogVAR args
     return args
 endf
 
@@ -260,7 +296,7 @@ function! s:Setqflist(qfl, today) "{{{3
     if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today < len(a:qfl) - 1
         let break = repeat('^', (&columns - 20 - len(g:vikitasks#today)) / 2)
         let text = join([break, g:vikitasks#today, break])
-        let qfl = insert(a:qfl, {'text': text}, a:today - 1)
+        let qfl = insert(a:qfl, {'bufnr': 0, 'text': text}, a:today - 1)
         call setqflist(qfl)
     else
         call setqflist(a:qfl)
@@ -312,11 +348,11 @@ function! s:FilterTasks(tasks, args) "{{{3
         " TLogVAR len(a:tasks)
         let constraint = get(a:args, 'constraint', '.')
         " TLogVAR constraint
-        if match(constraint, '^\(+\?\)\(\d\+\)') == -1
+        if constraint !~ '^[+-]\?\d\+'
             let future = ''
             let n = 1
         else
-            let [m0, future, n; _] = matchlist(constraint, '^\(+\?\)\(\d\+\)')
+            let [m0, future, n; _] = matchlist(constraint, '^\([+-]\?\)\(\d\+\)')
         endif
         let from = empty(future) ? 0 : localtime()
         let to = 0
@@ -328,14 +364,21 @@ function! s:FilterTasks(tasks, args) "{{{3
             let to = localtime()
         elseif constraint =~ '^m\%[onth]'
             let to = localtime() + 86400 * 31
-        elseif constraint == 'week'
+        elseif constraint == 'w\%[eek]'
             let to = localtime() + 86400 * 7
-        elseif constraint =~ '^+\?\d\+m$'
-            let to = localtime() + n * 86400 * 31
-        elseif constraint =~ '^+\?\d\+w$'
-            let to = localtime() + n * 86400 * 7
-        elseif constraint =~ '^+\?\d\+d\?$'
-            let to = localtime() + n * 86400
+        elseif constraint =~ '^[+-]\?\d\+[dwm]\?$'
+            let to = localtime()
+            let delta = n * 86400
+            if constraint =~ 'w$'
+                let delta = delta * 7
+            elseif constraint =~ 'm$'
+                let delta = delta * 31
+            endif
+            if constraint =~ '^-'
+                let from -= delta
+            else
+                let to += delta
+            endif
         else
             echoerr "vikitasks: Malformed constraint: ". constraint
         endif
@@ -758,15 +801,27 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
 endf
 
 
+" Mark a N tasks as done, i.e. assign them to category X -- see also 
+" |g:vikitasks#final_categories|.
 function! vikitasks#ItemMarkDone(count) "{{{3
     let rx = s:TasksRx('tasks')
     " TLogVAR rx
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         " TLogVAR lnum, line
-        " echom "DBG" string(line =~ rx) string(line !~ '^\C\s*#X')
-        if line =~ rx && line !~ '^\C\s*#X'
+        if line =~ rx && line !~ '^\C\s*#'. s:FinalRx()
             let line = substitute(line, '^\C\s*#\zs\u', 'X', '')
+            if g:vikitasks#done_add_date
+                let idx = matchend(line, s:date_rx)
+                if idx == -1
+                    let idx = matchend(line, '^\C\s*#\u\d*\ze\s')
+                endif
+                if idx != -1
+                    let line = strpart(line, 0, idx)
+                                \ . strftime(' :done:%Y-%m-%d')
+                                \ . strpart(line, idx)
+                endif
+            endif
             " TLogVAR line
             call setline(lnum, line)
         endif
@@ -774,7 +829,8 @@ function! vikitasks#ItemMarkDone(count) "{{{3
 endf
 
 
-function! vikitasks#ItemArchiveDone() "{{{3
+" Archive final (see |g:vikitasks#final_categories|) tasks.
+function! vikitasks#ItemArchiveFinal() "{{{3
     if empty(g:vikitasks#archive_filename_expr)
         echom "vikitasks: Cannot archive tasks: g:vikitasks#archive_filename_expr is empty"
     else
@@ -788,7 +844,7 @@ function! vikitasks#ItemArchiveDone() "{{{3
         let clnum = line('.')
         for lnum in reverse(range(1, line('$')))
             let line = getline(lnum)
-            if line =~ '\C^\s*#X' || line =~ '\C^\s\+#\(\u\d\|\d\u\)\s\+x[ [:digit:]]'
+            if line =~ '\C^\s*#'. s:FinalRx() || line =~ '\C^\s\+#\(\u\d\|\d\u\)\s\+x[ [:digit:]]'
                 call insert(to_be_archived, line)
                 if lnum <= clnum
                     norm! k
@@ -807,8 +863,9 @@ function! vikitasks#ItemArchiveDone() "{{{3
 endf
 
 
+" Edit a file monitored by vikitasks.
 function! vikitasks#ListTaskFiles() "{{{3
-    let files = s:MyFiles()
+    let files = s:Files()
     let selected = tlib#input#List('m', 'Select files:', files)
     for file in selected
         exec 'edit' fnameescape(file)
@@ -816,17 +873,63 @@ function! vikitasks#ListTaskFiles() "{{{3
 endf
 
 
-function! vikitasks#ItemMarkDueInDays(count) "{{{3
+" Mark a tasks as due in N days.
+function! vikitasks#ItemMarkDueInDays(count, days) "{{{3
+    " TLogVAR a:count, a:days
+    let duedate = strftime('%Y-%m-%d', localtime() + a:days * g:tlib#date#dayshift)
+    let rx = s:TasksRx('tasks')
     for lnum in range(line('.'), line('.') + a:count)
-        throw "TODO: Not yet implemented"
+        let line = getline(lnum)
+        if line =~ rx && line =~ s:date_rx && line !~ '^\C\s*#'. s:FinalRx()
+            let m = matchlist(line, s:date_rx)
+            if !empty(get(m, 4, ''))
+                let subst = '\1\2..'. duedate
+            else
+                let subst = '\1'. duedate
+            endif
+            let line1 = substitute(line, s:date_rx, subst, '')
+            call setline(lnum, line1)
+        endif
     endfor
 endf
 
 
-function! vikitasks#ItemMarkDueInWeeks(count) "{{{3
-    for lnum in range(line('.'), line('.') + a:count)
-        throw "TODO: Not yet implemented"
-    endfor
+" Mark a tasks as due in N weeks.
+function! vikitasks#ItemMarkDueInWeeks(count, weeks) "{{{3
+    " TLogVAR a:count, a:weeks
+    call vikitasks#ItemMarkDueInDays(a:count, a:weeks * 7)
 endf
 
+
+function! s:FinalRx() "{{{3
+    return printf('\C[%s]', g:vikitasks#final_categories)
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentKeymap(world, selected) "{{{3
+    let a:world.key_mode = 'vikitasks'
+    let a:world.state = 'display'
+    return a:world
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentMarkDone(world, selected) "{{{3
+    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDone')
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentDueDays(world, selected) "{{{3
+    let val = input("Number of days: ", 1)
+    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentDueWeeks(world, selected) "{{{3
+    let val = input("Number of weeks: ", 1)
+    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+endf
 
