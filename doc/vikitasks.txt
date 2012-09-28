@@ -396,7 +396,7 @@ vikitasks#EditFiles()
     Edit the list of files.
 
                                                     *vikitasks#ItemMarkDone()*
-vikitasks#Alarm(?ddays = -1)
+vikitasks#ItemMarkDone(count)
     Mark a N tasks as done, i.e. assign them to category X -- see also 
     |g:vikitasks#final_categories|.
 
