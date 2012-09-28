@@ -32,3 +32,23 @@ version: "0.04"
   - Don't check for has('vim_starting')
   MD5 checksum: 2f8c5fc7e4399d35f9f0a8b9a4ea9fef
 
+version: "0.05"
+  - Duplicate tag in help file
+  - g:vikitasks#today: show a break line in suspended list views
+  - VikiTasks: Files pattern arguments sometimes got lost
+  - Files patterns were ignored when working with a cached list
+  - g:vikitasks#today: Changed to "DUE"
+  - Integration with/dependency on viki_vim is now optional
+  - Check has('vim_starting') when running vikitasks#Alarm()
+  - Experimental support for todo.txt task lists (requires trag 0.10)
+  - Improved regexps for todotxt files
+  - s:Convert(): Run at most 5 iterations when replacing keywords
+  - Access trag_filenames through rag#HasFiletype() and trag#SetFiletype()
+  - g:vikitasks#ignore_completed_tasks:  If true, completely ignore completed tasks (fixes #1)
+  - g:vikitasks_startup_alarms default value: don't display the alarms list if vim is called with an argument
+  - When calling glob() for intervikis, make sure to scan subdirectories
+  - Keyboard shortcuts for mark done, archive done, list files etc.
+  - Minor changes to how constraints work & new commands: mark done, set due date, archive final/done tasks etc. (require tlib 1.0)
+  - g:vikitasks#use_calendar: use |:Calendar| as date picker
+  MD5 checksum: 4bf05727153faee87e36a28483e12211
+
