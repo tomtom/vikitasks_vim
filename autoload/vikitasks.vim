@@ -2,9 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Created:     2009-12-13.
-" @Last Change: 2012-09-19.
-" @Revision:    0.0.979
+" @Revision:    981
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -141,6 +139,14 @@ TLet g:vikitasks#archive_date_fmt = '** %Y-%m-%d'
 "   Y ... cancelled
 "   Z ... ???
 TLet g:vikitasks#final_categories = 'XYZ'
+
+" If non-empty, use |:Calendar| as date picker when marking an item as 
+" due in N days. 
+"
+" NOTE: This experimental feature is disabled by default. Enable it by 
+" setting this variable to, e.g., "Calendar" in your |vimrc| file.
+TLet g:vikitasks#use_calendar = ''
+" TLet g:vikitasks#use_calendar = exists(':Calendar') ? 'Calendar' : ''
 
 
 function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
@@ -877,20 +883,29 @@ endf
 function! vikitasks#ItemMarkDueInDays(count, days) "{{{3
     " TLogVAR a:count, a:days
     let duedate = strftime('%Y-%m-%d', localtime() + a:days * g:tlib#date#dayshift)
-    let rx = s:TasksRx('tasks')
     for lnum in range(line('.'), line('.') + a:count)
-        let line = getline(lnum)
-        if line =~ rx && line =~ s:date_rx && line !~ '^\C\s*#'. s:FinalRx()
-            let m = matchlist(line, s:date_rx)
-            if !empty(get(m, 4, ''))
-                let subst = '\1\2..'. duedate
-            else
-                let subst = '\1'. duedate
-            endif
-            let line1 = substitute(line, s:date_rx, subst, '')
-            call setline(lnum, line1)
-        endif
+        call vikitasks#MarkItemDuInDays(lnum, duedate)
     endfor
+endf
+
+
+" :nodoc:
+function! vikitasks#MarkItemDuInDays(lnum, duedate) "{{{3
+    " TLogVAR bufname('%'), a:lnum, a:duedate
+    let rx = s:TasksRx('tasks')
+    let line = getline(a:lnum)
+    " TLogVAR line
+    if line =~ rx && line =~ s:date_rx && line !~ '^\C\s*#'. s:FinalRx()
+        let m = matchlist(line, s:date_rx)
+        if !empty(get(m, 4, ''))
+            let subst = '\1\2..'. a:duedate
+        else
+            let subst = '\1'. a:duedate
+        endif
+        let line1 = substitute(line, s:date_rx, subst, '')
+        " TLogVAR line1
+        call setline(a:lnum, line1)
+    endif
 endf
 
 
@@ -922,8 +937,40 @@ endf
 
 " :nodoc:
 function! vikitasks#AgentDueDays(world, selected) "{{{3
-    let val = input("Number of days: ", 1)
-    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+    if !empty(g:vikitasks#use_calendar)
+        let s:calendar_action = exists('g:calendar_action') ? g:calendar_action : "<SID>CalendarDiary"
+        let s:calendar_callback_window = winnr()
+        let s:calendar_callback_buffer = winbufnr(0)
+        let s:calendar_callback_world = a:world
+        let s:calendar_callback_selected = a:selected
+        let g:calendar_action = 'vikitasks#CalendarCallback'
+        exec g:vikitasks#use_calendar
+        let s:calendar_window = winnr()
+        let s:calendar_buffer = winbufnr(0)
+        let world = tlib#agent#Suspend(a:world, a:selected)
+        exec s:calendar_window 'wincmd w'
+        return world
+    else
+        let val = input("Number of days: ", 1)
+        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+    endif
+endf
+
+
+" :nodoc:
+function! vikitasks#CalendarCallback(day, month, year, week, dir) "{{{3
+    " TLogVAR a:day, a:month, a:year, a:week, a:dir
+    if winbufnr(s:calendar_window) == s:calendar_buffer
+        silent! exec s:calendar_window 'wincmd c'
+    endif
+    let g:calendar_action = s:calendar_action
+    let duedate = printf('%4d-%02d-%02d', a:year, a:month, a:day)
+    " TLogVAR duedate
+    let world = trag#RunCmdOnSelected(s:calendar_callback_world, s:calendar_callback_selected,
+                \ printf('call vikitasks#MarkItemDuInDays(line("."), %s)', string(duedate)), 0)
+    " TLogVAR world.state
+    call setbufvar(s:calendar_callback_buffer, 'tlib_world', world)
+    exec s:calendar_callback_window 'wincmd w'
 endf
 
 
