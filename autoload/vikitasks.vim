@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    981
+" @Revision:    983
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -483,7 +483,7 @@ endf
 function! s:Files() "{{{3
     if !exists('s:files')
         let s:files = get(tlib#cache#Get(g:vikitasks#cache), 'files', [])
-        if !has('fname_case') || !&shellslash
+        if !has('fname_case') || g:tlib_filename_sep == '\'
             call map(s:files, 's:CanonicFilename(v:val)')
         endif
         " echom "DBG nfiles = ". len(s:files)
@@ -514,7 +514,7 @@ function! s:CanonicFilename(filename) "{{{3
     if !has('fname_case')
         let filename = tolower(filename)
     endif
-    if !&shellslash
+    if g:tlib_filename_sep == '\'
         let filename = substitute(filename, '\\', '/', 'g')
     endif
     return filename
@@ -537,13 +537,13 @@ function! s:MyFiles() "{{{3
         call filter(files, 'v:val !~ s:files_ignored')
     endif
     " TLogVAR files
-    if !has('fname_case') || !&shellslash
+    if !has('fname_case') || g:tlib_filename_sep == '\'
         call map(files, 's:CanonicFilename(v:val)')
     endif
     " TLogVAR g:vikitasks#sources.todotxt
     if g:vikitasks#sources.todotxt
         let todotxt = tlib#file#Join([g:vikitasks#todotxt_dir, 'todo.txt'])
-        if !has('fname_case') || !&shellslash
+        if !has('fname_case') || g:tlib_filename_sep == '\'
             let todotxt = s:CanonicFilename(todotxt)
         endif
         if filereadable(todotxt)
