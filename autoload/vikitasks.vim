@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    985
+" @Revision:    1007
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -100,12 +100,14 @@ TLet g:vikitasks#inputlist_params = {
             \             24 : {'key': 24, 'agent': 'vikitasks#AgentMarkDone', 'key_name': '<c-x>', 'help': 'Mark done'},
             \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+            \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
             \     },
             \     'vikitasks': extend(copy(g:tlib_keyagents_InputList_s),
             \         {
             \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
             \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
+            \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
             \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
             \         }
             \     )
@@ -916,6 +918,53 @@ function! vikitasks#ItemMarkDueInWeeks(count, weeks) "{{{3
 endf
 
 
+" Change the category for the current and the next a:count tasks.
+function! vikitasks#ItemChangeCategory(count, ...) "{{{3
+    if a:0 >= 1
+        let category = a:1
+    else
+        call inputsave()
+        let category = input('New task category [A-Z]: ')
+        call inputrestore()
+    endif
+    let category = toupper(category)
+    if category =~ '\C^[A-Z]$'
+        let rx = s:TasksRx('tasks')
+        " TLogVAR rx
+        for lnum in range(line('.'), line('.') + a:count)
+            let line = getline(lnum)
+            " TLogVAR lnum, line
+            if line =~ rx
+                let line = substitute(line, '^\C\s*#\zs\u', category, '')
+                " TLogVAR line
+                call setline(lnum, line)
+            endif
+        endfor
+    else
+        echohl WarningMsg
+        echom 'Invalid category (must be A-Z):' category
+        echohl NONE
+    endif
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentItemChangeCategory(world, selected) "{{{3
+    call inputsave()
+    let category = toupper(input('New task category [A-Z]: '))
+    call inputrestore()
+    if category =~ '\C^[A-Z]$'
+        return trag#AgentWithSelected(a:world, a:selected, 'call vikitasks#ItemChangeCategory(0,'. string(category) .')')
+    else
+        echohl WarningMsg
+        echom 'Invalid category (must be A-Z):' category
+        echohl NONE
+        let a:world.state = 'redisplay'
+        return a:world
+    endif
+endf
+
+
 function! s:FinalRx() "{{{3
     return printf('\C[%s]', g:vikitasks#final_categories)
 endf
@@ -976,7 +1025,9 @@ endf
 
 " :nodoc:
 function! vikitasks#AgentDueWeeks(world, selected) "{{{3
+    call inputsave()
     let val = input("Number of weeks: ", 1)
+    call inputrestore()
     return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
 endf
 
