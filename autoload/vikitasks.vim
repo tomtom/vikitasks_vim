@@ -261,6 +261,8 @@ function! vikitasks#Tasks(...) "{{{3
         " TLogVAR files
         call map(files, 'glob(v:val)')
         let files = split(join(files, "\n"), '\n')
+        let files = map(files, 's:CanonicFilename(v:val)')
+        let files = tlib#list#Uniq(files)
         " TLogVAR files
         if !empty(files)
             let qfl = trag#Grep('tasks', 1, files)
