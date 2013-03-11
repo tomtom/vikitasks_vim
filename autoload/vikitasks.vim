@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1007
+" @Revision:    1029
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -574,22 +574,31 @@ function! s:AddInterVikis(files) "{{{3
             if index(ivignored, matchstr(iv, '^\u\+')) == -1
                 " TLogVAR iv
                 let def = viki#GetLink(1, '[['. iv .']]', 0, '')
+                let file = def[1]
                 " TLogVAR def
-                if glob
+                if glob > 0
                     let suffix = viki#InterVikiSuffix(iv)
-                    let files = split(glob(tlib#file#Join([def[1]], '**/*'. suffix)), '\n')
+                    let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/*'. suffix], 1)
+                    call s:AddDirPattern(a:files, dirpattern)
                 else
-                    let files = [def[1]]
-                endif
-                for hp in files
-                    " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
-                    if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
-                        call add(a:files, hp)
+                    if filereadable(file) && !isdirectory(file) && index(a:files, file) == -1
+                        call add(a:files, file)
                     endif
-                endfor
+                endif
             endif
         endfor
     endif
+endf
+
+
+function! s:AddDirPattern(files, dirpattern) "{{{3
+    let files = split(glob(a:dirpattern), '\n')
+    for hp in files
+        " TLogVAR hp, filereadable(hp), !isdirectory(hp), index(a:files, hp) == -1
+        if filereadable(hp) && !isdirectory(hp) && index(a:files, hp) == -1
+            call add(a:files, hp)
+        endif
+    endfor
 endf
 
 
