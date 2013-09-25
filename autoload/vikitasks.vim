@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1029
+" @Revision:    1031
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -102,7 +102,7 @@ TLet g:vikitasks#inputlist_params = {
             \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
             \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
             \     },
-            \     'vikitasks': extend(copy(g:tlib_keyagents_InputList_s),
+            \     'vikitasks': extend(copy(g:tlib#input#keyagents_InputList_s),
             \         {
             \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
@@ -487,7 +487,7 @@ endf
 function! s:Files() "{{{3
     if !exists('s:files')
         let s:files = get(tlib#cache#Get(g:vikitasks#cache), 'files', [])
-        if !has('fname_case') || g:tlib_filename_sep == '\'
+        if !has('fname_case') || g:tlib#dir#sep == '\'
             call map(s:files, 's:CanonicFilename(v:val)')
         endif
         " echom "DBG nfiles = ". len(s:files)
@@ -518,7 +518,7 @@ function! s:CanonicFilename(filename) "{{{3
     if !has('fname_case')
         let filename = tolower(filename)
     endif
-    if g:tlib_filename_sep == '\'
+    if g:tlib#dir#sep == '\'
         let filename = substitute(filename, '\\', '/', 'g')
     endif
     return filename
@@ -541,13 +541,13 @@ function! s:MyFiles() "{{{3
         call filter(files, 'v:val !~ s:files_ignored')
     endif
     " TLogVAR files
-    if !has('fname_case') || g:tlib_filename_sep == '\'
+    if !has('fname_case') || g:tlib#dir#sep == '\'
         call map(files, 's:CanonicFilename(v:val)')
     endif
     " TLogVAR g:vikitasks#sources.todotxt
     if g:vikitasks#sources.todotxt
         let todotxt = tlib#file#Join([g:vikitasks#todotxt_dir, 'todo.txt'])
-        if !has('fname_case') || g:tlib_filename_sep == '\'
+        if !has('fname_case') || g:tlib#dir#sep == '\'
             let todotxt = s:CanonicFilename(todotxt)
         endif
         if filereadable(todotxt)
