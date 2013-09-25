@@ -131,6 +131,7 @@ Contents~
         vikitasks#ListTaskFiles ............... |vikitasks#ListTaskFiles()|
         vikitasks#ItemMarkDueInDays ........... |vikitasks#ItemMarkDueInDays()|
         vikitasks#ItemMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
+        vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
 
 
 ========================================================================
@@ -415,6 +416,10 @@ vikitasks#ItemMarkDueInDays(count, days)
                                                     *vikitasks#ItemMarkDueInWeeks()*
 vikitasks#ItemMarkDueInWeeks(count, weeks)
     Mark a tasks as due in N weeks.
+
+                                                    *vikitasks#ItemChangeCategory()*
+vikitasks#ItemChangeCategory(count, ...)
+    Change the category for the current and the next a:count tasks.
 
 
 
