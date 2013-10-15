@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2013-09-25.
-" @Revision:    273
+" @Revision:    287
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -94,6 +94,13 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
 command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
 " cabbr vikitasks VikiTasks
+
+" :display: VikiTasksPaste[!] [ARGUMENTS...]
+" Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
+" buffer. When called with a |bang| [!], create a new buffer. See 
+" |:VikiTasks| for the allowed ARGUMENTS.
+command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(!empty("<bang>"), vikitasks#GetArgs(0, [<f-args>]))
+
 
 command! -count VikiTasksAlarms call vikitasks#Alarm(<count>)
 

@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1031
+" @Revision:    1059
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -226,13 +226,20 @@ endf
 " :display: vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
 " If files is non-empty, use these files (glob patterns actually) 
 " instead of those defined in |g:vikitasks#files|.
+" 
+" suspend must be one of:
+"   -1 ... Don't display a list
+"    0 ... List takes the focus
+"    1 ... Current buffer takes the focus
 function! vikitasks#Tasks(...) "{{{3
     TVarArg ['args', {}], ['suspend', 0]
+    " TLogVAR args, suspend
 
     if get(args, 'cached', 1)
 
         let qfl = copy(s:Tasks())
         let files = get(args, 'files', [])
+        " TLogVAR files
         if !empty(files)
             for file in files
                 let file_rx = substitute(file, '\*', '.\\{-}', 'g')
@@ -292,12 +299,15 @@ endf
 
 
 function! s:TasksList(qfl, args, suspend) "{{{3
+    " TLogVAR a:qfl, a:args, a:suspend
     let qfl = a:qfl
     call s:FilterTasks(qfl, a:args)
     call sort(qfl, "s:SortTasks")
     let i = s:GetCurrentTask(qfl, 0)
     call s:Setqflist(qfl, a:suspend ? i : -1)
-    call s:View(i, a:suspend)
+    if a:suspend >= 0
+        call s:View(i, a:suspend)
+    endif
 endf
 
 
@@ -1040,5 +1050,33 @@ function! vikitasks#AgentDueWeeks(world, selected) "{{{3
     let val = input("Number of weeks: ", 1)
     call inputrestore()
     return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+endf
+
+
+" :nodoc:
+function! vikitasks#Paste(newbuffer, args) "{{{3
+    call vikitasks#Tasks(a:args, -1)
+    let lines = []
+    for item in getqflist()
+        " TLogVAR item
+        let bufname = fnamemodify(bufname(item.bufnr), ':p')
+        if has('conceal')
+            let link = printf('([[%s][%s]])',
+                        \ bufname, fnamemodify(bufname, ':t'))
+        else
+            let link = printf('[[%s]]', bufname)
+        endif
+        call add(lines, ' '. item.text .' ' . link)
+    endfor
+    silent! colder
+    " TLogVAR lines
+    if a:newbuffer
+        new
+        setf viki
+    endif
+    call append(line('.'), lines)
+    if a:newbuffer
+        0delete
+    endif
 endf
 
