@@ -89,6 +89,7 @@ Contents~
         g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
         :VikiTasks ............................ |:VikiTasks|
         :VikiTasksStatic ...................... |:VikiTasksStatic|
+        :VikiTasksPaste ....................... |:VikiTasksPaste|
         :VikiTasksAlarms ...................... |:VikiTasksAlarms|
         :VikiTasksAdd ......................... |:VikiTasksAdd|
         :VikiTasksDone ........................ |:VikiTasksDone|
@@ -203,6 +204,12 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
 
                                                     *:VikiTasksStatic*
 :VikiTasksStatic
+
+                                                    *:VikiTasksPaste*
+VikiTasksPaste[!] [ARGUMENTS...]
+    Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
+    buffer. When called with a |bang| [!], create a new buffer. See 
+    |:VikiTasks| for the allowed ARGUMENTS.
 
                                                     *:VikiTasksAlarms*
 :VikiTasksAlarms
@@ -383,6 +390,11 @@ g:vikitasks#use_calendar       (default: '')
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
     If files is non-empty, use these files (glob patterns actually) 
     instead of those defined in |g:vikitasks#files|.
+
+    suspend must be one of:
+      -1 ... Don't display a list
+       0 ... List takes the focus
+       1 ... Current buffer takes the focus
 
                                                     *vikitasks#AddBuffer()*
 vikitasks#AddBuffer(buffer, ...)
