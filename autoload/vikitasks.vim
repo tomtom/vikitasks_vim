@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1059
+" @Revision:    1100
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -149,6 +149,11 @@ TLet g:vikitasks#final_categories = 'XYZ'
 " setting this variable to, e.g., "Calendar" in your |vimrc| file.
 TLet g:vikitasks#use_calendar = ''
 " TLet g:vikitasks#use_calendar = exists(':Calendar') ? 'Calendar' : ''
+
+" Define how to format the list when calling |:VikiTasksPaste|.
+" A dictionary with the fields (default values are marked with "*"):
+"   filename: add*|group|none
+TLet g:vikitasks#paste = {}
 
 
 function! s:TaskLineRx(filetype, inline, sometasks, letters, levels) "{{{3
@@ -311,12 +316,17 @@ function! s:TasksList(qfl, args, suspend) "{{{3
 endf
 
 
+function! s:DueText() "{{{3
+    let break = repeat('^', (&columns - 20 - len(g:vikitasks#today)) / 2)
+    let text = join([break, g:vikitasks#today, break])
+    return text
+endf
+
+
 function! s:Setqflist(qfl, today) "{{{3
     " TLogVAR a:today
     if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today < len(a:qfl) - 1
-        let break = repeat('^', (&columns - 20 - len(g:vikitasks#today)) / 2)
-        let text = join([break, g:vikitasks#today, break])
-        let qfl = insert(a:qfl, {'bufnr': 0, 'text': text}, a:today - 1)
+        let qfl = insert(a:qfl, {'bufnr': 0, 'text': s:DueText()}, a:today - 1)
         call setqflist(qfl)
     else
         call setqflist(a:qfl)
@@ -1056,17 +1066,39 @@ endf
 " :nodoc:
 function! vikitasks#Paste(newbuffer, args) "{{{3
     call vikitasks#Tasks(a:args, -1)
+    let mode_filename = get(g:vikitasks#paste, 'filename', 'add')
     let lines = []
-    for item in getqflist()
-        " TLogVAR item
-        let bufname = fnamemodify(bufname(item.bufnr), ':p')
-        if has('conceal')
-            let link = printf('([[%s][%s]])',
-                        \ bufname, fnamemodify(bufname, ':t'))
-        else
-            let link = printf('[[%s]]', bufname)
+    if mode_filename == 'group'
+        let due = s:DueText()
+        let qfld = {}
+        for item in getqflist()
+            if item.text != due
+                let bufname = fnamemodify(bufname(item.bufnr), ':p')
+                if !has_key(qfld, bufname)
+                    let qfld[bufname] = []
+                endif
+                call add(qfld[bufname], item)
+            endif
+        endfor
+    else
+        let qfld = {'*': getqflist()}
+    endif
+    for key in sort(keys(qfld))
+        if key != '*'
+            call add(lines, s:FormatPasteLink(key, 0))
         endif
-        call add(lines, ' '. item.text .' ' . link)
+        for item in qfld[key]
+            " TLogVAR item
+            let bufname = fnamemodify(bufname(item.bufnr), ':p')
+            if mode_filename == 'group'
+                call add(lines, repeat(' ', &sw) . item.text)
+            elseif mode_filename == 'add'
+                call add(lines, ' '. item.text .' ' . s:FormatPasteLink(bufname, 1))
+            endif
+        endfor
+        if key != '*'
+            call add(lines, '')
+        endif
     endfor
     silent! colder
     " TLogVAR lines
@@ -1078,5 +1110,16 @@ function! vikitasks#Paste(newbuffer, args) "{{{3
     if a:newbuffer
         0delete
     endif
+endf
+
+
+function! s:FormatPasteLink(fname, inpars) "{{{3
+    if has('conceal')
+        let fmt = a:inpars ? '([[%s][%s]])' : '[[%s][%s]]'
+        let link = printf(fmt, a:fname, fnamemodify(a:fname, ':t'))
+    else
+        let link = printf('[[%s]]', a:fname)
+    endif
+    return link
 endf
 
