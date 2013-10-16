@@ -39,7 +39,7 @@ bar.txt: >
 Let's assume you have added both files to |g:vikitasks_files|. Switch to 
 the buffer foo.txt and call >
 
-    :VikiTasks!
+    :VikiTasks
 
 and you get the following list: >
 
@@ -123,6 +123,7 @@ Contents~
         g:vikitasks#archive_date_fmt .......... |g:vikitasks#archive_date_fmt|
         g:vikitasks#final_categories .......... |g:vikitasks#final_categories|
         g:vikitasks#use_calendar .............. |g:vikitasks#use_calendar|
+        g:vikitasks#paste ..................... |g:vikitasks#paste|
         vikitasks#Tasks ....................... |vikitasks#Tasks()|
         vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
         vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
@@ -193,20 +194,21 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     Examples:
         Show all cached tasks with a date: >
             VikiTasks
-<     Rescan files and show all tasks: >
+<       Rescan files and show all tasks: >
             VikiTasks!
-<     Show all cached tasks for today: >
+<       Show all cached tasks for today: >
             VikiTasks today
-<     Show all current cached tasks (today or with a deadline in the 
-    past) in a specified list of files: >
+<       Show all current cached tasks (today or with a deadline in the 
+        past) in a specified list of files: >
             VikiTasks current Notes*.txt
 <
 
                                                     *:VikiTasksStatic*
 :VikiTasksStatic
+    The same as |:VikiTasks| but the tasks list doesn't take the focus.
 
                                                     *:VikiTasksPaste*
-VikiTasksPaste[!] [ARGUMENTS...]
+:VikiTasksPaste[!] [ARGUMENTS...]
     Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
     buffer. When called with a |bang| [!], create a new buffer. See 
     |:VikiTasks| for the allowed ARGUMENTS.
@@ -385,6 +387,12 @@ g:vikitasks#use_calendar       (default: '')
 
     NOTE: This experimental feature is disabled by default. Enable it by 
     setting this variable to, e.g., "Calendar" in your |vimrc| file.
+
+                                                    *g:vikitasks#paste*
+g:vikitasks#paste              (default: {})
+    Define how to format the list when calling |:VikiTasksPaste|.
+    A dictionary with the fields (default values are marked with "*"):
+      filename: add*|group|none
 
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
