@@ -39,7 +39,7 @@ bar.txt: >
 Let's assume you have added both files to |g:vikitasks_files|. Switch to 
 the buffer foo.txt and call >
 
-    :VikiTasks!
+    :VikiTasks
 
 and you get the following list: >
 
@@ -193,20 +193,21 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     Examples:
         Show all cached tasks with a date: >
             VikiTasks
-<     Rescan files and show all tasks: >
+<       Rescan files and show all tasks: >
             VikiTasks!
-<     Show all cached tasks for today: >
+<       Show all cached tasks for today: >
             VikiTasks today
-<     Show all current cached tasks (today or with a deadline in the 
-    past) in a specified list of files: >
+<       Show all current cached tasks (today or with a deadline in the 
+        past) in a specified list of files: >
             VikiTasks current Notes*.txt
 <
 
                                                     *:VikiTasksStatic*
 :VikiTasksStatic
+    #TODO document
 
                                                     *:VikiTasksPaste*
-VikiTasksPaste[!] [ARGUMENTS...]
+:VikiTasksPaste[!] [ARGUMENTS...]
     Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
     buffer. When called with a |bang| [!], create a new buffer. See 
     |:VikiTasks| for the allowed ARGUMENTS.
