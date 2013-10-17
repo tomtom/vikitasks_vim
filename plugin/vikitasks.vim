@@ -105,7 +105,7 @@ command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(!empty("<bang>"), vi
 
 " :display: :[count]VikiTasksAlarms 
 " Display a list of alarms. Shows alarms due within N days.
-" If [count] is -1, uses |g:vikitasks#alarms| if any.
+" If N is -1, uses |g:vikitasks#alarms| if any.
 command! -count VikiTasksAlarms call vikitasks#Alarm(<count>)
 
 " :display: :VikiTasksAdd
