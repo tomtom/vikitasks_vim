@@ -123,6 +123,7 @@ Contents~
         g:vikitasks#archive_date_fmt .......... |g:vikitasks#archive_date_fmt|
         g:vikitasks#final_categories .......... |g:vikitasks#final_categories|
         g:vikitasks#use_calendar .............. |g:vikitasks#use_calendar|
+        g:vikitasks#paste ..................... |g:vikitasks#paste|
         vikitasks#Tasks ....................... |vikitasks#Tasks()|
         vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
         vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
@@ -204,7 +205,7 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
 
                                                     *:VikiTasksStatic*
 :VikiTasksStatic
-    #TODO document
+    The same as |:VikiTasks| but the tasks list doesn't take the focus.
 
                                                     *:VikiTasksPaste*
 :VikiTasksPaste[!] [ARGUMENTS...]
@@ -386,6 +387,12 @@ g:vikitasks#use_calendar       (default: '')
 
     NOTE: This experimental feature is disabled by default. Enable it by 
     setting this variable to, e.g., "Calendar" in your |vimrc| file.
+
+                                                    *g:vikitasks#paste*
+g:vikitasks#paste              (default: {})
+    Define how to format the list when calling |:VikiTasksPaste|.
+    A dictionary with the fields (default values are marked with "*"):
+      filename: add*|group|none
 
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)

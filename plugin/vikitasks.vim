@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2013-09-25.
-" @Revision:    287
+" @Revision:    291
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -41,7 +41,7 @@ TLet g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(
 " Scan a buffer on these events.
 TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 
-" :display: VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
+" :display: :VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
 " CONSTRAINT defined which tasks should be displayed. Possible values 
 " for CONSTRAINT are:
 "
@@ -92,6 +92,8 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 "   past) in a specified list of files: >
 "         :VikiTasks current Notes*.txt
 command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
+
+" The same as |:VikiTasks| but the tasks list doesn't take the focus.
 command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
 " cabbr vikitasks VikiTasks
 
@@ -101,7 +103,9 @@ command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!
 " |:VikiTasks| for the allowed ARGUMENTS.
 command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(!empty("<bang>"), vikitasks#GetArgs(0, [<f-args>]))
 
-
+" :display: :[count]VikiTasksAlarms 
+" Display a list of alarms. Shows alarms due within N days.
+" If [count] is -1, uses |g:vikitasks#alarms| if any.
 command! -count VikiTasksAlarms call vikitasks#Alarm(<count>)
 
 " :display: :VikiTasksAdd
@@ -128,12 +132,12 @@ command! VikiEditTasksFiles call vikitasks#EditFiles()
 command! VikiTasksFiles call vikitasks#ListTaskFiles()
 
 
-" :display: :[COUNT]VikiTasksDueInDays [DAYS=0]
+" :display: :[count]VikiTasksDueInDays [DAYS=0]
 " Mark a tasks as due in N days.
 command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(0, 0 + <q-args>)
 
 
-" :display: :[COUNT]VikiTasksDueInDays [WEEKS=1]
+" :display: :[count]VikiTasksDueInDays [WEEKS=1]
 " Mark a tasks as due in N weeks.
 command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(0, (0 + <q-args>) == 0 ? 1 : 0 + <q-args>)
 
