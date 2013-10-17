@@ -82,20 +82,20 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 " |g:vikiHomePage|, which must be set, is opened first.
 "
 " Examples:
-"     Show all cached tasks with a date: >
-"         VikiTasks
+"   Show all cached tasks with a date: >
+"         :VikiTasks
 " <   Rescan files and show all tasks: >
-"         VikiTasks!
+"         :VikiTasks!
 " <   Show all cached tasks for today: >
-"         VikiTasks today
+"         :VikiTasks today
 " <   Show all current cached tasks (today or with a deadline in the 
-" past) in a specified list of files: >
-"         VikiTasks current Notes*.txt
+"   past) in a specified list of files: >
+"         :VikiTasks current Notes*.txt
 command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
 command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
 " cabbr vikitasks VikiTasks
 
-" :display: VikiTasksPaste[!] [ARGUMENTS...]
+" :display: :VikiTasksPaste[!] [ARGUMENTS...]
 " Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
 " buffer. When called with a |bang| [!], create a new buffer. See 
 " |:VikiTasks| for the allowed ARGUMENTS.
