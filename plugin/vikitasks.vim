@@ -133,13 +133,13 @@ command! VikiTasksFiles call vikitasks#ListTaskFiles()
 
 
 " :display: :[count]VikiTasksDueInDays [DAYS=0]
-" Mark a tasks as due in N days.
-command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(0, 0 + <q-args>)
+" Mark [count] task(s) as due in N days.
+command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(<count>, 0 + <q-args>)
 
 
 " :display: :[count]VikiTasksDueInDays [WEEKS=1]
-" Mark a tasks as due in N weeks.
-command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(0, (0 + <q-args>) == 0 ? 1 : 0 + <q-args>)
+" Mark [count] task(s) as due in N weeks.
+command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(<count>, (0 + <q-args>) == 0 ? 1 : 0 + <q-args>)
 
 
 augroup VikiTasks
