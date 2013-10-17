@@ -685,7 +685,7 @@ endf
 " Display a list of alarms.
 " If ddays >= 0, the constraint value in |g:vikitasks#alarms| is set to 
 " ddays days.
-" If ddays is -1 and |g:vikitasks#alarms| is empty, not alarms will be 
+" If ddays is -1 and |g:vikitasks#alarms| is empty, no alarms will be 
 " listed.
 function! vikitasks#Alarm(...) "{{{3
     TVarArg ['ddays', -1]
