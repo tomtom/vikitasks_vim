@@ -151,7 +151,7 @@ g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
     Scan a buffer on these events.
 
                                                     *:VikiTasks*
-VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
+:VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     CONSTRAINT defined which tasks should be displayed. Possible values 
     for CONSTRAINT are:
 
@@ -192,15 +192,15 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     |g:vikiHomePage|, which must be set, is opened first.
 
     Examples:
-        Show all cached tasks with a date: >
-            VikiTasks
-<       Rescan files and show all tasks: >
-            VikiTasks!
-<       Show all cached tasks for today: >
-            VikiTasks today
-<       Show all current cached tasks (today or with a deadline in the 
-        past) in a specified list of files: >
-            VikiTasks current Notes*.txt
+      Show all cached tasks with a date: >
+            :VikiTasks
+<     Rescan files and show all tasks: >
+            :VikiTasks!
+<     Show all cached tasks for today: >
+            :VikiTasks today
+<     Show all current cached tasks (today or with a deadline in the 
+      past) in a specified list of files: >
+            :VikiTasks current Notes*.txt
 <
 
                                                     *:VikiTasksStatic*
@@ -214,7 +214,9 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     |:VikiTasks| for the allowed ARGUMENTS.
 
                                                     *:VikiTasksAlarms*
-:VikiTasksAlarms
+:[count]VikiTasksAlarms
+    Display a list of alarms. Shows alarms due within N days.
+    If N is -1, uses |g:vikitasks#alarms| if any.
 
                                                     *:VikiTasksAdd*
 :VikiTasksAdd
@@ -238,12 +240,12 @@ VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
     Edit a file monitored by vikitasks.
 
                                                     *:VikiTasksDueInDays*
-:[COUNT]VikiTasksDueInDays [DAYS=0]
-    Mark a tasks as due in N days.
+:[count]VikiTasksDueInDays [DAYS=0]
+    Mark [count] task(s) as due in N days.
 
                                                     *:VikiTasksDueInWeeks*
-:[COUNT]VikiTasksDueInDays [WEEKS=1]
-    Mark a tasks as due in N weeks.
+:[count]VikiTasksDueInDays [WEEKS=1]
+    Mark [count] task(s) as due in N weeks.
 
 
 ========================================================================
