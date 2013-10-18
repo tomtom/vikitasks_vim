@@ -52,3 +52,21 @@ version: "0.05"
   - g:vikitasks#use_calendar: use |:Calendar| as date picker
   MD5 checksum: 4bf05727153faee87e36a28483e12211
 
+  - Check the value of g:tlib_filename_sep instead of !&shellslash
+  - addon-info
+  - <c-c>, <localleader>tc: Change a task's category
+  - If g:vikitasks#files contains glob patterns, make sure to remove duplicates
+  - s:AddInterVikis(): move adding of dir/pattern to s:AddDirPattern()
+  - viki maps: Remove count with <c-u> from maps
+  - Adapt for tlib 1.06
+  - NEW :VikiTasksPaste command: paste vikitasks items to a (new) buffer (closes #4)
+  - Small docs tweaks
+  - Make display of pasted tasks list configurable via g:vikitasks#paste
+  - Do doc tweaks on source instead
+  - Merge branch 'master' of https://github.com/tomtom/vikitasks_vim
+  - Typo
+  - We're using N for [count], right?
+  - Consider [count]
+  MD5 checksum: 7d53532b805b741dd90d65def5b546f1
+version: "0.06"
+
