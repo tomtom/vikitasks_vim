@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2013-09-25.
-" @Revision:    292
+" @Last Change: 2013-10-21.
+" @Revision:    294
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -134,12 +134,12 @@ command! VikiTasksFiles call vikitasks#ListTaskFiles()
 
 " :display: :[count]VikiTasksDueInDays [DAYS=0]
 " Mark [count] task(s) as due in N days.
-command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(<count>, 0 + <q-args>)
+command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(0, 0 + <q-args>)
 
 
 " :display: :[count]VikiTasksDueInDays [WEEKS=1]
 " Mark [count] task(s) as due in N weeks.
-command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(<count>, (0 + <q-args>) == 0 ? 1 : 0 + <q-args>)
+command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(0, empty(<q-args>) ? 1 : 0 + <q-args>)
 
 
 augroup VikiTasks
