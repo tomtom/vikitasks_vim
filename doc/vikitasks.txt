@@ -36,7 +36,7 @@ bar.txt: >
         #C 2009-12-24 Wish @Bernie good luck
         #D 2009-11-01 Do that
 
-Let's assume you have added both files to |g:vikitasks_files|. Switch to 
+Let's assume you have added both files to |g:vikitasks#files|. Switch to 
 the buffer foo.txt and call >
 
     :VikiTasks
