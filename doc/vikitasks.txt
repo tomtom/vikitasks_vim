@@ -134,6 +134,7 @@ Contents~
         vikitasks#ItemMarkDueInDays ........... |vikitasks#ItemMarkDueInDays()|
         vikitasks#ItemMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
         vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
+        vikitasks#AgentPaste .................. |vikitasks#AgentPaste()|
 
 
 ========================================================================
@@ -442,6 +443,9 @@ vikitasks#ItemMarkDueInWeeks(count, weeks)
                                                     *vikitasks#ItemChangeCategory()*
 vikitasks#ItemChangeCategory(count, ...)
     Change the category for the current and the next a:count tasks.
+
+                                                    *vikitasks#AgentPaste()*
+vikitasks#AgentPaste(world, selected)
 
 
 
