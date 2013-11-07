@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2013-10-21.
-" @Revision:    294
+" @Last Change: 2013-11-07.
+" @Revision:    297
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -101,7 +101,7 @@ command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!
 " Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
 " buffer. When called with a |bang| [!], create a new buffer. See 
 " |:VikiTasks| for the allowed ARGUMENTS.
-command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(!empty("<bang>"), vikitasks#GetArgs(0, [<f-args>]))
+command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(empty("<bang>") ? '' : 'VikiTasksPaste', vikitasks#GetArgs(0, [<f-args>]))
 
 " :display: :[count]VikiTasksAlarms 
 " Display a list of alarms. Shows alarms due within N days.

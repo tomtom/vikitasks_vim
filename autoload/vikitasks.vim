@@ -2,7 +2,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1102
+" @Revision:    1117
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -101,6 +101,7 @@ TLet g:vikitasks#inputlist_params = {
             \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
             \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
+            \             14 : {'key': 14, 'agent': 'vikitasks#AgentPaste', 'key_name': '<c-n>', 'help': 'Paste selected items in a new buffer'},
             \     },
             \     'vikitasks': extend(copy(g:tlib#input#keyagents_InputList_s),
             \         {
@@ -1064,14 +1065,13 @@ endf
 
 
 " :nodoc:
-function! vikitasks#Paste(newbuffer, args) "{{{3
-    call vikitasks#Tasks(a:args, -1)
+function s:Paste(newbuffer, qfl) "{{{3
     let mode_filename = get(g:vikitasks#paste, 'filename', 'add')
     let lines = []
     if mode_filename == 'group'
         let due = s:DueText()
         let qfld = {}
-        for item in getqflist()
+        for item in a:qfl
             if item.text != due
                 let bufname = fnamemodify(bufname(item.bufnr), ':p')
                 if !has_key(qfld, bufname)
@@ -1081,7 +1081,7 @@ function! vikitasks#Paste(newbuffer, args) "{{{3
             endif
         endfor
     else
-        let qfld = {'*': getqflist()}
+        let qfld = {'*': a:qfl}
     endif
     for key in sort(keys(qfld))
         if key != '*'
@@ -1102,14 +1102,42 @@ function! vikitasks#Paste(newbuffer, args) "{{{3
     endfor
     silent! colder
     " TLogVAR lines
-    if a:newbuffer
-        new
+    if !empty(a:newbuffer)
+        let name = substitute(a:newbuffer, '[[:space:]\/*&<>]', '_', 'g') . g:vikiNameSuffix
+        exec 'split' name
         setf viki
     endif
     call append(line('.'), lines)
     if a:newbuffer
         0delete
     endif
+endf
+
+
+function! vikitasks#AgentPaste(world, selected) "{{{3
+    if empty(a:selected)
+        call a:world.RestoreOrigin()
+    else
+        call a:world.RestoreOrigin()
+        let qfl = []
+        for idx in a:selected
+            let idx -= 1
+            if idx >= 0
+                let qfe = a:world.qfl[idx]
+                call add(qfl, qfe)
+            endif
+        endfor
+        call s:Paste(a:world.DisplayFilter(), qfl)
+    endif
+    let a:world.state = "exit"
+    return a:world
+endf
+
+
+" :nodoc:
+function! vikitasks#Paste(newbuffer, args) "{{{3
+    call vikitasks#Tasks(a:args, -1)
+    call s:Paste(newbuffer, getqflist())
 endf
 
 
