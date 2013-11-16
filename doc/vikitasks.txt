@@ -131,8 +131,8 @@ Contents~
         vikitasks#ItemMarkDone ................ |vikitasks#ItemMarkDone()|
         vikitasks#ItemArchiveFinal ............ |vikitasks#ItemArchiveFinal()|
         vikitasks#ListTaskFiles ............... |vikitasks#ListTaskFiles()|
-        vikitasks#ItemMarkDueInDays ........... |vikitasks#ItemMarkDueInDays()|
-        vikitasks#ItemMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
+        vikitasks#ItemsMarkDueInDays ........... |vikitasks#ItemMarkDueInDays()|
+        vikitasks#ItemsMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
         vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
 
 

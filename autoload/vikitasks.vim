@@ -5,12 +5,12 @@
 " @Revision:    1100
 
 
-" A list of glob patterns (or files) that will be searched for task 
-" lists.
+" A list of glob patterns (or files) to search for task lists.
 " Can be buffer-local.
 " If you add ! to 'viminfo', this variable will be automatically saved 
 " between editing sessions.
-" Alternatively, add new items in ~/vimfiles/after/plugin/vikitasks.vim
+" Alternatively, add new items in the *after-directory* in 'runtimepath'
+" (e.g.  ~/vimfiles/after/plugin/vikitasks.vim)
 TLet g:vikitasks#files = []
 
 " A list of |regexp| patterns for filenames that should not be 
@@ -33,15 +33,12 @@ TLet g:vikitasks#ignore_completed_tasks = 1
 TLet g:vikitasks#intervikis_ignored = []
 
 " If you use todo.txt (http://todotxt.com), set this variable to the 
-" full name of base directory where todo.txt is kept.
-" For display, lines in todo.txt are converted to viki task list syntax.
+" full name of the base directory where todo.txt is kept.
+" Lines in todo.txt are converted to the viki task list syntax for display.
 TLet g:vikitasks#todotxt_dir = ''
 
 " If true, provide tighter integration with the vim viki plugin.
-TLet g:vikitasks#sources = {
-            \ 'viki': exists('g:loaded_viki'),
-            \ 'todotxt': !empty(g:vikitasks#todotxt_dir)
-            \ }
+TLet g:vikitasks#sources = {'viki': exists('g:loaded_viki'), 'todotxt': !empty(g:vikitasks#todotxt_dir)}
 
 " Default category/priority when converting tasks without priorities.
 TLet g:vikitasks#default_priority = 'F'
@@ -114,7 +111,7 @@ TLet g:vikitasks#inputlist_params = {
             \ }
             \ }
 
-" Mapleader for some vikitasks related maps.
+" Mapleader for some vikitasks-related mappings.
 TLet g:vikitasks#mapleader = '<LocalLeader>t'
 
 " If true, add a date tag when marking a task done with |vikitasks#ItemMarkDone()|.
@@ -124,7 +121,7 @@ TLet g:vikitasks#done_add_date = 1
 " archived tasks should be moved to.
 TLet g:vikitasks#archive_filename_expr = 'expand("%:p:r") ."_archived". g:vikiNameSuffix'
 
-" A list of strings. The header for newly created tasks archives.
+" A list of strings. The header for newly created task archives.
 TLet g:vikitasks#archive_header = ['* Archived tasks']
 
 " The date format string (see |strftime()|) for archived entries.
@@ -151,8 +148,9 @@ TLet g:vikitasks#use_calendar = ''
 " TLet g:vikitasks#use_calendar = exists(':Calendar') ? 'Calendar' : ''
 
 " Define how to format the list when calling |:VikiTasksPaste|.
-" A dictionary with the fields (default values are marked with "*"):
-"   filename: add*|group|none
+" A dictionary {'filename': mode} where mode can be 'add' or 'group'.
+" The 'group' mode groups tasks under source filenames; 
+" the 'add' mode (default) adds tasks together with their source filename.
 TLet g:vikitasks#paste = {}
 
 
@@ -433,8 +431,8 @@ function! s:View(index, suspend) "{{{3
 endf
 
 
-" The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
-" The PATTERN is made case sensitive if it contains an upper-case letter 
+" If the |regexp| PATTERN seems to be a word, |\<| is prepended.
+" The PATTERN is case-sensitive if it contains an upper-case letter 
 " and if 'smartcase' is true.
 function! s:MakePattern(pattern) "{{{3
     let pattern = a:pattern
@@ -840,7 +838,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
 endf
 
 
-" Mark a N tasks as done, i.e. assign them to category X -- see also 
+" Mark N tasks as done, i.e. assign them to category X -- see also 
 " |g:vikitasks#final_categories|.
 function! vikitasks#ItemMarkDone(count) "{{{3
     let rx = s:TasksRx('tasks')
@@ -868,7 +866,7 @@ function! vikitasks#ItemMarkDone(count) "{{{3
 endf
 
 
-" Archive final (see |g:vikitasks#final_categories|) tasks.
+" Archive finalized (see |g:vikitasks#final_categories|) tasks.
 function! vikitasks#ItemArchiveFinal() "{{{3
     if empty(g:vikitasks#archive_filename_expr)
         echom "vikitasks: Cannot archive tasks: g:vikitasks#archive_filename_expr is empty"
@@ -912,18 +910,18 @@ function! vikitasks#ListTaskFiles() "{{{3
 endf
 
 
-" Mark a tasks as due in N days.
-function! vikitasks#ItemMarkDueInDays(count, days) "{{{3
+" Mark task(s) as due in N days.
+function! vikitasks#ItemsMarkDueInDays(count, days) "{{{3
     " TLogVAR a:count, a:days
     let duedate = strftime('%Y-%m-%d', localtime() + a:days * g:tlib#date#dayshift)
     for lnum in range(line('.'), line('.') + a:count)
-        call vikitasks#MarkItemDuInDays(lnum, duedate)
+        call vikitasks#ItemMarkDueInDays(lnum, duedate)
     endfor
 endf
 
 
 " :nodoc:
-function! vikitasks#MarkItemDuInDays(lnum, duedate) "{{{3
+function! vikitasks#ItemMarkDueInDays(lnum, duedate) "{{{3
     " TLogVAR bufname('%'), a:lnum, a:duedate
     let rx = s:TasksRx('tasks')
     let line = getline(a:lnum)
@@ -942,10 +940,10 @@ function! vikitasks#MarkItemDuInDays(lnum, duedate) "{{{3
 endf
 
 
-" Mark a tasks as due in N weeks.
-function! vikitasks#ItemMarkDueInWeeks(count, weeks) "{{{3
+" Mark task(s) as due in N weeks.
+function! vikitasks#ItemsMarkDueInWeeks(count, weeks) "{{{3
     " TLogVAR a:count, a:weeks
-    call vikitasks#ItemMarkDueInDays(a:count, a:weeks * 7)
+    call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7)
 endf
 
 
@@ -1047,7 +1045,7 @@ function! vikitasks#CalendarCallback(day, month, year, week, dir) "{{{3
     let duedate = printf('%4d-%02d-%02d', a:year, a:month, a:day)
     " TLogVAR duedate
     let world = trag#RunCmdOnSelected(s:calendar_callback_world, s:calendar_callback_selected,
-                \ printf('call vikitasks#MarkItemDuInDays(line("."), %s)', string(duedate)), 0)
+                \ printf('call vikitasks#ItemMarkDueInDays(line("."), %s)', string(duedate)), 0)
     " TLogVAR world.state
     call setbufvar(s:calendar_callback_buffer, 'tlib_world', world)
     exec s:calendar_callback_window 'wincmd w'
