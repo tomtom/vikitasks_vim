@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    35
+" @Revision:    39
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -28,8 +28,8 @@ endf
 let s:prototype.sometasks_rx = s:prototype.TaskLineRx(1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
 let s:prototype.tasks_rx = s:prototype.TaskLineRx(0, 0, 'A-Z', '0-9')
 
-exec 'TRagDefKind tasks todotxt /'. s:tasks_todotxt_rx .'/'
-exec 'TRagDefKind sometasks todotxt /'. s:sometasks_todotxt_rx .'/'
+exec 'TRagDefKind tasks todotxt /'. s:prototype.tasks_rx .'/'
+exec 'TRagDefKind sometasks todotxt /'. s:prototype.sometasks_rx .'/'
 
 
 function! s:prototype.ConvertLine(line) dict "{{{3
@@ -73,6 +73,9 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
         for filename in split(glob(pattern), '\n')
             " call add(files, filename)
+            if !trag#HasFiletype(filename)
+                call trag#SetFiletype('todotxt', filename)
+            endif
             call call(a:registrar, [filename, 'todotxt', archive])
         endfor
     endfor
@@ -85,9 +88,6 @@ endf
 
 
 function! vikitasks#ft#todotxt#GetInstance() "{{{3
-    if !trag#HasFiletype(todotxt)
-        call trag#SetFiletype('todotxt', 'todotxt')
-    endif
     return s:prototype
 endf
 
