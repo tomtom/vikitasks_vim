@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1497
+" @Revision:    1515
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -98,6 +98,7 @@ TLet g:vikitasks#inputlist_params = {
             \     )
             \ }
             \ }
+            " \ 'AfterRunCmd': function('vikitasks#ScanCurrentBuffer'),
 
 " Mapleader for some vikitasks related maps.
 TLet g:vikitasks#mapleader = '<LocalLeader>t'
@@ -331,8 +332,8 @@ endf
 
 
 function! s:Setqflist(qfl, today) "{{{3
-    " TLogVAR a:today
-    if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today < len(a:qfl) - 1
+    " TLogVAR a:today, len(a:qfl)
+    if !empty(g:vikitasks#today) && len(a:qfl) > 1 && a:today > 1 && a:today <= len(a:qfl)
         let qfl = insert(a:qfl, {'bufnr': 0, 'text': s:DueText()}, a:today - 1)
         call setqflist(qfl)
     else
@@ -483,13 +484,15 @@ function! s:GetCurrentTask(qfl, daysdiff) "{{{3
     let today = strftime(g:vikitasks#date_fmt)
     for qi in a:qfl
         let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates)
-        " TLogVAR qid, today
         if !empty(qid) && qid != '_' && tlib#date#DiffInDays(qid, today, 1) <= a:daysdiff
+            " let ddays = tlib#date#DiffInDays(qid,today,1)  " DBG
+            " TLogVAR qid, today, ddays
             let i += 1
         else
             break
         endif
     endfor
+    " TLogVAR i
     return i
 endf
 
