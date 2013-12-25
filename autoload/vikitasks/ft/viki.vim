@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    47
+" @Revision:    69
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -22,6 +22,22 @@ let s:prototype = {}
 
 function! s:prototype.GetFiletype(...) dict "{{{3
     return 'viki'
+endf
+
+
+function! s:prototype.DateRx() dict "{{{3
+    return g:vikitasks#viki_date_rx
+endf
+
+
+function! s:prototype.CategoryRx() dict "{{{3
+    return '^\C\s*#\zs\u'
+endf
+
+
+function! s:prototype.FinalRx() dict "{{{3
+    let rx = printf('\C^\s*#\([%s]\|\(\u\d\|\d\u\)\s\+x[ [:digit:]]\)', g:vikitasks#final_categories)
+    return rx
 endf
 
 
@@ -78,16 +94,16 @@ endf
 function! s:prototype.MarkDone(line) dict "{{{3
     let line = a:line
     let rx = vikitasks#TasksRx('tasks')
-    if line =~ rx && line !~ '^\C\s*#'. vikitasks#FinalRx()
+    if line =~ rx && line !~ '^\C\s*#'. self.FinalRx()
         let line = substitute(line, '^\C\s*#\zs\u', 'X', '')
         if g:vikitasks#done_add_date
-            let idx = matchend(line, g:vikitasks#date_rx)
+            let idx = matchend(line, g:vikitasks#viki_date_rx)
             if idx == -1
                 let idx = matchend(line, '^\C\s*#\u\d*\ze\s')
             endif
             if idx != -1
                 let line = strpart(line, 0, idx)
-                            \ . strftime(' :done:%Y-%m-%d')
+                            \ . strftime(' :done:'. g:vikitasks#date_fmt)
                             \ . strpart(line, idx)
             endif
         endif
@@ -110,46 +126,27 @@ function! s:prototype.GetArchiveName(filename) dict "{{{3
 endf
 
 
-function! s:prototype.ItemArchiveFinal() dict "{{{3
-    let archive_filename = s:vikitasks#GetFileProperty('archive', expand("%:p:r"))
-    if filereadable(archive_filename)
-        let archived = readfile(archive_filename)
-    else
-        let archived = copy(g:vikitasks#archive_header)
-    endif
-    let to_be_archived = []
-    let clnum = line('.')
-    for lnum in reverse(range(1, line('$')))
-        let line = getline(lnum)
-        if line =~ '\C^\s*#'. vikitasks#FinalRx() || line =~ '\C^\s\+#\(\u\d\|\d\u\)\s\+x[ [:digit:]]'
-            call insert(to_be_archived, line)
-            if lnum <= clnum
-                norm! k
-            endif
-            exec lnum 'delete'
-        endif
-    endfor
-    if !empty(to_be_archived)
-        if !empty(g:vikitasks#archive_date_fmt)
-            let archived += ['', strftime(g:vikitasks#archive_date_fmt)]
-        endif
-        let archived += to_be_archived
-        call writefile(archived, archive_filename)
-    endif
+function! s:prototype.ArchiveHeader(first_entry) dict "{{{3
+    return (a:first_entry ? '' : "\n"). g:vikitasks#archive_header_fmt
+endf
+
+
+function! s:prototype.ArchiveItem(line) dict "{{{3
+    return a:line
 endf
 
 
 function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
     let line = a:line
     let rx = vikitasks#TasksRx('tasks')
-    if line =~ rx && line =~ g:vikitasks#date_rx && line !~ '^\C\s*#'. vikitasks#FinalRx()
-        let m = matchlist(line, g:vikitasks#date_rx)
+    if line =~ rx && line =~ g:vikitasks#viki_date_rx && line !~ '^\C\s*#'. self.FinalRx()
+        let m = matchlist(line, g:vikitasks#viki_date_rx)
         if !empty(get(m, 4, ''))
             let subst = '\1\2..'. a:duedate
         else
             let subst = '\1'. a:duedate
         endif
-        let line1 = substitute(line, g:vikitasks#date_rx, subst, '')
+        let line1 = substitute(line, g:vikitasks#viki_date_rx, subst, '')
         " TLogVAR line1
         return [1, line1]
     else
@@ -159,7 +156,41 @@ endf
 
 
 function! s:prototype.IsA(filename) dict "{{{3
-    return 1
+    " TLogVAR bufloaded(a:filename), a:filename
+    if bufloaded(a:filename)
+        return !empty(getbufvar(a:filename, 'vikiEnabled'))
+    else
+        return 1
+    endif
+endf
+
+
+function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
+    let m = matchlist(a:line, g:vikitasks#viki_date_rx)
+    if !empty(get(m, 4, ''))
+        let subst = '\1\2..'. a:duedate
+    else
+        let subst = '\1'. a:duedate
+    endif
+    let line1 = substitute(line, g:vikitasks#viki_date_rx, subst, '')
+    return line1
+endf
+
+
+function! s:prototype.ItemMarkDone(line) dict "{{{3
+    let line = substitute(a:line, '^\C\s*#\zs\u', 'X', '')
+    if g:vikitasks#done_add_date
+        let idx = matchend(line, self.DateRx())
+        if idx == -1
+            let idx = matchend(line, '^\C\s*#\u\d*\ze\s')
+        endif
+        if idx != -1
+            let line = strpart(line, 0, idx)
+                        \ . strftime(' :done:'. g:vikitasks#date_fmt)
+                        \ . strpart(line, idx)
+        endif
+    endif
+    return line
 endf
 
 

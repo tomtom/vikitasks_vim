@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1361
+" @Revision:    1497
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -76,6 +76,7 @@ TLet g:vikitasks#inputlist_params = {
             \ 'trag_list_syntax': g:vikitasks#sources.viki ? 'viki' : '',
             \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
             \ 'trag_short_filename': 1,
+            \ 'GetBufferLines': function('vikitasks#GetBufferLines'),
             \ 'scratch': '__VikiTasks__',
             \ 'key_map': {
             \     'default': {
@@ -111,8 +112,11 @@ TLet g:vikitasks#archive_filename_fmt = '"%s_archived". g:vikiNameSuffix'
 " A list of strings. The header for newly created tasks archives.
 TLet g:vikitasks#archive_header = ['* Archived tasks']
 
+" The date format string (see |strftime()|).
+TLet g:vikitasks#date_fmt = "%Y-%m-%d"
+
 " The date format string (see |strftime()|) for archived entries.
-TLet g:vikitasks#archive_date_fmt = '** %Y-%m-%d'
+TLet g:vikitasks#archive_header_fmt = "** " . g:vikitasks#date_fmt
 
 " Letters of final categories, i.e. tasks that should not be altered 
 " after assigning them to one of these categories.
@@ -140,20 +144,39 @@ TLet g:vikitasks#use_calendar = ''
 TLet g:vikitasks#paste = {}
 
 
+let s:tasks_rx = {}
+
 function! vikitasks#TasksRx(which_tasks, ...) "{{{3
-    TVarArg ['filetype', 'viki']
-    let ftdef = vikitasks#ft#{filetype}#GetInstance()
-    let fmt = ftdef[a:which_tasks .'_rx']
-    if fmt =~ '%s'
-        return printf(fmt, '.*')
+    if a:0 >= 1
+        if type(a:1) == 4
+            let filetype = a:1.GetFiletype()
+        else
+            let filetype = a:1
+        endif
     else
-        return fmt
+        let filetype = 'viki'
+    endif
+    if has_key(get(s:tasks_rx, filetype, {}), a:which_tasks)
+        return s:tasks_rx[filetype][a:which_tasks]
+    else
+        let ftdef = vikitasks#ft#{filetype}#GetInstance()
+        let fmt = ftdef[a:which_tasks .'_rx']
+        if fmt =~ '%s'
+            let rv = printf(fmt, '.*')
+        else
+            let rv = fmt
+        endif
+        if !has_key(s:tasks_rx, filetype)
+            let s:tasks_rx[filetype] = {}
+        endif
+        let s:tasks_rx[filetype][a:which_tasks] = rv
+        return rv
     endif
 endf
 
 
-let g:vikitasks#date_rx = '\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|\d\+-\d\+-\d\+\)\(\.\.\(\(_\|\d\+-\d\+-\d\+\)\)\)\?\ze\s'
-let s:file_defs = {}
+let g:vikitasks#date_rx = '\d\+-\d\+-\d\+\>'
+let g:vikitasks#viki_date_rx = printf('\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|%s\)\(\.\.\(\(_\|%s\)\)\)\?\ze\s', g:vikitasks#date_rx, g:vikitasks#date_rx)
 
 
 " :nodoc:
@@ -184,6 +207,70 @@ function! vikitasks#GetArgs(bang, list) "{{{3
 endf
 
 
+function! s:GetTasks(args, use_cached) "{{{3
+    " TLogVAR a:args
+    if a:use_cached
+        let qfl = copy(s:GetCachedTasks())
+        let files = get(a:args, 'files', [])
+        " TLogVAR files
+        if !empty(files)
+            for file in files
+                let file_rx = vikitasks#Glob2Rx(file)
+                call filter(qfl, '(has_key(v:val, "filename") ? v:val.filename : bufname(v:val.bufnr)) =~ file_rx')
+            endfor
+        endif
+        return qfl
+    else
+        if g:vikitasks#sources.viki && &filetype != 'viki' && !viki#HomePage()
+            echoerr "VikiTasks: Not a viki buffer and cannot open the homepage"
+            return
+        endif
+        let files = get(a:args, 'files', [])
+        " TLogVAR files
+        if empty(files)
+            let files = s:CollectTaskFiles()
+            " TLogVAR files
+        endif
+        " TAssertType files, 'list'
+        " TLogVAR files
+        call map(files, 'glob(v:val)')
+        let files = split(join(files, "\n"), '\n')
+        let cfiles = map(files, 's:CanonicFilename(v:val)')
+        let cfiles = tlib#list#Uniq(cfiles)
+        " TLogVAR cfiles
+        if !empty(cfiles)
+            let qfl = trag#Grep('tasks', 1, cfiles)
+            " TLogVAR qfl
+            " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
+            let tasks = copy(qfl)
+            let file_defs = s:GetCachedFiles()
+            let remove_tasks = []
+            for i in range(len(tasks))
+                let bufnr = tasks[i].bufnr
+                let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
+                let tasks[i].filename = cfilename
+                let filetype = s:GetFiletype(cfilename)
+                if filetype != 'viki'
+                    let tasks[i].text = s:ConvertLine(file_defs, cfilename, filetype, tasks[i].text)
+                endif
+                if empty(tasks[i].text)
+                    call add(remove_tasks, i)
+                else
+                    call remove(tasks[i], 'bufnr')
+                endif
+            endfor
+            for i in remove_tasks
+                call remove(tasks, i)
+            endfor
+            call s:SaveInfo(file_defs, tasks)
+            return qfl
+        else
+            throw "VikiTasks: No task files"
+        endif
+    endif
+endf
+
+
 " :display: vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
 " If files is non-empty, use these files (glob patterns actually) 
 " instead of those defined in |g:vikitasks#files|.
@@ -195,65 +282,30 @@ endf
 function! vikitasks#Tasks(...) "{{{3
     TVarArg ['args', {}], ['suspend', 0]
     " TLogVAR args, suspend
-
-    if get(args, 'cached', 1)
-
-        let qfl = copy(s:GetCachedTasks())
-        let files = get(args, 'files', [])
-        " TLogVAR files
-        if !empty(files)
-            for file in files
-                let file_rx = vikitasks#Glob2Rx(file)
-                call filter(qfl, '(has_key(v:val, "filename") ? v:val.filename : bufname(v:val.bufnr)) =~ file_rx')
-            endfor
-        endif
+    let qfl = s:GetTasks(args, get(args, 'cached', 1))
+    if !empty(qfl)
         call s:TasksList(qfl, args, suspend)
+    endif
+endf
 
+
+function! s:ConvertLine(file_defs, cfilename, filetype, line) "{{{3
+    if a:filetype == 'viki'
+        return a:line
     else
-
-        if g:vikitasks#sources.viki && &filetype != 'viki' && !viki#HomePage()
-            echoerr "VikiTasks: Not a viki buffer and cannot open the homepage"
-            return
+        let ftdef = vikitasks#ft#{a:filetype}#GetInstance()
+        let line1 = ftdef.ConvertLine(a:line)
+        if !empty(a:line) && line1 =~ vikitasks#TasksRx('tasks', ftdef)
+            if !has_key(a:file_defs, a:cfilename)
+                throw 'VikiTasks: Internal error: No filedef for '. a:cfilename
+            else
+                let mapsource = get(a:file_defs[a:cfilename], 'mapsource', {})
+                let mapsource[a:line] = line1
+                let a:file_defs[a:cfilename].mapsource = mapsource
+                " TLogVAR a:filetype, a:line, line1
+            endif
         endif
-
-        " TLogVAR args
-        let files = get(args, 'files', [])
-        " TLogVAR files
-        if empty(files)
-            let files = s:CollectTaskFiles()
-            " TLogVAR files
-        endif
-        " TAssertType files, 'list'
-
-        " TLogVAR files
-        call map(files, 'glob(v:val)')
-        let files = split(join(files, "\n"), '\n')
-        let files = map(files, 's:CanonicFilename(v:val)')
-        let files = tlib#list#Uniq(files)
-        " TLogVAR files
-        if !empty(files)
-            let qfl = trag#Grep('tasks', 1, files)
-            " TLogVAR qfl
-            " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
-            let tasks = copy(qfl)
-            for i in range(len(tasks))
-                let bufnr = tasks[i].bufnr
-                let filename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
-                let tasks[i].filename = filename
-                let filetype = s:GetFiletype(filename, '')
-                if filetype != 'viki'
-                    let tasks[i].text = s:Convert(filetype, tasks[i].text)
-                endif
-                call remove(tasks[i], 'bufnr')
-            endfor
-            let file_defs = s:GetCachedFiles()
-            call s:SaveInfo(file_defs, tasks)
-
-            call s:TasksList(qfl, args, suspend)
-        else
-            echom "VikiTasks: No task files"
-        endif
-
+        return line1
     endif
 endf
 
@@ -315,7 +367,7 @@ function! s:FilterTasks(tasks, args) "{{{3
 
     let ignore_completed = get(a:args, 'ignore_completed', g:vikitasks#ignore_completed_tasks)
     if ignore_completed
-        call filter(a:tasks, 'empty(get(matchlist(v:val.text, g:vikitasks#date_rx), 1, ""))')
+        call filter(a:tasks, 'empty(get(matchlist(v:val.text, g:vikitasks#viki_date_rx), 1, ""))')
     endif
 
     let which_tasks = get(a:args, 'tasks', 'tasks')
@@ -408,7 +460,7 @@ endf
 
 
 function! s:GetTaskDueDate(task, use_end_date, use_unspecified) "{{{3
-    let m = matchlist(a:task, g:vikitasks#date_rx)
+    let m = matchlist(a:task, g:vikitasks#viki_date_rx)
     if a:use_end_date && g:vikitasks#use_end_date
         let rv = get(m, 4, '')
     else
@@ -428,7 +480,7 @@ endf
 function! s:GetCurrentTask(qfl, daysdiff) "{{{3
     " TLogVAR a:daysdiff
     let i = 1
-    let today = strftime('%Y-%m-%d')
+    let today = strftime(g:vikitasks#date_fmt)
     for qi in a:qfl
         let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates)
         " TLogVAR qid, today
@@ -465,7 +517,8 @@ function! s:GetCachedFiles() "{{{3
         if empty(s:file_defs)
             let files = get(tlib#cache#Get(g:vikitasks#cache), 'files', [])
             for file in files
-                call vikitasks#RegisterFilename(file, s:GetFiletype(a:file, ''), '')
+                let cfilename = s:CanonicFilename(file)
+                call vikitasks#RegisterFilename(cfilename, s:GetFiletype(cfilename), '')
             endfor
         endif
     endif
@@ -542,14 +595,30 @@ function s:find_params.Check(val) dict
 endf
 
 
-function! s:GetFiletype(filename, filetype) "{{{3
-    let [ft, ok] = vikitasks#EachSource(s:TaskSource(a:filetype), 'IsA', [a:filename], s:find_params)
+function! s:GetFileSource(cfilename, filetype) "{{{3
+    return vikitasks#EachSource(s:TaskSource(a:filetype), 'IsA', [a:cfilename], s:find_params)
+endf
+
+
+function! s:GetFiletype(...) "{{{3
+    let cfilename = a:0 >= 1 ? a:1 : s:CanonicFilename(expand('%:p'))
+    let filetype = a:0 >= 2 ? a:2 : ''
+    let on_error = a:0 >= 3 ? a:3 : 0
+    let [ft, ok] = s:GetFileSource(cfilename, filetype)
+    if !ok
+        if on_error == 2
+            throw 'VikiTasks: Unsupported filetype: '. filetype
+        elseif on_error == 1
+            return ''
+        endif
+    endif
     return ft
 endf
 
 
 function! s:GetArchiveName(filename, filetype) "{{{3
-    let [ft, archive] = vikitasks#EachSource(s:TaskSource(a:filetype), 'GetArchiveName', [a:filename], s:find_params)
+    let cfilename = s:CanonicFilename(a:filename)
+    let [ft, archive] = vikitasks#EachSource(s:TaskSource(a:filetype), 'GetArchiveName', [cfilename], s:find_params)
     return archive
 endf
 
@@ -569,9 +638,9 @@ endf
 
 
 function! vikitasks#UnRegisterFilename(filename) "{{{3
-    let filename = s:CanonicFilename(a:filename)
-    if has_key(s:file_defs, filename)
-        call remove(s:file_defs, filename)
+    let cfilename = s:CanonicFilename(a:filename)
+    if has_key(s:file_defs, cfilename)
+        call remove(s:file_defs, cfilename)
     endif
 endf
 
@@ -579,22 +648,27 @@ endf
 function! vikitasks#RegisterFilename(dirpattern, filetype, archive) "{{{3
     for filename in split(glob(a:dirpattern), '\n')
         if filereadable(filename) && !isdirectory(filename)
-            let filename = s:CanonicFilename(filename)
-            if !has_key(s:file_defs, filename) && filename !~ s:files_ignored
-                let s:file_defs[filename] = {'filetype': a:filetype}
-                if !empty(a:archive)
-                    let s:file_defs[filename].archive = a:archive
-                endif
-                " TLogVAR filename
-            endif
+            let cfilename = s:CanonicFilename(filename)
+            call s:MaybeRegisterFilename(cfilename, a:filetype, a:archive)
+            " TLogVAR cfilename
         endif
     endfor
 endf
 
 
+function! s:MaybeRegisterFilename(cfilename, filetype, archive) "{{{3
+    if !has_key(s:file_defs, a:cfilename) && a:cfilename !~ s:files_ignored
+        let s:file_defs[a:cfilename] = {'filetype': a:filetype}
+        if !empty(a:archive)
+            let s:file_defs[a:cfilename].archive = a:archive
+        endif
+    endif
+endf
+
+
 function! s:Select(text, from, to) "{{{3
-    let sfrom = strftime('%Y-%m-%d', a:from)
-    let sto = strftime('%Y-%m-%d', a:to)
+    let sfrom = strftime(g:vikitasks#date_fmt, a:from)
+    let sto = strftime(g:vikitasks#date_fmt, a:to)
     let date1 = s:GetTaskDueDate(a:text, 0, g:vikitasks#use_unspecified_dates)
     let date2 = s:GetTaskDueDate(a:text, 1, g:vikitasks#use_unspecified_dates)
     if date1 == '_'
@@ -622,13 +696,12 @@ endf
 function! vikitasks#AddBuffer(buffer, ...) "{{{3
     TVarArg ['save', 1], ['filetype', &filetype]
     " TLogVAR a:buffer, save
-    let fname = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
+    let cfilename = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
     let file_defs = s:GetCachedFiles()
-    if filereadable(fname) && !has_key(file_defs, fname)
+    if filereadable(cfilename) && !has_key(file_defs, cfilename)
         let filetype = s:TaskSource(filetype)
-        " <+TODO+> file_defs vs s:file_defs
-        call vikitasks#RegisterFilename(fname, filetype, '')
-        if save && !vikitasks#ScanCurrentBuffer(fname)
+        call vikitasks#RegisterFilename(cfilename, filetype, '')
+        if save && !vikitasks#ScanCurrentBuffer(cfilename)
             call s:SaveInfo(file_defs, s:GetCachedTasks())
         endif
     endif
@@ -639,12 +712,17 @@ endf
 function! vikitasks#RemoveBuffer(buffer, ...) "{{{3
     TVarArg ['save', 1]
     " TLogVAR a:buffer, save
-    let fname = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
+    let cfilename = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
     let file_defs = s:GetCachedFiles()
-    if has_key(file_defs, fname)
-        call vikitasks#UnRegisterFilename(fname)
+    if has_key(file_defs, cfilename)
+        let source = s:TaskSource(file_defs[cfilename].filetype)
+        let ftdef = vikitasks#ft#{source}#GetInstance()
+        if has_key(ftdef, 'RemoveFile')
+            call ftdef.RemoveFile(cfilename)
+        endif
+        call vikitasks#UnRegisterFilename(cfilename)
         " <+TODO+> Are tasks from a:buffer removed?
-        if save && !vikitasks#ScanCurrentBuffer(fname)
+        if save && !vikitasks#ScanCurrentBuffer(cfilename)
             call s:SaveInfo(file_defs, s:GetCachedTasks())
         endif
     endif
@@ -654,17 +732,17 @@ endf
 " Edit the list of files.
 function! vikitasks#EditFiles() "{{{3
     let file_defs = s:GetCachedFiles()
-    let files = keys(file_defs)
-    let files1 = tlib#input#EditList('Edit task files:', files)
-    if files != files1
-        for f in files1
+    let cfiles = keys(file_defs)
+    let cfiles1 = tlib#input#EditList('Edit task files:', cfiles)
+    if cfiles != cfiles1
+        for cfilename in cfiles1
             if !has_key(file_defs)
-                let file_defs[f] = s:GetFiletype(f, '')
+                let file_defs[cfilename] = s:GetFiletype(cfilename)
             endif
         endfor
-        for f in files
-            if index(files1, f) == -1 && has_key(file_defs, f)
-                call remove(file_defs, f)
+        for cfilename in cfiles
+            if index(cfiles1, cfilename) == -1 && has_key(file_defs, cfilename)
+                call remove(file_defs, cfilename)
             endif
         endfor
         call s:SaveInfo(file_defs, s:GetCachedTasks())
@@ -674,19 +752,19 @@ endf
 
 
 " :nodoc:
-" :display: vikitasks#Alarm(?ddays = -1)
+" :display: vikitasks#Alarm(?ddays = -1, ?use_cached = 1)
 " Display a list of alarms.
 " If ddays >= 0, the constraint value in |g:vikitasks#alarms| is set to 
 " ddays days.
 " If ddays is -1 and |g:vikitasks#alarms| is empty, no alarms will be 
 " listed.
 function! vikitasks#Alarm(...) "{{{3
-    TVarArg ['ddays', -1]
+    TVarArg ['ddays', -1], ['use_cached', 1]
     " TLogVAR ddays
     if ddays < 0 && empty(g:vikitasks#alarms)
         return
     endif
-    let tasks = copy(s:GetCachedTasks())
+    let tasks = s:GetTasks({}, use_cached)
     call sort(tasks, "s:SortTasks")
     let alarms = copy(g:vikitasks#alarms)
     if ddays >= 0
@@ -703,6 +781,18 @@ function! vikitasks#Alarm(...) "{{{3
 endf
 
 
+function! vikitasks#GetBufferLines(from, to) "{{{3
+    let lines = getline(a:from, a:to)
+    let file_defs = s:GetCachedFiles()
+    let ftdef = s:GetBufferTasksDef()
+    let cfilename = s:CanonicFilename(expand('%:p'))
+    let filetype = ftdef.GetFiletype()
+    let lines = map(lines, 's:ConvertLine(file_defs, cfilename, filetype, v:val)')
+    " call s:SaveInfo(file_defs, tasks)
+    return lines
+endf
+
+
 " :nodoc:
 " Scan the current buffer for task lists.
 function! vikitasks#ScanCurrentBuffer(...) "{{{3
@@ -710,24 +800,30 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     let use_buffer = empty(filename)
     if use_buffer
         let bufnr = bufnr('%')
-        let filename = s:CanonicFilename(fnamemodify(bufname('%'), ':p'))
+        let cfilename = s:CanonicFilename(expand('%:p'))
     else
         let bufnr = bufnr(filename)
-        let filename = s:CanonicFilename(filename)
+        let cfilename = s:CanonicFilename(filename)
     endif
-    " TLogVAR filename, use_buffer
-    if getbufvar(bufnr, '&buftype') =~ '\<nofile\>' || (!empty(s:files_ignored) && filename =~ s:files_ignored) || !filereadable(filename) || isdirectory(filename) || empty(filename)
+    if getbufvar(bufnr, '&buftype') =~ '\<nofile\>' || (!empty(s:files_ignored) && cfilename =~ s:files_ignored) || !filereadable(cfilename) || isdirectory(cfilename) || empty(cfilename)
         return 0
     endif
+    let [source, ok] = s:GetFileSource(cfilename, getbufvar(bufnr, '&filetype'))
+    " TLogVAR source, ok, cfilename
+    if !ok
+        return 0
+    endif
+    let file_defs = s:GetCachedFiles()
+    call s:MaybeRegisterFilename(cfilename, source, '')
+    " TLogVAR cfilename, use_buffer, has_key(file_defs, cfilename)
     let tasks0 = s:GetCachedTasks()
     let ntasks = len(tasks0)
     let tasks = []
     let buftasks = {}
-    let filetype = s:GetFiletype(filename, getbufvar(bufnr, '&filetype'))
-    let ftdef = vikitasks#ft#{filetype}#GetInstance()
+    let ftdef = vikitasks#ft#{source}#GetInstance()
     for task in tasks0
         " TLogVAR task
-        if s:CanonicFilename(task.filename) == filename
+        if s:CanonicFilename(task.filename) == cfilename
             " TLogVAR task.lnum, task
             if has_key(task, 'text')
                 let buftasks[task.lnum] = task
@@ -738,7 +834,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
         unlet task
     endfor
     " TLogVAR len(tasks)
-    let rx = vikitasks#TasksRx('tasks', filetype)
+    let rx = vikitasks#TasksRx('tasks', source)
     let def = {'inline': 0, 'sometasks': 0, 'letters': 'A-Z', 'levels': '0-9'}
     let @r = rx
     let update = 0
@@ -748,11 +844,11 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     if use_buffer
         let lines = getline(1, '$')
     else
-        let lines = readfile(filename)
+        let lines = readfile(cfilename)
     endif
-    " call filter(tasks, 'v:val.filename != filename')
+    " call filter(tasks, 'v:val.filename != cfilename')
     for line0 in lines
-        let line = ftdef.ConvertLine(line0)
+        let line = s:ConvertLine(file_defs, cfilename, source, line0)
         if line =~ '^%\s*vikitasks:'
             let paramss = matchstr(line, '^%\s*vikitasks:\s*\zs.*$')
             " TLogVAR paramss
@@ -783,7 +879,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
                 let update = 1
                 " TLogVAR lnum, text
                 call add(tasks, {
-                            \ 'filename': filename,
+                            \ 'filename': cfilename,
                             \ 'lnum': lnum,
                             \ 'text': text
                             \ })
@@ -796,12 +892,10 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     " TLogVAR len(tasks)
     if update
         " TLogVAR update
-        call vikitasks#AddBuffer(filename, 0, filetype)
-        let file_defs = s:GetCachedFiles()
+        call vikitasks#AddBuffer(cfilename, 0, source)
         call s:SaveInfo(file_defs, tasks)
     elseif !tasks_found
-        call vikitasks#RemoveBuffer(filename, 0)
-        let file_defs = s:GetCachedFiles()
+        call vikitasks#RemoveBuffer(cfilename, 0)
         call s:SaveInfo(file_defs, tasks)
     endif
     return update
@@ -810,26 +904,15 @@ endf
 
 " Mark a N tasks as done, i.e. assign them to category X -- see also 
 " |g:vikitasks#final_categories|.
-" <+TODO+> dispatch on filetype
 function! vikitasks#ItemMarkDone(count) "{{{3
-    let rx = vikitasks#TasksRx('tasks')
+    let ftdef = s:GetBufferTasksDef()
+    let rx = vikitasks#TasksRx('tasks', ftdef)
     " TLogVAR rx
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         " TLogVAR lnum, line
-        if line =~ rx && line !~ '^\C\s*#'. vikitasks#FinalRx()
-            let line = substitute(line, '^\C\s*#\zs\u', 'X', '')
-            if g:vikitasks#done_add_date
-                let idx = matchend(line, g:vikitasks#date_rx)
-                if idx == -1
-                    let idx = matchend(line, '^\C\s*#\u\d*\ze\s')
-                endif
-                if idx != -1
-                    let line = strpart(line, 0, idx)
-                                \ . strftime(' :done:%Y-%m-%d')
-                                \ . strpart(line, idx)
-                endif
-            endif
+        if line =~ rx && line !~ ftdef.FinalRx()
+            let line = ftdef.ItemMarkDone(line)
             " TLogVAR line
             call setline(lnum, line)
         endif
@@ -838,19 +921,19 @@ endf
 
 
 " Archive final (see |g:vikitasks#final_categories|) tasks.
-" <+TODO+> dispatch on filetype
 function! vikitasks#ItemArchiveFinal() "{{{3
-    let archive_filename = s:GetArchiveName(expand("%:p:r"), '')
+    let ftdef = s:GetBufferTasksDef()
+    let archive_filename = ftdef.GetArchiveName(expand("%:p:r"))
     if filereadable(archive_filename)
         let archived = readfile(archive_filename)
     else
-        let archived = copy(g:vikitasks#archive_header)
+        let archived = ftdef.ArchiveHeader(1)
     endif
     let to_be_archived = []
     let clnum = line('.')
     for lnum in reverse(range(1, line('$')))
         let line = getline(lnum)
-        if line =~ '\C^\s*#'. vikitasks#FinalRx() || line =~ '\C^\s\+#\(\u\d\|\d\u\)\s\+x[ [:digit:]]'
+        if line =~ ftdef.FinalRx()
             call insert(to_be_archived, line)
             if lnum <= clnum
                 norm! k
@@ -859,10 +942,11 @@ function! vikitasks#ItemArchiveFinal() "{{{3
         endif
     endfor
     if !empty(to_be_archived)
-        if !empty(g:vikitasks#archive_date_fmt)
-            let archived += ['', strftime(g:vikitasks#archive_date_fmt)]
+        let archive_header = ftdef.ArchiveHeader(0)
+        if !empty(archive_header)
+            let archived += split(strftime(archive_header), '\n')
         endif
-        let archived += to_be_archived
+        let archived += map(to_be_archived, 'ftdef.ArchiveItem(v:val)')
         call writefile(archived, archive_filename)
     endif
 endf
@@ -882,28 +966,33 @@ endf
 " Mark a tasks as due in N days.
 function! vikitasks#ItemMarkDueInDays(count, days) "{{{3
     " TLogVAR a:count, a:days
-    let duedate = strftime('%Y-%m-%d', localtime() + a:days * g:tlib#date#dayshift)
+    let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
     for lnum in range(line('.'), line('.') + a:count)
         call vikitasks#MarkItemDueInDays(lnum, duedate)
     endfor
 endf
 
 
+function! s:GetBufferTasksDef() "{{{3
+    let source = s:GetFiletype()
+    let ftdef = vikitasks#ft#{source}#GetInstance()
+    return ftdef
+endf
+
+
 " :nodoc:
-" <+TODO+> dispatch on filetype
 function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
     " TLogVAR bufname('%'), a:lnum, a:duedate
-    let rx = vikitasks#TasksRx('tasks')
+    let ftdef = s:GetBufferTasksDef()
+    " TLogVAR ftdef
+    let rx = vikitasks#TasksRx('tasks', ftdef)
+    " TLogVAR rx
     let line = getline(a:lnum)
-    " TLogVAR line
-    if line =~ rx && line =~ g:vikitasks#date_rx && line !~ '^\C\s*#'. vikitasks#FinalRx()
-        let m = matchlist(line, g:vikitasks#date_rx)
-        if !empty(get(m, 4, ''))
-            let subst = '\1\2..'. a:duedate
-        else
-            let subst = '\1'. a:duedate
-        endif
-        let line1 = substitute(line, g:vikitasks#date_rx, subst, '')
+    " TLogVAR line, line=~rx
+    " TLogVAR line =~ rx, line =~ ftdef.DateRx(), line !~ ftdef.FinalRx()
+    if line =~ rx && line =~ ftdef.DateRx() && line !~ ftdef.FinalRx()
+        " TLogVAR line
+        let line1 = ftdef.MarkItemDueInDays(line, a:duedate)
         " TLogVAR line1
         call setline(a:lnum, line1)
     endif
@@ -926,15 +1015,16 @@ function! vikitasks#ItemChangeCategory(count, ...) "{{{3
         let category = input('New task category [A-Z]: ')
         call inputrestore()
     endif
+    let ftdef = s:GetBufferTasksDef()
     let category = toupper(category)
     if category =~ '\C^[A-Z]$'
-        let rx = vikitasks#TasksRx('tasks')
+        let rx = vikitasks#TasksRx('tasks', ftdef)
         " TLogVAR rx
         for lnum in range(line('.'), line('.') + a:count)
             let line = getline(lnum)
             " TLogVAR lnum, line
             if line =~ rx
-                let line = substitute(line, '^\C\s*#\zs\u', category, '')
+                let line = substitute(line, ftdef.CategoryRx(), category, '')
                 " TLogVAR line
                 call setline(lnum, line)
             endif
@@ -961,11 +1051,6 @@ function! vikitasks#AgentItemChangeCategory(world, selected) "{{{3
         let a:world.state = 'redisplay'
         return a:world
     endif
-endf
-
-
-function! vikitasks#FinalRx() "{{{3
-    return printf('\C[%s]', g:vikitasks#final_categories)
 endf
 
 
