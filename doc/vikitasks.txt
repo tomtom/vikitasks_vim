@@ -87,6 +87,7 @@ Contents~
 
         g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
         g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
+        g:vikitasks_scan_patterns ............. |g:vikitasks_scan_patterns|
         :VikiTasks ............................ |:VikiTasks|
         :VikiTasksStatic ...................... |:VikiTasksStatic|
         :VikiTasksPaste ....................... |:VikiTasksPaste|
@@ -100,11 +101,9 @@ Contents~
         :VikiTasksDueInWeeks .................. |:VikiTasksDueInWeeks|
         g:vikitasks#files ..................... |g:vikitasks#files|
         g:vikitasks#files_ignored ............. |g:vikitasks#files_ignored|
-        g:vikitasks#intervikis ................ |g:vikitasks#intervikis|
         g:vikitasks#ignore_completed_tasks .... |g:vikitasks#ignore_completed_tasks|
-        g:vikitasks#intervikis_ignored ........ |g:vikitasks#intervikis_ignored|
-        g:vikitasks#todotxt_dir ............... |g:vikitasks#todotxt_dir|
         g:vikitasks#sources ................... |g:vikitasks#sources|
+        g:vikitasks#filetype_map .............. |g:vikitasks#filetype_map|
         g:vikitasks#default_priority .......... |g:vikitasks#default_priority|
         g:vikitasks#qfl_viewer ................ |g:vikitasks#qfl_viewer|
         g:vikitasks#rx_letters ................ |g:vikitasks#rx_letters|
@@ -118,16 +117,23 @@ Contents~
         g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
         g:vikitasks#mapleader ................. |g:vikitasks#mapleader|
         g:vikitasks#done_add_date ............. |g:vikitasks#done_add_date|
-        g:vikitasks#archive_filename_expr ..... |g:vikitasks#archive_filename_expr|
+        g:vikitasks#archive_filename_fmt ...... |g:vikitasks#archive_filename_fmt|
         g:vikitasks#archive_header ............ |g:vikitasks#archive_header|
-        g:vikitasks#archive_date_fmt .......... |g:vikitasks#archive_date_fmt|
+        g:vikitasks#date_fmt .................. |g:vikitasks#date_fmt|
+        g:vikitasks#archive_header_fmt ........ |g:vikitasks#archive_header_fmt|
         g:vikitasks#final_categories .......... |g:vikitasks#final_categories|
         g:vikitasks#use_calendar .............. |g:vikitasks#use_calendar|
         g:vikitasks#paste ..................... |g:vikitasks#paste|
+        vikitasks#TasksRx ..................... |vikitasks#TasksRx()|
         vikitasks#Tasks ....................... |vikitasks#Tasks()|
+        vikitasks#MustUseCanonicFilename ...... |vikitasks#MustUseCanonicFilename()|
+        vikitasks#EachSource .................. |vikitasks#EachSource()|
+        vikitasks#UnRegisterFilename .......... |vikitasks#UnRegisterFilename()|
+        vikitasks#RegisterFilename ............ |vikitasks#RegisterFilename()|
         vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
         vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
         vikitasks#EditFiles ................... |vikitasks#EditFiles()|
+        vikitasks#GetBufferLines .............. |vikitasks#GetBufferLines()|
         vikitasks#ItemMarkDone ................ |vikitasks#ItemMarkDone()|
         vikitasks#ItemArchiveFinal ............ |vikitasks#ItemArchiveFinal()|
         vikitasks#ListTaskFiles ............... |vikitasks#ListTaskFiles()|
@@ -135,6 +141,7 @@ Contents~
         vikitasks#ItemMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
         vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
         vikitasks#AgentPaste .................. |vikitasks#AgentPaste()|
+        vikitasks#Glob2Rx ..................... |vikitasks#Glob2Rx()|
 
 
 ========================================================================
@@ -150,6 +157,11 @@ g:vikitasks_startup_alarms     (default: (!has('clientserver') || len(split(serv
                                                     *g:vikitasks_scan_events*
 g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
     Scan a buffer on these events.
+
+                                                    *g:vikitasks_scan_patterns*
+g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
+    A list of filename patterns (see 'wildcards') for files that should 
+    automatically on events specified in |g:vikitasks_scan_events|.
 
                                                     *:VikiTasks*
 :VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
@@ -266,32 +278,24 @@ g:vikitasks#files_ignored      (default: [])
     A list of |regexp| patterns for filenames that should not be 
     scanned.
 
-                                                    *g:vikitasks#intervikis*
-g:vikitasks#intervikis         (default: 0)
-    If non-null, automatically add the homepages of your intervikis to 
-    |g:vikitasks#files|.
-    If the value is 2, scan all files (taking into account the interviki 
-    suffix) in the interviki's top directory.
-    Can be buffer-local.
-
                                                     *g:vikitasks#ignore_completed_tasks*
 g:vikitasks#ignore_completed_tasks (default: 1)
     If true, completely ignore completed tasks.
 
-                                                    *g:vikitasks#intervikis_ignored*
-g:vikitasks#intervikis_ignored (default: [])
-    A list of ignored intervikis.
-    Can be buffer-local.
-
-                                                    *g:vikitasks#todotxt_dir*
-g:vikitasks#todotxt_dir        (default: '')
-    If you use todo.txt (http://todotxt.com), set this variable to the 
-    full name of base directory where todo.txt is kept.
-    For display, lines in todo.txt are converted to viki task list syntax.
-
                                                     *g:vikitasks#sources*
 g:vikitasks#sources            (default: {)
-    If true, provide tighter integration with the vim viki plugin.
+    If non-false, provide tighter integration with the vim viki plugin.
+
+                                                    *g:vikitasks#filetype_map*
+g:vikitasks#filetype_map       (default: {)
+    A dictionary of 'filetype' => source (see |g:vikitasks#sources|).
+
+    By default vikitasks expects todo.txt files to have the filetype 
+    |todotxt| (which is used by the todo.txt plugin found at 
+    https://github.com/davidoc/todo.txt-vim and my own fork at 
+    https://github.com/tomtom/todo.txt-vim-1/). Using this map allows 
+    users to use todo.txt plugins that use the filetype "todo" (e.g. 
+    https://github.com/freitass/todo.txt-vim).
 
                                                     *g:vikitasks#default_priority*
 g:vikitasks#default_priority   (default: 'F')
@@ -357,8 +361,8 @@ g:vikitasks#mapleader          (default: '<LocalLeader>t')
 g:vikitasks#done_add_date      (default: 1)
     If true, add a date tag when marking a task done with |vikitasks#ItemMarkDone()|.
 
-                                                    *g:vikitasks#archive_filename_expr*
-g:vikitasks#archive_filename_expr (default: 'expand("%:p:r") ."_archived". g:vikiNameSuffix')
+                                                    *g:vikitasks#archive_filename_fmt*
+g:vikitasks#archive_filename_fmt (default: '"%s_archived". g:vikiNameSuffix')
     A vim expression that returns the filename of the archive where 
     archived tasks should be moved to.
 
@@ -366,8 +370,12 @@ g:vikitasks#archive_filename_expr (default: 'expand("%:p:r") ."_archived". g:vik
 g:vikitasks#archive_header     (default: ['* Archived tasks'])
     A list of strings. The header for newly created tasks archives.
 
-                                                    *g:vikitasks#archive_date_fmt*
-g:vikitasks#archive_date_fmt   (default: '** %Y-%m-%d')
+                                                    *g:vikitasks#date_fmt*
+g:vikitasks#date_fmt           (default: "%Y-%m-%d")
+    The date format string (see |strftime()|).
+
+                                                    *g:vikitasks#archive_header_fmt*
+g:vikitasks#archive_header_fmt (default: "** " . g:vikitasks#date_fmt)
     The date format string (see |strftime()|) for archived entries.
 
                                                     *g:vikitasks#final_categories*
@@ -397,6 +405,9 @@ g:vikitasks#paste              (default: {})
     A dictionary with the fields (default values are marked with "*"):
       filename: add*|group|none
 
+                                                    *vikitasks#TasksRx()*
+vikitasks#TasksRx(which_tasks, ...)
+
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
     If files is non-empty, use these files (glob patterns actually) 
@@ -406,6 +417,18 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
       -1 ... Don't display a list
        0 ... List takes the focus
        1 ... Current buffer takes the focus
+
+                                                    *vikitasks#MustUseCanonicFilename()*
+vikitasks#MustUseCanonicFilename()
+
+                                                    *vikitasks#EachSource()*
+vikitasks#EachSource(fallback, fn, args, params)
+
+                                                    *vikitasks#UnRegisterFilename()*
+vikitasks#UnRegisterFilename(filename)
+
+                                                    *vikitasks#RegisterFilename()*
+vikitasks#RegisterFilename(dirpattern, filetype, archive)
 
                                                     *vikitasks#AddBuffer()*
 vikitasks#AddBuffer(buffer, ...)
@@ -418,6 +441,9 @@ vikitasks#RemoveBuffer(buffer, ...)
                                                     *vikitasks#EditFiles()*
 vikitasks#EditFiles()
     Edit the list of files.
+
+                                                    *vikitasks#GetBufferLines()*
+vikitasks#Alarm(?ddays = -1, ?use_cached = 1)
 
                                                     *vikitasks#ItemMarkDone()*
 vikitasks#ItemMarkDone(count)
@@ -446,6 +472,9 @@ vikitasks#ItemChangeCategory(count, ...)
 
                                                     *vikitasks#AgentPaste()*
 vikitasks#AgentPaste(world, selected)
+
+                                                    *vikitasks#Glob2Rx()*
+vikitasks#Glob2Rx(pattern)
 
 
 
