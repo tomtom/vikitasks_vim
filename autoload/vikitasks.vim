@@ -26,6 +26,19 @@ TLet g:vikitasks#sources = {
             \ 'todotxt': 1
             \ }
 
+" A dictionary of 'filetype' => source (see |g:vikitasks#sources|).
+"
+" By default vikitasks expects todo.txt files to have the filetype 
+" |todotxt| (which is used by the todo.txt plugin found at 
+" https://github.com/davidoc/todo.txt-vim and my own fork at 
+" https://github.com/tomtom/todo.txt-vim-1/). Using this map allows 
+" users to use todo.txt plugins that use the filetype "todo" (e.g. 
+" https://github.com/freitass/todo.txt-vim).
+TLet g:vikitasks#filetype_map = {
+            \ 'txt': 'viki',
+            \ 'todo': 'todotxt'
+            \ }
+
 " Default category/priority when converting tasks without priorities.
 TLet g:vikitasks#default_priority = 'F'
 
@@ -222,7 +235,7 @@ function! s:GetTasks(args, use_cached) "{{{3
         endif
         return qfl
     else
-        if g:vikitasks#sources.viki && &filetype != 'viki' && !viki#HomePage()
+        if g:vikitasks#sources.viki && s:GetBufferFiletype() != 'viki' && !viki#HomePage()
             echoerr "VikiTasks: Not a viki buffer and cannot open the homepage"
             return
         endif
@@ -603,6 +616,13 @@ function! s:GetFileSource(cfilename, filetype) "{{{3
 endf
 
 
+function! s:GetBufferFiletype(...) "{{{3
+    let bufnr = a:0 >= 1 ? a:1 : bufnr('%')
+    let ft = getbufvar(bufnr, '&filetype')
+    return get(g:vikitasks#filetype_map, ft, ft)
+endf
+
+
 function! s:GetFiletype(...) "{{{3
     let cfilename = a:0 >= 1 ? a:1 : s:CanonicFilename(expand('%:p'))
     let filetype = a:0 >= 2 ? a:2 : ''
@@ -697,9 +717,17 @@ endf
 
 " Register BUFFER as a file that should be scanned for task lists.
 function! vikitasks#AddBuffer(buffer, ...) "{{{3
-    TVarArg ['save', 1], ['filetype', &filetype]
-    " TLogVAR a:buffer, save
-    let cfilename = s:CanonicFilename(fnamemodify(a:buffer, ':p'))
+    if type(a:buffer) == 0
+        let bufnr = a:buffer
+        let bufname = bufname(bufnr)
+    else
+        let bufname = a:buffer
+        let bufnr = bufnr(bufname)
+    endif
+    let bft = s:GetBufferFiletype(bufnr)
+    TVarArg ['save', 1], ['filetype', bft]
+    " TLogVAR a:buffer, bufnr, bufname, save, filetype
+    let cfilename = s:CanonicFilename(fnamemodify(bufname, ':p'))
     let file_defs = s:GetCachedFiles()
     if filereadable(cfilename) && !has_key(file_defs, cfilename)
         let filetype = s:TaskSource(filetype)
@@ -811,7 +839,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     if getbufvar(bufnr, '&buftype') =~ '\<nofile\>' || (!empty(s:files_ignored) && cfilename =~ s:files_ignored) || !filereadable(cfilename) || isdirectory(cfilename) || empty(cfilename)
         return 0
     endif
-    let [source, ok] = s:GetFileSource(cfilename, getbufvar(bufnr, '&filetype'))
+    let [source, ok] = s:GetFileSource(cfilename, s:GetBufferFiletype(bufnr))
     " TLogVAR source, ok, cfilename
     if !ok
         return 0
@@ -895,7 +923,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
     " TLogVAR len(tasks)
     if update
         " TLogVAR update
-        call vikitasks#AddBuffer(cfilename, 0, source)
+        call vikitasks#AddBuffer(bufnr, 0, source)
         call s:SaveInfo(file_defs, tasks)
     elseif !tasks_found
         call vikitasks#RemoveBuffer(cfilename, 0)
