@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2013-11-07.
-" @Revision:    306
+" @Revision:    307
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -26,7 +26,7 @@ endif
 if &cp || exists("g:loaded_vikitasks")
     finish
 endif
-let g:loaded_vikitasks = 6
+let g:loaded_vikitasks = 100
 
 let s:save_cpo = &cpo
 set cpo&vim
