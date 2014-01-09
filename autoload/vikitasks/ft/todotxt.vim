@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    134
+" @Revision:    136
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -170,6 +170,17 @@ function! s:prototype.ItemMarkDone(line) dict "{{{3
     endif
     call insert(line, 'x')
     return join(line, ' ')
+endf
+
+
+function! s:prototype.ChangeCategory(line, category) dict "{{{3
+    let rx = self.CategoryRx()
+    if a:line =~ rx
+        let line = substitute(a:line, rx, a:category, '')
+    else
+        let line = printf('(%s) %s', a:category, a:line)
+    endif
+    return line
 endf
 
 

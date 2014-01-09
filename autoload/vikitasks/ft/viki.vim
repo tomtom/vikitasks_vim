@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    69
+" @Revision:    70
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -190,6 +190,12 @@ function! s:prototype.ItemMarkDone(line) dict "{{{3
                         \ . strpart(line, idx)
         endif
     endif
+    return line
+endf
+
+
+function! s:prototype.ChangeCategory(line, category) dict "{{{3
+    let line = substitute(a:line, self.CategoryRx(), a:category, '')
     return line
 endf
 

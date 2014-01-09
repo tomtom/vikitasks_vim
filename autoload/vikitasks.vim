@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1515
+" @Revision:    1528
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -1055,7 +1055,7 @@ function! vikitasks#ItemChangeCategory(count, ...) "{{{3
             let line = getline(lnum)
             " TLogVAR lnum, line
             if line =~ rx
-                let line = substitute(line, ftdef.CategoryRx(), category, '')
+                let line = ftdef.ChangeCategory(line, category)
                 " TLogVAR line
                 call setline(lnum, line)
             endif
