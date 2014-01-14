@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    70
+" @Revision:    71
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -172,7 +172,7 @@ function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
     else
         let subst = '\1'. a:duedate
     endif
-    let line1 = substitute(line, g:vikitasks#viki_date_rx, subst, '')
+    let line1 = substitute(a:line, g:vikitasks#viki_date_rx, subst, '')
     return line1
 endf
 
