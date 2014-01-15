@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1528
+" @Revision:    1531
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -958,7 +958,7 @@ function! vikitasks#ItemArchiveFinal() "{{{3
     if filereadable(archive_filename)
         let archived = readfile(archive_filename)
     else
-        let archived = ftdef.ArchiveHeader(1)
+        let archived = split(ftdef.ArchiveHeader(1), '\n')
     endif
     let to_be_archived = []
     let clnum = line('.')

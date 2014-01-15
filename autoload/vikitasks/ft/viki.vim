@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    71
+" @Revision:    72
 
 
 " If non-null, automatically add the homepages of your intervikis to 
