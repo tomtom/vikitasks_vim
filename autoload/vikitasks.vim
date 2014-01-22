@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1531
+" @Revision:    1541
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -81,6 +81,9 @@ TLet g:vikitasks#use_unspecified_dates = 0
 
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
+
+" |:execute| a command (as string) after changing a buffer.
+TLet g:vikitasks#after_change_exec = ''
 
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
@@ -649,6 +652,7 @@ endf
 function! s:CollectTaskFiles() "{{{3
     let file_defs = s:GetCachedFiles()
     for [source, ok] in items(g:vikitasks#sources)
+        TLogVAR source, ok
         if ok
             let ftdef = vikitasks#ft#{source}#GetInstance()
             call ftdef.GetFiles(function('vikitasks#RegisterFilename'))
@@ -946,6 +950,7 @@ function! vikitasks#ItemMarkDone(count) "{{{3
             let line = ftdef.ItemMarkDone(line)
             " TLogVAR line
             call setline(lnum, line)
+            call s:AfterChange(lnum, ftdef)
         endif
     endfor
 endf
@@ -1011,6 +1016,21 @@ function! s:GetBufferTasksDef() "{{{3
 endf
 
 
+function! s:AfterChange(lnum, ...) "{{{3
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
+    if has_key(ftdef, 'AfterChange')
+        let pos = getpos('.')
+        try
+            exec a:lnum
+            norm! ^
+            call ftdef.AfterChange()
+        finally
+            call setpos('.', pos)
+        endtry
+    endif
+endf
+
+
 " :nodoc:
 function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
     " TLogVAR bufname('%'), a:lnum, a:duedate
@@ -1026,6 +1046,7 @@ function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
         let line1 = ftdef.MarkItemDueInDays(line, a:duedate)
         " TLogVAR line1
         call setline(a:lnum, line1)
+        call s:AfterChange(a:lnum, ftdef)
     endif
 endf
 
@@ -1058,6 +1079,7 @@ function! vikitasks#ItemChangeCategory(count, ...) "{{{3
                 let line = ftdef.ChangeCategory(line, category)
                 " TLogVAR line
                 call setline(lnum, line)
+                call s:AfterChange(lnum, ftdef)
             endif
         endfor
     else

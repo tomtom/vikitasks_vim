@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    137
+" @Revision:    143
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -12,6 +12,17 @@ TLet g:vikitasks#ft#todotxt#files = {}
 
 " If true, use t:DATE to hide entries until DATE.
 TLet g:vikitasks#ft#todotxt#use_threshold = 1   "{{{2
+
+" Assume this default (in terms of vikitasks) for tasks with no due 
+" date.
+" Useful values:
+"   '_' ... Unspecified date -> include in alarms list
+"   ''  ... No date -> exclude from alarms list
+TLet g:vikitasks#ft#todotxt#due_default = ''   "{{{2
+
+" |:execute| a command (as string) after changing a buffer.
+" See also |g:vikitasks#after_change_exec|.
+TLet g:vikitasks#ft#todotxt#after_change_exec = g:vikitasks#after_change_exec
 
 
 if exists('g:todotxt#dir')
@@ -73,10 +84,14 @@ function! s:prototype.ConvertLine(line) dict "{{{3
     if line !~# '^#\u'
         let line = '#'. g:vikitasks#default_priority .' '. line
     endif
+    if line !~# '\<due:\(\d\+-\d\+-\d\+\|_\)'
+        let line .= ' due:'. g:vikitasks#ft#todotxt#due_default
+    endif
     for [rx, subst] in [
                 \ ['\s\zs+\(\S\+\)', ':\1'],
                 \ ['^#\u\d*\s\+\zs\('. g:vikitasks#date_rx .'\s\+\)\(.\{-}\)\s*$', '\2 created:\1'],
                 \ ['^#\u\d*\s\+\zs\(.\{-}\)\<due:\('. g:vikitasks#date_rx .'\)\s*', '\2 \1'],
+                \ ['\s\s\+', ' '],
                 \ ]
         " \ ['^#\u\d*\s\+\(\d\+-\d\+-\d\+\s\+\)\?\zs\(.\{-}\)\<due:\(\d\+-\d\+-\d\+\)', '..\2 \1'],
         " \ ['^#\u\d*\s\([0-9-]\+\s\([0-9-]\+\)\?\s\)\?\zs\(.\{-}\)\s+\(\S\+\)\ze\+\(\s\|$\)', ':\4 \3']
@@ -181,6 +196,13 @@ function! s:prototype.ChangeCategory(line, category) dict "{{{3
         let line = printf('(%s) %s', a:category, a:line)
     endif
     return line
+endf
+
+
+function! s:prototype.AfterChange() dict "{{{3
+    if !empty(g:vikitasks#ft#todotxt#after_change_exec)
+        exec g:vikitasks#ft#todotxt#after_change_exec
+    endif
 endf
 
 
