@@ -8,7 +8,7 @@
 " If the value is 2, scan all files (taking into account the interviki 
 " suffix) in the interviki's top directory.
 " Can be buffer-local.
-TLet g:vikitasks#ft#viki#intervikis = 0
+TLet g:vikitasks#ft#viki#intervikis = 2
 
 " A list of ignored intervikis.
 " Can be buffer-local.
@@ -68,17 +68,18 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
     for file in tlib#var#Get('vikitasks#files', 'bg', [])
         call call(a:registrar, [file, 'viki', ''])
     endfor
-    if tlib#var#Get('vikitasks#ft#viki#intervikis', 'bg', 0) > 0
+    let scan_interviki = tlib#var#Get('vikitasks#ft#viki#intervikis', 'bg', 0)
+    TLogVAR scan_interviki
+    if scan_interviki > 0
         " TLogVAR a:files
-        let ivignored = tlib#var#Get('vikitasks#intervikis_ignored', 'bg', [])
-        let glob = tlib#var#Get('vikitasks#intervikis', 'bg', 0) == 2
+        let ivignored = tlib#var#Get('vikitasks#ft#viki#intervikis_ignored', 'bg', [])
         for iv in viki#GetInterVikis()
             if index(ivignored, matchstr(iv, '^\u\+')) == -1
                 " TLogVAR iv
                 let def = viki#GetLink(1, '[['. iv .']]', 0, '')
                 let file = def[1]
                 " TLogVAR def
-                if glob > 0
+                if scan_interviki == 2
                     let suffix = viki#InterVikiSuffix(iv)
                     let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/*'. suffix], 1)
                     call call(a:registrar, [dirpattern, 'viki', ''])
