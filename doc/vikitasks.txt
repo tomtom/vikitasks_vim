@@ -85,20 +85,6 @@ Also available via git: http://github.com/tomtom/vikitasks_vim/
 ========================================================================
 Contents~
 
-        g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
-        g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
-        g:vikitasks_scan_patterns ............. |g:vikitasks_scan_patterns|
-        :VikiTasks ............................ |:VikiTasks|
-        :VikiTasksStatic ...................... |:VikiTasksStatic|
-        :VikiTasksPaste ....................... |:VikiTasksPaste|
-        :VikiTasksAlarms ...................... |:VikiTasksAlarms|
-        :VikiTasksAdd ......................... |:VikiTasksAdd|
-        :VikiTasksDone ........................ |:VikiTasksDone|
-        :VikiTasksArchive ..................... |:VikiTasksArchive|
-        :VikiEditTasksFiles ................... |:VikiEditTasksFiles|
-        :VikiTasksFiles ....................... |:VikiTasksFiles|
-        :VikiTasksDueInDays ................... |:VikiTasksDueInDays|
-        :VikiTasksDueInWeeks .................. |:VikiTasksDueInWeeks|
         g:vikitasks#files ..................... |g:vikitasks#files|
         g:vikitasks#files_ignored ............. |g:vikitasks#files_ignored|
         g:vikitasks#ignore_completed_tasks .... |g:vikitasks#ignore_completed_tasks|
@@ -114,6 +100,7 @@ Contents~
         g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
         g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
         g:vikitasks#remove_unreadable_files ... |g:vikitasks#remove_unreadable_files|
+        g:vikitasks#after_change_exec ......... |g:vikitasks#after_change_exec|
         g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
         g:vikitasks#mapleader ................. |g:vikitasks#mapleader|
         g:vikitasks#done_add_date ............. |g:vikitasks#done_add_date|
@@ -142,123 +129,20 @@ Contents~
         vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
         vikitasks#AgentPaste .................. |vikitasks#AgentPaste()|
         vikitasks#Glob2Rx ..................... |vikitasks#Glob2Rx()|
-
-
-========================================================================
-plugin/vikitasks.vim~
-
-                                                    *g:vikitasks_startup_alarms*
-g:vikitasks_startup_alarms     (default: (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0)
-    Show alarms on pending tasks.
-    If 0, don't display alarms for pending tasks.
-    If n > 0, display alarms for pending tasks or tasks with a deadline in n 
-    days.
-
-                                                    *g:vikitasks_scan_events*
-g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
-    Scan a buffer on these events.
-
-                                                    *g:vikitasks_scan_patterns*
-g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
-    A list of filename patterns (see 'wildcards') for files that should 
-    automatically on events specified in |g:vikitasks_scan_events|.
-
-                                                    *:VikiTasks*
-:VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
-    CONSTRAINT defined which tasks should be displayed. Possible values 
-    for CONSTRAINT are:
-
-      today            ... Show tasks that are due today
-      current          ... Show pending and today's tasks
-      NUMBER (of days) ... Show tasks that are due within N days
-      Nd               ... Tasks for the next N days
-      Nw               ... Tasks for the next N weeks (i.e. 7 days)
-      Nm               ... Tasks for the next N months (i.e. 31 days)
-      week             ... Tasks for the next week (i.e. 7 days)
-      month            ... Tasks for the next month (i.e. 31 days)
-      .                ... Show some tasks (see |g:vikitasks#rx_letters| 
-                           and |g:vikitasks#rx_levels|)
-      *                ... Show all tasks
-
-    The default value for CONSTRAINT is ".".
-
-    If N is prepended with + (e.g. "+2w"), tasks with a deadline in the 
-    past are hidden.
-
-    If N is prepended with - (e.g. "-2w"), only tasks with a deadline in 
-    the past (in this example in the last two weeks) are shown. This 
-    implies showing all tasks as with "*".
-
-    If CONSTRAINT doesn't match one of the constraints described above, it 
-    is assumed to be a PATTERN -- see also |viki-tasks|.
-
-    The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
-    The PATTERN is made case sensitive if it contains an upper-case letter 
-    and if 'smartcase' is true. Only tasks matching the PATTERN will be 
-    listed. Use "." to match any task.
-
-    With the optional !, all files are rescanned. Otherwise cached 
-    information is used. Either scan all known files (|interviki|s and 
-    pages registered via |:VikiTasksAdd|) or files matching FILE_PATTERNS.
-
-    The current buffer has to be a viki buffer. If it isn't, your 
-    |g:vikiHomePage|, which must be set, is opened first.
-
-    Examples:
-      Show all cached tasks with a date: >
-            :VikiTasks
-<     Rescan files and show all tasks: >
-            :VikiTasks!
-<     Show all cached tasks for today: >
-            :VikiTasks today
-<     Show all current cached tasks (today or with a deadline in the 
-      past) in a specified list of files: >
-            :VikiTasks current Notes*.txt
-<
-
-                                                    *:VikiTasksStatic*
-:VikiTasksStatic
-    The same as |:VikiTasks| but the tasks list doesn't take the focus.
-
-                                                    *:VikiTasksPaste*
-:VikiTasksPaste[!] [ARGUMENTS...]
-    Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
-    buffer. When called with a |bang| [!], create a new buffer. See 
-    |:VikiTasks| for the allowed ARGUMENTS.
-
-                                                    *:VikiTasksAlarms*
-:[count]VikiTasksAlarms
-    Display a list of alarms. Shows alarms due within N days.
-    If N is -1, uses |g:vikitasks#alarms| if any.
-
-                                                    *:VikiTasksAdd*
-:VikiTasksAdd
-    Add the current buffer to |g:vikitasks#files|.
-
-                                                    *:VikiTasksDone*
-:VikiTasksDone
-    Mark a task as done (see |vikitasks#ItemMarkDone()|).
-
-                                                    *:VikiTasksArchive*
-:VikiTasksArchive
-    Archive final (see |g:vikitasks#final_categories|) tasks.
-
-                                                    *:VikiEditTasksFiles*
-:VikiEditTasksFiles
-    Edit |g:vikitasks#files|. This allows you to remove buffers from the 
-    list.
-
-                                                    *:VikiTasksFiles*
-:VikiTasksFiles
-    Edit a file monitored by vikitasks.
-
-                                                    *:VikiTasksDueInDays*
-:[count]VikiTasksDueInDays [DAYS=0]
-    Mark [count] task(s) as due in N days.
-
-                                                    *:VikiTasksDueInWeeks*
-:[count]VikiTasksDueInDays [WEEKS=1]
-    Mark [count] task(s) as due in N weeks.
+        g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
+        g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
+        g:vikitasks_scan_patterns ............. |g:vikitasks_scan_patterns|
+        :VikiTasks ............................ |:VikiTasks|
+        :VikiTasksStatic ...................... |:VikiTasksStatic|
+        :VikiTasksPaste ....................... |:VikiTasksPaste|
+        :VikiTasksAlarms ...................... |:VikiTasksAlarms|
+        :VikiTasksAdd ......................... |:VikiTasksAdd|
+        :VikiTasksDone ........................ |:VikiTasksDone|
+        :VikiTasksArchive ..................... |:VikiTasksArchive|
+        :VikiEditTasksFiles ................... |:VikiEditTasksFiles|
+        :VikiTasksFiles ....................... |:VikiTasksFiles|
+        :VikiTasksDueInDays ................... |:VikiTasksDueInDays|
+        :VikiTasksDueInWeeks .................. |:VikiTasksDueInWeeks|
 
 
 ========================================================================
@@ -348,6 +232,10 @@ g:vikitasks#use_unspecified_dates (default: 0)
                                                     *g:vikitasks#remove_unreadable_files*
 g:vikitasks#remove_unreadable_files (default: 1)
     If true, remove unreadable files from the tasks list.
+
+                                                    *g:vikitasks#after_change_exec*
+g:vikitasks#after_change_exec  (default: '')
+    |:execute| a command (as string) after changing a buffer.
 
                                                     *g:vikitasks#inputlist_params*
 g:vikitasks#inputlist_params   (default: {...})
@@ -475,6 +363,123 @@ vikitasks#AgentPaste(world, selected)
 
                                                     *vikitasks#Glob2Rx()*
 vikitasks#Glob2Rx(pattern)
+
+
+========================================================================
+plugin/vikitasks.vim~
+
+                                                    *g:vikitasks_startup_alarms*
+g:vikitasks_startup_alarms     (default: (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0)
+    Show alarms on pending tasks.
+    If 0, don't display alarms for pending tasks.
+    If n > 0, display alarms for pending tasks or tasks with a deadline in n 
+    days.
+
+                                                    *g:vikitasks_scan_events*
+g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
+    Scan a buffer on these events.
+
+                                                    *g:vikitasks_scan_patterns*
+g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
+    A list of filename patterns (see 'wildcards') for files that should 
+    automatically on events specified in |g:vikitasks_scan_events|.
+
+                                                    *:VikiTasks*
+:VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
+    CONSTRAINT defined which tasks should be displayed. Possible values 
+    for CONSTRAINT are:
+
+      today            ... Show tasks that are due today
+      current          ... Show pending and today's tasks
+      NUMBER (of days) ... Show tasks that are due within N days
+      Nd               ... Tasks for the next N days
+      Nw               ... Tasks for the next N weeks (i.e. 7 days)
+      Nm               ... Tasks for the next N months (i.e. 31 days)
+      week             ... Tasks for the next week (i.e. 7 days)
+      month            ... Tasks for the next month (i.e. 31 days)
+      .                ... Show some tasks (see |g:vikitasks#rx_letters| 
+                           and |g:vikitasks#rx_levels|)
+      *                ... Show all tasks
+
+    The default value for CONSTRAINT is ".".
+
+    If N is prepended with + (e.g. "+2w"), tasks with a deadline in the 
+    past are hidden.
+
+    If N is prepended with - (e.g. "-2w"), only tasks with a deadline in 
+    the past (in this example in the last two weeks) are shown. This 
+    implies showing all tasks as with "*".
+
+    If CONSTRAINT doesn't match one of the constraints described above, it 
+    is assumed to be a PATTERN -- see also |viki-tasks|.
+
+    The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
+    The PATTERN is made case sensitive if it contains an upper-case letter 
+    and if 'smartcase' is true. Only tasks matching the PATTERN will be 
+    listed. Use "." to match any task.
+
+    With the optional !, all files are rescanned. Otherwise cached 
+    information is used. Either scan all known files (|interviki|s and 
+    pages registered via |:VikiTasksAdd|) or files matching FILE_PATTERNS.
+
+    The current buffer has to be a viki buffer. If it isn't, your 
+    |g:vikiHomePage|, which must be set, is opened first.
+
+    Examples:
+      Show all cached tasks with a date: >
+            :VikiTasks
+<     Rescan files and show all tasks: >
+            :VikiTasks!
+<     Show all cached tasks for today: >
+            :VikiTasks today
+<     Show all current cached tasks (today or with a deadline in the 
+      past) in a specified list of files: >
+            :VikiTasks current Notes*.txt
+<
+
+                                                    *:VikiTasksStatic*
+:VikiTasksStatic
+    The same as |:VikiTasks| but the tasks list doesn't take the focus.
+
+                                                    *:VikiTasksPaste*
+:VikiTasksPaste[!] [ARGUMENTS...]
+    Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
+    buffer. When called with a |bang| [!], create a new buffer. See 
+    |:VikiTasks| for the allowed ARGUMENTS.
+
+                                                    *:VikiTasksAlarms*
+:[count]VikiTasksAlarms
+    Display a list of alarms. Shows alarms due within N days.
+    If N is -1, uses |g:vikitasks#alarms| if any.
+
+                                                    *:VikiTasksAdd*
+:VikiTasksAdd
+    Add the current buffer to |g:vikitasks#files|.
+
+                                                    *:VikiTasksDone*
+:VikiTasksDone
+    Mark a task as done (see |vikitasks#ItemMarkDone()|).
+
+                                                    *:VikiTasksArchive*
+:VikiTasksArchive
+    Archive final (see |g:vikitasks#final_categories|) tasks.
+
+                                                    *:VikiEditTasksFiles*
+:VikiEditTasksFiles
+    Edit |g:vikitasks#files|. This allows you to remove buffers from the 
+    list.
+
+                                                    *:VikiTasksFiles*
+:VikiTasksFiles
+    Edit a file monitored by vikitasks.
+
+                                                    *:VikiTasksDueInDays*
+:[count]VikiTasksDueInDays [DAYS=0]
+    Mark [count] task(s) as due in N days.
+
+                                                    *:VikiTasksDueInWeeks*
+:[count]VikiTasksDueInDays [WEEKS=1]
+    Mark [count] task(s) as due in N weeks.
 
 
 
