@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    82
+" @Revision:    83
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -73,7 +73,7 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
         call call(a:registrar, [file, 'viki', ''])
     endfor
     let scan_interviki = tlib#var#Get('vikitasks#ft#viki#intervikis', 'bg', 0)
-    TLogVAR scan_interviki
+    " TLogVAR scan_interviki
     if scan_interviki > 0
         " TLogVAR a:files
         let ivignored = tlib#var#Get('vikitasks#ft#viki#intervikis_ignored', 'bg', [])

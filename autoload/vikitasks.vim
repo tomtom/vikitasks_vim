@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1541
+" @Revision:    1542
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -652,7 +652,7 @@ endf
 function! s:CollectTaskFiles() "{{{3
     let file_defs = s:GetCachedFiles()
     for [source, ok] in items(g:vikitasks#sources)
-        TLogVAR source, ok
+        " TLogVAR source, ok
         if ok
             let ftdef = vikitasks#ft#{source}#GetInstance()
             call ftdef.GetFiles(function('vikitasks#RegisterFilename'))
