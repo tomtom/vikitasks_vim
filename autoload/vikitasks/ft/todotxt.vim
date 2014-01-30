@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    143
+" @Revision:    144
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -61,7 +61,7 @@ function! s:prototype.TaskLineRx(inline, sometasks, letters, levels) dict "{{{3
 endf
 
 
-let s:prototype.sometasks_rx = s:prototype.TaskLineRx(1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
+let s:prototype.sometasks_rx = s:prototype.TaskLineRx(1, 1, g:vikitasks#rx_categories, g:vikitasks#rx_levels)
 let s:prototype.tasks_rx = s:prototype.TaskLineRx(0, 0, 'A-Z', '0-9')
 
 exec 'TRagDefKind tasks todotxt /'. s:prototype.tasks_rx .'/'
