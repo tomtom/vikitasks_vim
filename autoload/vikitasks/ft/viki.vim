@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    83
+" @Revision:    84
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -54,7 +54,7 @@ function! s:prototype.TaskLineRx(inline, sometasks, letters, levels) dict "{{{3
 endf
 
 
-let s:prototype.sometasks_rx = s:prototype.TaskLineRx(1, 1, g:vikitasks#rx_letters, g:vikitasks#rx_levels)
+let s:prototype.sometasks_rx = s:prototype.TaskLineRx(1, 1, g:vikitasks#rx_categories, g:vikitasks#rx_levels)
 let s:prototype.tasks_rx = s:prototype.TaskLineRx(0, 0, 'A-Z', '0-9')
 
 exec 'TRagDefKind tasks viki /'. s:prototype.tasks_rx .'/'

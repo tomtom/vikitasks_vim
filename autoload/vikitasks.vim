@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1544
+" @Revision:    1557
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -49,7 +49,7 @@ TLet g:vikitasks#qfl_viewer = ''
 " |:VikiTasks|.
 " A user-defined value must be set in |vimrc| before the plugin is 
 " loaded.
-TLet g:vikitasks#rx_letters = 'A-P'
+TLet g:vikitasks#rx_categories = 'A-P'
 
 " Item levels that should be included in the list when calling 
 " |:VikiTasks|.
