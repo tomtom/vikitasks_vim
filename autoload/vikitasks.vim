@@ -71,7 +71,7 @@ call add(g:tlib#cache#dont_purge, '[\/]vikitasks[\/]files$')
 "   all_tasks  ... If non-null, also display tasks with no due-date
 "   tasks      ... Either 'tasks' or 'sometasks'
 "   constraint ... See |:VikiTasks|
-TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'constraint': 14}
+TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'persistent_categories': 'A-C', 'constraint': 14}
 
 " If true, the end-date of date ranges (FROM..TO) is significant.
 TLet g:vikitasks#use_end_date = 1
@@ -398,7 +398,7 @@ function! s:FilterTasks(tasks, args) "{{{3
     endif
 
     if !get(a:args, 'all_tasks', 0)
-        call filter(a:tasks, '!empty(s:GetTaskDueDate(v:val.text, 0, g:vikitasks#use_unspecified_dates))')
+        call filter(a:tasks, '!empty(s:GetTaskDueDate(v:val.text, 0, g:vikitasks#use_unspecified_dates, a:args))')
         " TLogVAR len(a:tasks)
         let constraint = get(a:args, 'constraint', '.')
         " TLogVAR constraint
@@ -438,7 +438,7 @@ function! s:FilterTasks(tasks, args) "{{{3
         endif
         " TLogVAR from, to
         if from != 0 || to != 0
-            call filter(a:tasks, 's:Select(v:val.text, from, to)')
+            call filter(a:tasks, 's:Select(v:val.text, from, to, a:args)')
         endif
     endif
 endf
@@ -476,10 +476,18 @@ function! s:MakePattern(pattern) "{{{3
 endf
 
 
-function! s:GetTaskDueDate(task, use_end_date, use_unspecified) "{{{3
+function! s:GetTaskCategory(task) "{{{3
+    let c = matchstr(a:task, '^\s*#\d*\zs\u')
+    return c
+endf
+
+
+function! s:GetTaskDueDate(task, use_end_date, use_unspecified, args) "{{{3
     let m = matchlist(a:task, g:vikitasks#viki_date_rx)
     if a:use_end_date && g:vikitasks#use_end_date
         let rv = get(m, 4, '')
+    elseif has_key(a:args, 'persistent_categories') && s:GetTaskCategory(a:task) =~ '^['. a:args.persistent_categories .']$'
+        let rv = '_'
     else
         let rv = ''
     endif
@@ -499,7 +507,7 @@ function! s:GetCurrentTask(qfl, daysdiff) "{{{3
     let i = 1
     let today = strftime(g:vikitasks#date_fmt)
     for qi in a:qfl
-        let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates)
+        let qid = s:GetTaskDueDate(qi.text, 1, g:vikitasks#use_unspecified_dates, {})
         if !empty(qid) && qid != '_' && tlib#date#DiffInDays(qid, today, 1) <= a:daysdiff
             " let ddays = tlib#date#DiffInDays(qid,today,1)  " DBG
             " TLogVAR qid, today, ddays
@@ -516,8 +524,8 @@ endf
 function! s:SortTasks(a, b) "{{{3
     let a = a:a.text
     let b = a:b.text
-    let ad = s:GetTaskDueDate(a, 1, g:vikitasks#use_unspecified_dates)
-    let bd = s:GetTaskDueDate(b, 1, g:vikitasks#use_unspecified_dates)
+    let ad = s:GetTaskDueDate(a, 1, g:vikitasks#use_unspecified_dates, {})
+    let bd = s:GetTaskDueDate(b, 1, g:vikitasks#use_unspecified_dates, {})
     if ad && !bd
         return -1
     elseif !ad && bd
@@ -693,11 +701,11 @@ function! s:MaybeRegisterFilename(cfilename, filetype, archive) "{{{3
 endf
 
 
-function! s:Select(text, from, to) "{{{3
+function! s:Select(text, from, to, args) "{{{3
     let sfrom = strftime(g:vikitasks#date_fmt, a:from)
     let sto = strftime(g:vikitasks#date_fmt, a:to)
-    let date1 = s:GetTaskDueDate(a:text, 0, g:vikitasks#use_unspecified_dates)
-    let date2 = s:GetTaskDueDate(a:text, 1, g:vikitasks#use_unspecified_dates)
+    let date1 = s:GetTaskDueDate(a:text, 0, g:vikitasks#use_unspecified_dates, a:args)
+    let date2 = s:GetTaskDueDate(a:text, 1, g:vikitasks#use_unspecified_dates, a:args)
     if date1 == '_'
         let rv = 1
     elseif date1 == date2
