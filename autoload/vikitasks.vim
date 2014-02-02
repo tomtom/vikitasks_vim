@@ -71,7 +71,7 @@ call add(g:tlib#cache#dont_purge, '[\/]vikitasks[\/]files$')
 "   all_tasks  ... If non-null, also display tasks with no due-date
 "   tasks      ... Either 'tasks' or 'sometasks'
 "   constraint ... See |:VikiTasks|
-TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'persistent_categories': 'A-C', 'constraint': 14}
+TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'persistent_categories': 'A', 'constraint': 14}
 
 " If true, the end-date of date ranges (FROM..TO) is significant.
 TLet g:vikitasks#use_end_date = 1
