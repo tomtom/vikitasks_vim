@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    84
+" @Revision:    94
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -75,18 +75,22 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
     let scan_interviki = tlib#var#Get('vikitasks#ft#viki#intervikis', 'bg', 0)
     " TLogVAR scan_interviki
     if scan_interviki > 0
-        " TLogVAR a:files
         let ivignored = tlib#var#Get('vikitasks#ft#viki#intervikis_ignored', 'bg', [])
+        " TLogVAR ivignored
         for iv in viki#GetInterVikis()
+            " TLogVAR iv
             if index(ivignored, matchstr(iv, '^\u\+')) == -1
                 " TLogVAR iv
                 let def = viki#GetLink(1, '[['. iv .']]', 0, '')
                 let file = def[1]
                 " TLogVAR def
                 if scan_interviki == 2
-                    let suffix = viki#InterVikiSuffix(iv)
-                    let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/*'. suffix], 1)
-                    call call(a:registrar, [dirpattern, 'viki', ''])
+                    let filepattern = '*'. viki#InterVikiSuffix(iv)
+                    if index(g:vikitasks_scan_patterns, filepattern) != -1
+                        let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/'. filepattern], 1)
+                        " TLogVAR dirpattern
+                        call call(a:registrar, [dirpattern, 'viki', ''])
+                    endif
                 else
                     call call(a:registrar, [file, 'viki', ''])
                 endif

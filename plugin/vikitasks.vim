@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2014-01-20.
-" @Revision:    308
+" @Revision:    309
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -162,7 +162,7 @@ augroup VikiTasks
             exec 'autocmd' g:vikitasks_scan_events s:pattern 'call vikitasks#ScanCurrentBuffer(expand("<afile>:p"))'
         endfor
     endif
-    unlet g:vikitasks_startup_alarms g:vikitasks_scan_events g:vikitasks_scan_patterns s:pattern
+    unlet g:vikitasks_startup_alarms g:vikitasks_scan_events s:pattern
 augroup END
 
 
