@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1689
+" @Revision:    1693
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -68,7 +68,7 @@ call add(g:tlib#cache#dont_purge, '[\/]vikitasks[\/]files$')
 
 " If true, check whether the mtime of files with cached tasks has 
 " changed and update the info as necessary.
-TLet g:vikitasks#cache_check_mtime = 1
+TLet g:vikitasks#cache_check_mtime_rx = '.'
 
 " Definition of the tasks that should be included in the Alarms list.
 " Fields:
@@ -241,7 +241,7 @@ function! s:GetTasks(args, use_cached) "{{{3
                 call filter(qfl, '(has_key(v:val, "filename") ? v:val.filename : bufname(v:val.bufnr)) =~ file_rx')
             endfor
         endif
-        if g:vikitasks#cache_check_mtime
+        if !empty(g:vikitasks#cache_check_mtime_rx)
             let timestamp = s:GetCachedTimestamp()
             let file_defs = s:GetCachedFiles()
             let cfiles = map(copy(qfl), 's:CanonicFilename(v:val.filename)')
@@ -251,21 +251,24 @@ function! s:GetTasks(args, use_cached) "{{{3
                 let remove = []
                 for cfilename in cfiles
                     " TLogVAR cfilename
-                    if filereadable(cfilename)
-                        let mtime = getftime(cfilename)
-                        if mtime > timestamp
-                            if has_key(file_defs, cfilename)
-                                let filetype = file_defs[cfilename].filetype
-                                if !has_key(update, cfilename)
-                                    let update[filetype] = []
+                    if cfilename =~ g:vikitasks#cache_check_mtime_rx
+                        " TLogVAR cfilename
+                        if filereadable(cfilename)
+                            let mtime = getftime(cfilename)
+                            if mtime > timestamp
+                                if has_key(file_defs, cfilename)
+                                    let filetype = file_defs[cfilename].filetype
+                                    if !has_key(update, cfilename)
+                                        let update[filetype] = []
+                                    endif
+                                    call add(update[filetype], cfilename)
+                                else
+                                    echom "VikiTasks: GetTasks: Internal error: No info about ". cfilename
                                 endif
-                                call add(update[filetype], cfilename)
-                            else
-                                echom "VikiTasks: GetTasks: Internal error: No info about ". cfilename
                             endif
+                        else
+                            call add(remove, cfilename)
                         endif
-                    else
-                        call add(remove, cfilename)
                     endif
                 endfor
                 if !empty(update)
@@ -310,6 +313,7 @@ endf
 
 
 function! s:RemoveFiles(cfiles) "{{{3
+    " TLogVAR a:cfiles
     let file_defs = s:GetCachedFiles()
     let tasks = s:GetCachedTasks()
     for cfilename in a:cfiles
