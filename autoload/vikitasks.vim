@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1676
+" @Revision:    1689
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -248,18 +248,24 @@ function! s:GetTasks(args, use_cached) "{{{3
             let cfiles = tlib#list#Uniq(cfiles)
             if !empty(cfiles)
                 let update = {}
+                let remove = []
                 for cfilename in cfiles
-                    let mtime = getftime(cfilename)
-                    if mtime > timestamp
-                        if has_key(file_defs, cfilename)
-                            let filetype = file_defs[cfilename].filetype
-                            if !has_key(update, cfilename)
-                                let update[filetype] = []
+                    " TLogVAR cfilename
+                    if filereadable(cfilename)
+                        let mtime = getftime(cfilename)
+                        if mtime > timestamp
+                            if has_key(file_defs, cfilename)
+                                let filetype = file_defs[cfilename].filetype
+                                if !has_key(update, cfilename)
+                                    let update[filetype] = []
+                                endif
+                                call add(update[filetype], cfilename)
+                            else
+                                echom "VikiTasks: GetTasks: Internal error: No info about ". cfilename
                             endif
-                            call add(update[filetype], cfilename)
-                        else
-                            echom "VikiTasks: GetTasks: Internal error: No info about ". cfilename
                         endif
+                    else
+                        call add(remove, cfilename)
                     endif
                 endfor
                 if !empty(update)
@@ -267,6 +273,9 @@ function! s:GetTasks(args, use_cached) "{{{3
                         let [file_defs, tasks] = s:UpdateFiles(cfiles, filetype)
                     endfor
                     let qfl = copy(tasks)
+                endif
+                if !empty(remove)
+                    call s:RemoveFiles(remove)
                 endif
             endif
         endif
@@ -300,9 +309,23 @@ function! s:GetTasks(args, use_cached) "{{{3
 endf
 
 
-function! s:UpdateFiles(files, filetype) "{{{3
-    if !empty(a:files)
-        let cfiles = map(a:files, 's:CanonicFilename(v:val)')
+function! s:RemoveFiles(cfiles) "{{{3
+    let file_defs = s:GetCachedFiles()
+    let tasks = s:GetCachedTasks()
+    for cfilename in a:cfiles
+        if has_key(file_defs, cfilename)
+            remove(file_defs, cfilename)
+        endif
+        let tasks = filter(tasks, 'v:val.filename != cfilename')
+    endfor
+    call s:SaveInfo(file_defs, tasks)
+endf
+
+
+function! s:UpdateFiles(cfiles, filetype) "{{{3
+    if !empty(a:cfiles)
+        " let cfiles = map(a:cfiles, 's:CanonicFilename(v:val)')
+        let cfiles = a:cfiles
         " TLogVAR len(cfiles)
         let [new_file_defs, new_tasks] = s:ScanFiles(cfiles, a:filetype)
         " TLogVAR len(new_file_defs), len(new_tasks)
