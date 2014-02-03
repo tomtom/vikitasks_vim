@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    144
+" @Revision:    147
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -69,6 +69,7 @@ exec 'TRagDefKind sometasks todotxt /'. s:prototype.sometasks_rx .'/'
 
 
 function! s:prototype.ConvertLine(line) dict "{{{3
+    " TLogVAR a:line
     let t_rx = '\<t:\zs'. g:vikitasks#date_rx
     if g:vikitasks#ft#todotxt#use_threshold && a:line =~ t_rx
         let today = strftime(g:vikitasks#date_fmt)

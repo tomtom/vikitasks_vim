@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1693
+" @Revision:    1712
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -242,7 +242,6 @@ function! s:GetTasks(args, use_cached) "{{{3
             endfor
         endif
         if !empty(g:vikitasks#cache_check_mtime_rx)
-            let timestamp = s:GetCachedTimestamp()
             let file_defs = s:GetCachedFiles()
             let cfiles = map(copy(qfl), 's:CanonicFilename(v:val.filename)')
             let cfiles = tlib#list#Uniq(cfiles)
@@ -255,7 +254,9 @@ function! s:GetTasks(args, use_cached) "{{{3
                         " TLogVAR cfilename
                         if filereadable(cfilename)
                             let mtime = getftime(cfilename)
-                            if mtime > timestamp
+                            let cmtime = get(get(file_defs, cfilename, {}), 'mtime', 0)
+                            " TLogVAR mtime, cmtime
+                            if mtime > cmtime
                                 if has_key(file_defs, cfilename)
                                     let filetype = file_defs[cfilename].filetype
                                     if !has_key(update, cfilename)
@@ -331,6 +332,7 @@ function! s:UpdateFiles(cfiles, filetype) "{{{3
         " let cfiles = map(a:cfiles, 's:CanonicFilename(v:val)')
         let cfiles = a:cfiles
         " TLogVAR len(cfiles)
+        " TLogVAR cfiles
         let [new_file_defs, new_tasks] = s:ScanFiles(cfiles, a:filetype)
         " TLogVAR len(new_file_defs), len(new_tasks)
         if !empty(new_tasks)
@@ -376,16 +378,34 @@ function! s:SetTimestamp(file_defs, ...) "{{{3
 endf
 
 
+let s:did_init_trag = 0
+
+function! s:InitTrag() "{{{3
+    if !s:did_init_trag
+        for [source, enabled] in items(g:vikitasks#sources)
+            if enabled
+                call vikitasks#ft#{source}#GetInstance()
+            endif
+        endfor
+        let s:did_init_trag = 1
+    endif
+endf
+
+
 function! s:ScanFiles(cfiles, ...) "{{{3
     let filetype0 = a:0 >= 1 ? a:1 : ''
-    let qfl = trag#Grep('tasks', 1, a:cfiles)
+    " TLogVAR a:cfiles, filetype0
+    call s:InitTrag()
+    let qfl = trag#Grep('tasks', 1, a:cfiles, filetype0)
     " TLogVAR len(qfl)
     " TLogVAR qfl
     " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
-    let new_tasks = copy(qfl)
     let new_file_defs = filter(copy(s:GetCachedFiles()), 'index(a:cfiles, v:key) != -1')
+    let new_tasks = copy(qfl)
+    " TLogVAR len(new_file_defs), len(new_tasks)
     let remove_tasks = []
     for i in range(len(new_tasks))
+        " TLogVAR new_tasks[i]
         let bufnr = new_tasks[i].bufnr
         let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
         let new_tasks[i].filename = cfilename
@@ -399,6 +419,7 @@ function! s:ScanFiles(cfiles, ...) "{{{3
             call remove(new_tasks[i], 'bufnr')
         endif
     endfor
+    " TLogVAR remove_tasks
     for i in remove_tasks
         call remove(new_tasks, i)
     endfor
