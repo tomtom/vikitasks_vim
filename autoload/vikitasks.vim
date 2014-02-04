@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1712
+" @Revision:    1713
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -319,7 +319,7 @@ function! s:RemoveFiles(cfiles) "{{{3
     let tasks = s:GetCachedTasks()
     for cfilename in a:cfiles
         if has_key(file_defs, cfilename)
-            remove(file_defs, cfilename)
+            call remove(file_defs, cfilename)
         endif
         let tasks = filter(tasks, 'v:val.filename != cfilename')
     endfor
