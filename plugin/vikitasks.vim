@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2014-01-20.
-" @Revision:    311
+" @Last Change: 2014-02-05.
+" @Revision:    312
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -37,7 +37,7 @@ set cpo&vim
 " If n > 0, display alarms for pending tasks or tasks with a deadline in n 
 " days.
 "
-" A useful value is: >
+" A useful value (for your |vimrc|) is: >
 "
 "     let g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
 "
