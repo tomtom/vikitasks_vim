@@ -96,7 +96,7 @@ Contents~
         g:vikitasks#rx_levels ................. |g:vikitasks#rx_levels|
         g:vikitasks#today ..................... |g:vikitasks#today|
         g:vikitasks#cache ..................... |g:vikitasks#cache|
-        g:vikitasks#cache_check_mtime ......... |g:vikitasks#cache_check_mtime|
+        g:vikitasks#cache_check_mtime_rx ...... |g:vikitasks#cache_check_mtime_rx|
         g:vikitasks#alarms .................... |g:vikitasks#alarms|
         g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
         g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
@@ -215,8 +215,8 @@ g:vikitasks#cache              (default: tlib#cache#Filename('vikitasks', 'files
     Cache file name.
     By default, use |tlib#cache#Filename()| to determine the file name.
 
-                                                    *g:vikitasks#cache_check_mtime*
-g:vikitasks#cache_check_mtime  (default: 1)
+                                                    *g:vikitasks#cache_check_mtime_rx*
+g:vikitasks#cache_check_mtime_rx (default: '.')
     If true, check whether the mtime of files with cached tasks has 
     changed and update the info as necessary.
 
@@ -379,11 +379,18 @@ vikitasks#Glob2Rx(pattern)
 plugin/vikitasks.vim~
 
                                                     *g:vikitasks_startup_alarms*
-g:vikitasks_startup_alarms     (default: (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0)
+g:vikitasks_startup_alarms     (default: 0)
     Show alarms on pending tasks.
     If 0, don't display alarms for pending tasks.
     If n > 0, display alarms for pending tasks or tasks with a deadline in n 
     days.
+
+    A useful value (for your |vimrc|) is: >
+
+        let g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
+
+<   This will display alarms when running the first instance of gvim 
+    without arguments.
 
                                                     *g:vikitasks_scan_events*
 g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
