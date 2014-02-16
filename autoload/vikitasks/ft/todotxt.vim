@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    147
+" @Revision:    151
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -20,9 +20,14 @@ TLet g:vikitasks#ft#todotxt#use_threshold = 1   "{{{2
 "   ''  ... No date -> exclude from alarms list
 TLet g:vikitasks#ft#todotxt#due_default = ''   "{{{2
 
+" |:execute| a command (as string) after changing a line.
+" See also |g:vikitasks#after_change_line_exec|.
+TLet g:vikitasks#ft#todotxt#after_change_line_exec = g:vikitasks#after_change_line_exec
+
+
 " |:execute| a command (as string) after changing a buffer.
-" See also |g:vikitasks#after_change_exec|.
-TLet g:vikitasks#ft#todotxt#after_change_exec = g:vikitasks#after_change_exec
+" See also |g:vikitasks#after_change_line_exec|.
+TLet g:vikitasks#ft#todotxt#after_change_buffer_exec = g:vikitasks#after_change_buffer_exec
 
 
 if exists('g:todotxt#dir')
@@ -200,9 +205,16 @@ function! s:prototype.ChangeCategory(line, category) dict "{{{3
 endf
 
 
-function! s:prototype.AfterChange() dict "{{{3
-    if !empty(g:vikitasks#ft#todotxt#after_change_exec)
-        exec g:vikitasks#ft#todotxt#after_change_exec
+function! s:prototype.AfterChangeBuffer() dict "{{{3
+    if !empty(g:vikitasks#ft#todotxt#after_change_buffer_exec)
+        exec g:vikitasks#ft#todotxt#after_change_buffer_exec
+    endif
+endf
+
+
+function! s:prototype.AfterChangeLine() dict "{{{3
+    if !empty(g:vikitasks#ft#todotxt#after_change_line_exec)
+        exec g:vikitasks#ft#todotxt#after_change_line_exec
     endif
 endf
 

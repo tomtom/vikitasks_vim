@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    94
+" @Revision:    99
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -16,9 +16,13 @@ TLet g:vikitasks#ft#viki#intervikis_ignored = []
 
 TLet g:vikitasks#ft#viki#archive_filename_fmt = '"%s_archived". g:vikiNameSuffix'
 
+" |:execute| a command (as string) after changing a line.
+" See also |g:vikitasks#after_change_line_exec|.
+TLet g:vikitasks#ft#viki#after_change_line_exec = g:vikitasks#after_change_line_exec
+
 " |:execute| a command (as string) after changing a buffer.
-" See also |g:vikitasks#after_change_exec|.
-TLet g:vikitasks#ft#viki#after_change_exec = g:vikitasks#after_change_exec
+" See also |g:vikitasks#after_change_line_exec|.
+TLet g:vikitasks#ft#viki#after_change_buffer_exec = g:vikitasks#after_change_buffer_exec
 
 
 let s:prototype = {}
@@ -209,9 +213,16 @@ function! s:prototype.ChangeCategory(line, category) dict "{{{3
 endf
 
 
-function! s:prototype.AfterChange() dict "{{{3
-    if !empty(g:vikitasks#ft#viki#after_change_exec)
-        exec g:vikitasks#ft#viki#after_change_exec
+function! s:prototype.AfterChangeBuffer() dict "{{{3
+    if !empty(g:vikitasks#ft#viki#after_change_buffer_exec)
+        exec g:vikitasks#ft#viki#after_change_buffer_exec
+    endif
+endf
+
+
+function! s:prototype.AfterChangeLine() dict "{{{3
+    if !empty(g:vikitasks#ft#viki#after_change_line_exec)
+        exec g:vikitasks#ft#viki#after_change_line_exec
     endif
 endf
 

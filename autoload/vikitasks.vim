@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1715
+" @Revision:    1724
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -86,8 +86,13 @@ TLet g:vikitasks#use_unspecified_dates = 0
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
 
+" |:execute| a command (as string) after changing a line.
+" A useful value is |:update|.
+TLet g:vikitasks#after_change_line_exec = ''
+
 " |:execute| a command (as string) after changing a buffer.
-TLet g:vikitasks#after_change_exec = ''
+" A useful value is |:update|.
+TLet g:vikitasks#after_change_buffer_exec = ''
 
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
@@ -1108,6 +1113,7 @@ function! vikitasks#ItemMarkDone(count) "{{{3
     let ftdef = s:GetBufferTasksDef()
     let rx = vikitasks#TasksRx('tasks', ftdef)
     " TLogVAR rx
+    let modified = 0
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         " TLogVAR lnum, line
@@ -1115,9 +1121,13 @@ function! vikitasks#ItemMarkDone(count) "{{{3
             let line = ftdef.ItemMarkDone(line)
             " TLogVAR line
             call setline(lnum, line)
-            call s:AfterChange(lnum, ftdef)
+            let modified = 1
+            call s:AfterChange('Line', ftdef, lnum)
         endif
     endfor
+    if modified
+        call s:AfterChange('Buffer', ftdef)
+    endif
 endf
 
 
@@ -1181,14 +1191,17 @@ function! s:GetBufferTasksDef() "{{{3
 endf
 
 
-function! s:AfterChange(lnum, ...) "{{{3
-    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
-    if has_key(ftdef, 'AfterChange')
+function! s:AfterChange(type, ftdef, ...) "{{{3
+    let lnum = a:0 >= 1 ? a:1 : 0
+    let name = 'AfterChange'. a:type
+    if has_key(a:ftdef, name)
         let pos = getpos('.')
         try
-            exec a:lnum
-            norm! ^
-            call ftdef.AfterChange()
+            if lnum > 0
+                exec lnum
+                norm! ^
+            endif
+            call call(a:ftdef[name], [], a:ftdef)
         finally
             call setpos('.', pos)
         endtry
@@ -1211,7 +1224,8 @@ function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
         let line1 = ftdef.MarkItemDueInDays(line, a:duedate)
         " TLogVAR line1
         call setline(a:lnum, line1)
-        call s:AfterChange(a:lnum, ftdef)
+        call s:AfterChange('Line', ftdef, a:lnum)
+        call s:AfterChange('Buffer', ftdef)
     endif
 endf
 
@@ -1237,6 +1251,7 @@ function! vikitasks#ItemChangeCategory(count, ...) "{{{3
     if category =~ '\C^[A-Z]$'
         let rx = vikitasks#TasksRx('tasks', ftdef)
         " TLogVAR rx
+        let modified = 0
         for lnum in range(line('.'), line('.') + a:count)
             let line = getline(lnum)
             " TLogVAR lnum, line
@@ -1244,9 +1259,13 @@ function! vikitasks#ItemChangeCategory(count, ...) "{{{3
                 let line = ftdef.ChangeCategory(line, category)
                 " TLogVAR line
                 call setline(lnum, line)
-                call s:AfterChange(lnum, ftdef)
+                let modified = 1
+                call s:AfterChange('Line', ftdef, lnum)
             endif
         endfor
+        if modified
+            call s:AfterChange('Buffer', ftdef)
+        endif
     else
         echohl WarningMsg
         echom 'Invalid category (must be A-Z):' category
