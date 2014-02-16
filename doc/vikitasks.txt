@@ -85,66 +85,67 @@ Also available via git: http://github.com/tomtom/vikitasks_vim/
 ========================================================================
 Contents~
 
-        g:vikitasks#files ..................... |g:vikitasks#files|
-        g:vikitasks#files_ignored ............. |g:vikitasks#files_ignored|
-        g:vikitasks#ignore_completed_tasks .... |g:vikitasks#ignore_completed_tasks|
-        g:vikitasks#sources ................... |g:vikitasks#sources|
-        g:vikitasks#filetype_map .............. |g:vikitasks#filetype_map|
-        g:vikitasks#default_priority .......... |g:vikitasks#default_priority|
-        g:vikitasks#qfl_viewer ................ |g:vikitasks#qfl_viewer|
-        g:vikitasks#rx_categories ............. |g:vikitasks#rx_categories|
-        g:vikitasks#rx_levels ................. |g:vikitasks#rx_levels|
-        g:vikitasks#today ..................... |g:vikitasks#today|
-        g:vikitasks#cache ..................... |g:vikitasks#cache|
-        g:vikitasks#cache_check_mtime_rx ...... |g:vikitasks#cache_check_mtime_rx|
-        g:vikitasks#alarms .................... |g:vikitasks#alarms|
-        g:vikitasks#use_end_date .............. |g:vikitasks#use_end_date|
-        g:vikitasks#use_unspecified_dates ..... |g:vikitasks#use_unspecified_dates|
-        g:vikitasks#remove_unreadable_files ... |g:vikitasks#remove_unreadable_files|
-        g:vikitasks#after_change_exec ......... |g:vikitasks#after_change_exec|
-        g:vikitasks#inputlist_params .......... |g:vikitasks#inputlist_params|
-        g:vikitasks#mapleader ................. |g:vikitasks#mapleader|
-        g:vikitasks#done_add_date ............. |g:vikitasks#done_add_date|
-        g:vikitasks#archive_filename_fmt ...... |g:vikitasks#archive_filename_fmt|
-        g:vikitasks#archive_header ............ |g:vikitasks#archive_header|
-        g:vikitasks#date_fmt .................. |g:vikitasks#date_fmt|
-        g:vikitasks#archive_header_fmt ........ |g:vikitasks#archive_header_fmt|
-        g:vikitasks#final_categories .......... |g:vikitasks#final_categories|
-        g:vikitasks#use_calendar .............. |g:vikitasks#use_calendar|
-        g:vikitasks#paste ..................... |g:vikitasks#paste|
-        g:vikitasks#debug ..................... |g:vikitasks#debug|
-        vikitasks#TasksRx ..................... |vikitasks#TasksRx()|
-        vikitasks#Tasks ....................... |vikitasks#Tasks()|
-        vikitasks#MustUseCanonicFilename ...... |vikitasks#MustUseCanonicFilename()|
-        vikitasks#EachSource .................. |vikitasks#EachSource()|
-        vikitasks#UnRegisterFilename .......... |vikitasks#UnRegisterFilename()|
-        vikitasks#RegisterFilename ............ |vikitasks#RegisterFilename()|
-        vikitasks#AddBuffer ................... |vikitasks#AddBuffer()|
-        vikitasks#RemoveBuffer ................ |vikitasks#RemoveBuffer()|
-        vikitasks#EditFiles ................... |vikitasks#EditFiles()|
-        vikitasks#GetBufferLines .............. |vikitasks#GetBufferLines()|
-        vikitasks#ItemMarkDone ................ |vikitasks#ItemMarkDone()|
-        vikitasks#ItemArchiveFinal ............ |vikitasks#ItemArchiveFinal()|
-        vikitasks#ListTaskFiles ............... |vikitasks#ListTaskFiles()|
-        vikitasks#ItemMarkDueInDays ........... |vikitasks#ItemMarkDueInDays()|
-        vikitasks#ItemMarkDueInWeeks .......... |vikitasks#ItemMarkDueInWeeks()|
-        vikitasks#ItemChangeCategory .......... |vikitasks#ItemChangeCategory()|
-        vikitasks#AgentPaste .................. |vikitasks#AgentPaste()|
-        vikitasks#Glob2Rx ..................... |vikitasks#Glob2Rx()|
-        g:vikitasks_startup_alarms ............ |g:vikitasks_startup_alarms|
-        g:vikitasks_scan_events ............... |g:vikitasks_scan_events|
-        g:vikitasks_scan_patterns ............. |g:vikitasks_scan_patterns|
-        :VikiTasks ............................ |:VikiTasks|
-        :VikiTasksStatic ...................... |:VikiTasksStatic|
-        :VikiTasksPaste ....................... |:VikiTasksPaste|
-        :VikiTasksAlarms ...................... |:VikiTasksAlarms|
-        :VikiTasksAdd ......................... |:VikiTasksAdd|
-        :VikiTasksDone ........................ |:VikiTasksDone|
-        :VikiTasksArchive ..................... |:VikiTasksArchive|
-        :VikiEditTasksFiles ................... |:VikiEditTasksFiles|
-        :VikiTasksFiles ....................... |:VikiTasksFiles|
-        :VikiTasksDueInDays ................... |:VikiTasksDueInDays|
-        :VikiTasksDueInWeeks .................. |:VikiTasksDueInWeeks|
+        g:vikitasks#files ...................... |g:vikitasks#files|
+        g:vikitasks#files_ignored .............. |g:vikitasks#files_ignored|
+        g:vikitasks#ignore_completed_tasks ..... |g:vikitasks#ignore_completed_tasks|
+        g:vikitasks#sources .................... |g:vikitasks#sources|
+        g:vikitasks#filetype_map ............... |g:vikitasks#filetype_map|
+        g:vikitasks#default_priority ........... |g:vikitasks#default_priority|
+        g:vikitasks#qfl_viewer ................. |g:vikitasks#qfl_viewer|
+        g:vikitasks#rx_categories .............. |g:vikitasks#rx_categories|
+        g:vikitasks#rx_levels .................. |g:vikitasks#rx_levels|
+        g:vikitasks#today ...................... |g:vikitasks#today|
+        g:vikitasks#cache ...................... |g:vikitasks#cache|
+        g:vikitasks#cache_check_mtime_rx ....... |g:vikitasks#cache_check_mtime_rx|
+        g:vikitasks#alarms ..................... |g:vikitasks#alarms|
+        g:vikitasks#use_end_date ............... |g:vikitasks#use_end_date|
+        g:vikitasks#use_unspecified_dates ...... |g:vikitasks#use_unspecified_dates|
+        g:vikitasks#remove_unreadable_files .... |g:vikitasks#remove_unreadable_files|
+        g:vikitasks#after_change_line_exec ..... |g:vikitasks#after_change_line_exec|
+        g:vikitasks#after_change_buffer_exec ... |g:vikitasks#after_change_buffer_exec|
+        g:vikitasks#inputlist_params ........... |g:vikitasks#inputlist_params|
+        g:vikitasks#mapleader .................. |g:vikitasks#mapleader|
+        g:vikitasks#done_add_date .............. |g:vikitasks#done_add_date|
+        g:vikitasks#archive_filename_fmt ....... |g:vikitasks#archive_filename_fmt|
+        g:vikitasks#archive_header ............. |g:vikitasks#archive_header|
+        g:vikitasks#date_fmt ................... |g:vikitasks#date_fmt|
+        g:vikitasks#archive_header_fmt ......... |g:vikitasks#archive_header_fmt|
+        g:vikitasks#final_categories ........... |g:vikitasks#final_categories|
+        g:vikitasks#use_calendar ............... |g:vikitasks#use_calendar|
+        g:vikitasks#paste ...................... |g:vikitasks#paste|
+        g:vikitasks#debug ...................... |g:vikitasks#debug|
+        vikitasks#TasksRx ...................... |vikitasks#TasksRx()|
+        vikitasks#Tasks ........................ |vikitasks#Tasks()|
+        vikitasks#MustUseCanonicFilename ....... |vikitasks#MustUseCanonicFilename()|
+        vikitasks#EachSource ................... |vikitasks#EachSource()|
+        vikitasks#UnRegisterFilename ........... |vikitasks#UnRegisterFilename()|
+        vikitasks#RegisterFilename ............. |vikitasks#RegisterFilename()|
+        vikitasks#AddBuffer .................... |vikitasks#AddBuffer()|
+        vikitasks#RemoveBuffer ................. |vikitasks#RemoveBuffer()|
+        vikitasks#EditFiles .................... |vikitasks#EditFiles()|
+        vikitasks#GetBufferLines ............... |vikitasks#GetBufferLines()|
+        vikitasks#ItemMarkDone ................. |vikitasks#ItemMarkDone()|
+        vikitasks#ItemArchiveFinal ............. |vikitasks#ItemArchiveFinal()|
+        vikitasks#ListTaskFiles ................ |vikitasks#ListTaskFiles()|
+        vikitasks#ItemMarkDueInDays ............ |vikitasks#ItemMarkDueInDays()|
+        vikitasks#ItemMarkDueInWeeks ........... |vikitasks#ItemMarkDueInWeeks()|
+        vikitasks#ItemChangeCategory ........... |vikitasks#ItemChangeCategory()|
+        vikitasks#AgentPaste ................... |vikitasks#AgentPaste()|
+        vikitasks#Glob2Rx ...................... |vikitasks#Glob2Rx()|
+        g:vikitasks_startup_alarms ............. |g:vikitasks_startup_alarms|
+        g:vikitasks_scan_events ................ |g:vikitasks_scan_events|
+        g:vikitasks_scan_patterns .............. |g:vikitasks_scan_patterns|
+        :VikiTasks ............................. |:VikiTasks|
+        :VikiTasksStatic ....................... |:VikiTasksStatic|
+        :VikiTasksPaste ........................ |:VikiTasksPaste|
+        :VikiTasksAlarms ....................... |:VikiTasksAlarms|
+        :VikiTasksAdd .......................... |:VikiTasksAdd|
+        :VikiTasksDone ......................... |:VikiTasksDone|
+        :VikiTasksArchive ...................... |:VikiTasksArchive|
+        :VikiEditTasksFiles .................... |:VikiEditTasksFiles|
+        :VikiTasksFiles ........................ |:VikiTasksFiles|
+        :VikiTasksDueInDays .................... |:VikiTasksDueInDays|
+        :VikiTasksDueInWeeks ................... |:VikiTasksDueInWeeks|
 
 
 ========================================================================
@@ -240,9 +241,15 @@ g:vikitasks#use_unspecified_dates (default: 0)
 g:vikitasks#remove_unreadable_files (default: 1)
     If true, remove unreadable files from the tasks list.
 
-                                                    *g:vikitasks#after_change_exec*
-g:vikitasks#after_change_exec  (default: '')
+                                                    *g:vikitasks#after_change_line_exec*
+g:vikitasks#after_change_line_exec (default: '')
+    |:execute| a command (as string) after changing a line.
+    A useful value is |:update|.
+
+                                                    *g:vikitasks#after_change_buffer_exec*
+g:vikitasks#after_change_buffer_exec (default: '')
     |:execute| a command (as string) after changing a buffer.
+    A useful value is |:update|.
 
                                                     *g:vikitasks#inputlist_params*
 g:vikitasks#inputlist_params   (default: {...})
