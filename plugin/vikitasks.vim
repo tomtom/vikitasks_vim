@@ -4,10 +4,11 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2014-02-05.
-" @Revision:    312
+" @Revision:    313
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
+scriptencoding utf-8
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 106
     runtime plugin/02tlib.vim
