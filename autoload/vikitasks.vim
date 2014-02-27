@@ -81,7 +81,7 @@ TLet g:vikitasks#alarms = {'all_tasks': 0, 'tasks': 'sometasks', 'persistent_cat
 TLet g:vikitasks#use_end_date = 1
 
 " Interpret entries with an unspecified date ("_") as current tasks.
-TLet g:vikitasks#use_unspecified_dates = 0
+TLet g:vikitasks#use_unspecified_dates = 1
 
 " If true, remove unreadable files from the tasks list.
 TLet g:vikitasks#remove_unreadable_files = 1
