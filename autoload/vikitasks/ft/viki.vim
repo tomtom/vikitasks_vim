@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    99
+" @Revision:    103
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -12,7 +12,11 @@ TLet g:vikitasks#ft#viki#intervikis = 2
 
 " A list of ignored intervikis.
 " Can be buffer-local.
-TLet g:vikitasks#ft#viki#intervikis_ignored = []
+TLet g:vikitasks#ft#viki#intervikis_exclude = []
+
+" If non-empty, scan an interviki only if the name is included in this 
+" list.
+TLet g:vikitasks#ft#viki#intervikis_include = []
 
 TLet g:vikitasks#ft#viki#archive_filename_fmt = '"%s_archived". g:vikiNameSuffix'
 
@@ -79,15 +83,18 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
     let scan_interviki = tlib#var#Get('vikitasks#ft#viki#intervikis', 'bg', 0)
     " TLogVAR scan_interviki
     if scan_interviki > 0
-        let ivignored = tlib#var#Get('vikitasks#ft#viki#intervikis_ignored', 'bg', [])
-        " TLogVAR ivignored
+        let iv_exclude = tlib#var#Get('vikitasks#ft#viki#intervikis_exclude', 'bg', [])
+        let iv_include = tlib#var#Get('vikitasks#ft#viki#intervikis_include', 'bg', [])
+        " TLogVAR iv_exclude
         for iv in viki#GetInterVikis()
             " TLogVAR iv
-            if index(ivignored, matchstr(iv, '^\u\+')) == -1
+            let iv_name = matchstr(iv, '^\u\+')
+            if index(iv_exclude, iv_name) == -1
+                        \ && (empty(iv_include) || index(iv_include, iv_name) != -1)
                 " TLogVAR iv
                 let def = viki#GetLink(1, '[['. iv .']]', 0, '')
-                let file = def[1]
                 " TLogVAR def
+                let file = def[1]
                 if scan_interviki == 2
                     let filepattern = '*'. viki#InterVikiSuffix(iv)
                     if index(g:vikitasks_scan_patterns, filepattern) != -1

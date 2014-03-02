@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    151
+" @Revision:    155
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -9,6 +9,8 @@
 "
 " Caveat: Make sure |g:vikitasks#sources.todotxt| is true.
 TLet g:vikitasks#ft#todotxt#files = {}
+
+TLet g:vikitasks#ft#todotxt#ignore_rx = '[\/]\(recur\|done\)\.txt$'
 
 " If true, use t:DATE to hide entries until DATE.
 TLet g:vikitasks#ft#todotxt#use_threshold = 1   "{{{2
@@ -144,11 +146,12 @@ endf
 function! s:prototype.GetFiles(registrar) dict "{{{3
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
         for filename in split(glob(pattern), '\n')
+            " TLogVAR filename
             " call add(files, filename)
             if !trag#HasFiletype(filename)
                 call trag#SetFiletype('todotxt', filename)
             endif
-            call call(a:registrar, [filename, 'todotxt', archive])
+            call call(a:registrar, [filename, 'todotxt', archive, g:vikitasks#ft#todotxt#ignore_rx])
         endfor
     endfor
 endf
