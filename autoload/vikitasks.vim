@@ -173,6 +173,9 @@ TLet g:vikitasks#paste = {}
 
 TLet g:vikitasks#debug = 0
 
+" If non-null, convert cygwin filenames to windows format.
+TLet g:vikitasks#convert_cygwin = has('win32unix') && executable('cygpath')
+
 let s:tasks_rx = {}
 
 function! vikitasks#TasksRx(which_tasks, ...) "{{{3
@@ -736,16 +739,28 @@ function vikitasks#MustUseCanonicFilename()
 endf
 
 
+let s:cygpath = {}
+
 function! s:CanonicFilename(filename) "{{{3
     if !vikitasks#MustUseCanonicFilename()
         return a:filename
     else
         let filename = a:filename
+        if g:vikitasks#convert_cygwin && filename !~ '^\c[a-z]:'
+            if !has_key(s:cygpath, filename)
+                let s:cygpath[filename] = substitute(system('cygpath -m '. shellescape(filename)), '\n$', '', '')
+            endif
+            let filename = s:cygpath[filename]
+            " TLogVAR a:filename, filename
+        endif
         if !has('fname_case')
             let filename = tolower(filename)
         endif
         if g:tlib#dir#sep == '\'
             let filename = substitute(filename, '\\', '/', 'g')
+        endif
+        if filename !~ '^\w\+://'
+            let filename = substitute(filename, '//\+', '/', 'g')
         endif
         return filename
     endif
