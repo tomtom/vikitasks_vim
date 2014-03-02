@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1754
+" @Revision:    1822
 
 scriptencoding utf-8
 
@@ -16,7 +16,7 @@ TLet g:vikitasks#files = []
 
 " A list of |regexp| patterns for filenames that should not be 
 " scanned.
-TLet g:vikitasks#files_ignored = []
+TLet g:vikitasks#files_ignored = ['_archived\.[^.]\+$']
 let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
 
 " If true, completely ignore completed tasks.
