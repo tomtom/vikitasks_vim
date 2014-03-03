@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1822
+" @Revision:    1841
 
 scriptencoding utf-8
 
@@ -246,7 +246,7 @@ function! s:GetTasks(args, use_cached) "{{{3
         let files = get(a:args, 'files', [])
         " TLogVAR files
         if !empty(files)
-            " TLogVAR filter(copy(files), 'v:val =~ ''\Ctodo.txt$''')
+            " TLogVAR filter(copy(files), 'v:val =~ ''\CAcademia.txt$''')
             for file in files
                 let file_rx = vikitasks#Glob2Rx(file)
                 call filter(qfl, '(has_key(v:val, "filename") ? v:val.filename : bufname(v:val.bufnr)) =~ file_rx')
@@ -257,7 +257,7 @@ function! s:GetTasks(args, use_cached) "{{{3
             " TLogVAR file_defs
             let cfiles = map(copy(qfl), 's:CanonicFilename(v:val.filename)')
             let cfiles = tlib#list#Uniq(cfiles, '', 1)
-            " TLogVAR filter(copy(cfiles), 'v:val =~ ''\Ctodo.txt$''')
+            " TLogVAR filter(copy(cfiles), 'v:val =~ ''\CAcademia.txt$''')
             if !empty(cfiles)
                 let update = {}
                 let remove = []
@@ -309,7 +309,7 @@ function! s:GetTasks(args, use_cached) "{{{3
         " TLogVAR files
         if empty(files)
             let [files, file_defs] = s:CollectTaskFiles(0)
-            " TLogVAR filter(copy(files), 'v:val =~ ''\Ctodo.txt$''')
+            " TLogVAR filter(copy(files), 'v:val =~ ''\<Academia.txt$''')
             " TLogVAR files
         else
             let file_defs = {}
@@ -321,6 +321,7 @@ function! s:GetTasks(args, use_cached) "{{{3
         let cfiles = map(files, 's:CanonicFilename(v:val)')
         let cfiles = tlib#list#Uniq(cfiles, '', 1)
         " TLogVAR len(cfiles)
+        " TLogVAR cfiles
         if !empty(cfiles)
             let [new_file_defs, new_tasks] = s:ScanFiles(cfiles, '', file_defs)
             " TLogVAR len(new_file_defs), len(new_tasks)
@@ -424,7 +425,7 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     let file_defs = a:0 >= 2 ? a:2 : s:GetCachedFiles()
     " TLogVAR a:cfiles, filetype0
     call s:InitTrag()
-    let qfl = trag#Grep('tasks', 1, a:cfiles, filetype0)
+    let qfl = trag#Grep('tasks', 1, copy(a:cfiles), filetype0)
     " TLogVAR len(qfl)
     " TLogVAR qfl
     " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
@@ -433,17 +434,18 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     " TLogVAR filter(keys(file_defs), 'v:val =~ ''\Ctodo.txt$''')
     let new_file_defs = {}
     for cfilename in a:cfiles
+        " TLogVAR cfilename, has_key(file_defs,cfilename)
         if has_key(file_defs, cfilename)
             let new_file_defs[cfilename] = file_defs[cfilename]
         else
-            let cfilename = s:CanonicFilename(new_file)
             let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
             call s:MaybeRegisterFilename(new_file_defs, cfilename, filetype, '')
         endif
     endfor
     let new_tasks = copy(qfl)
     " TLogVAR len(file_defs), len(new_file_defs), len(new_tasks)
-    " TLogVAR file_defs, new_file_defs
+    " TLogVAR file_defs
+    " TLogVAR new_file_defs
     " TLogVAR new_tasks
     let remove_tasks = []
     for i in range(len(new_tasks))
