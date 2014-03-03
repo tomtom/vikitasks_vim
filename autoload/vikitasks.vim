@@ -739,10 +739,11 @@ endf
 
 function! s:GetCachedFiles() "{{{3
     if !exists('s:file_defs')
-        let s:file_defs = get(tlib#cache#Get(g:vikitasks#cache), 'file_defs', {})
+        let cdata = s:GetInfo()
+        let s:file_defs = get(cdata, 'file_defs', {})
         " echom "DBG file_defs" string(s:file_defs)
         if empty(s:file_defs)
-            let files = get(tlib#cache#Get(g:vikitasks#cache), 'files', [])
+            let files = get(cdata, 'files', [])
             for file in files
                 let cfilename = s:CanonicFilename(file)
                 call vikitasks#RegisterFilename(cfilename, s:GetFiletype(cfilename), '')
@@ -755,18 +756,18 @@ endf
 
 function! s:GetCachedTasks() "{{{3
     if !exists('s:tasks')
-        let s:tasks = get(tlib#cache#Get(g:vikitasks#cache), 'tasks', [])
+        let s:tasks = get(s:GetInfo(), 'tasks', [])
         " echom "DBG ntasks = ". len(s:tasks)
     endif
     return s:tasks
 endf
 
 
-function! s:GetCachedTimestamp() "{{{3
-    if !exists('s:timestamp')
-        let s:timestamp = get(tlib#cache#Get(g:vikitasks#cache), 'timestamp', 0)
+function! s:GetInfo() "{{{3
+    if !exists('s:cdata')
+        let s:cdata = tlib#cache#Get(g:vikitasks#cache)
     endif
-    return s:timestamp
+    return s:cdata
 endf
 
 
@@ -775,7 +776,8 @@ function! s:SaveInfo(file_defs, tasks) "{{{3
     let s:file_defs = a:file_defs
     let s:tasks = a:tasks
     let s:timestamp = localtime()
-    call tlib#cache#Save(g:vikitasks#cache, {'file_defs': a:file_defs, 'tasks': a:tasks, 'timestamp': s:timestamp})
+    let s:cdata = {'file_defs': a:file_defs, 'tasks': a:tasks, 'timestamp': s:timestamp}
+    call tlib#cache#Save(g:vikitasks#cache, s:cdata)
 endf
 
 
