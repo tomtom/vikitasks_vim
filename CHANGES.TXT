@@ -70,3 +70,37 @@ version: "0.05"
   MD5 checksum: 7d53532b805b741dd90d65def5b546f1
 version: "0.06"
 
+  - Help template
+  - FIX Don't call VikiTasksDueInDays & VikiTasksDueInWeeks with <count>
+  - <c-n> Paste selected items into a new window
+  - Rewrite A
+  - Remove s:files (use s:file_defs instead)
+  - Full support for todo.txt (requires trag 0.12)
+  - Correctly set today marker for last but one item
+  - g:vikitasks#filetype_map
+  - todo.txt: Improved support for changing the category/priority
+  - .ArchiveHeader(): type error
+  - FIX support for scanning intervikis
+  - :VikiTasksAlarms: FIX bang value
+  - #AfterChange hook
+  - g:vikitasks#rx_letters defaults to 'A-P'
+  - Renamed g:vikitasks#rx_letters to g:vikitasks#rx_categories
+  - g:vikitasks#alarms: Support for persistent_categories (always include tasks in these categories in the "Alarms" list)
+  - FIX Use g:vikitasks#rx_categories in todotxt.vim
+  - g:vikitasks#alarms.persistent_categories defaults to [A]
+  - g:vikitasks#cache_check_mtime: Detect files that were changed by external programs based on mtime
+  - s:GetTasks() if g:vikitasks#cache_check_mtime: Remove obsolete filename
+  - g:vikitasks#cache_check_mtime_rx (replaces g:vikitasks#cache_check_mtime)
+  - Checking g:vikitasks#cache_check_mtime_rx actually works (properly init trag)
+  - g:vikitasks_startup_alarms defaults to 0 (without user intervention don't display alarms on startup)
+  - g:vikitasks#after_change_buffer_exec: Run command after changing a buffer
+  - g:vikitasks#use_unspecified_dates default to 1
+  - scriptencoding utf-8
+  - g:vikitasks#files_ignored defaults to ['_archived\.[^.]\+$']
+  - g:vikitasks#convert_cygwin
+  - Misc improvements
+  - Load cached data only once
+  - FIX: duplicate entries
+  MD5 checksum: f1556492bc4b63a0275c2bf6f37141fe
+version: "1.00"
+
