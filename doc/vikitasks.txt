@@ -114,8 +114,10 @@ Contents~
         g:vikitasks#use_calendar ............... |g:vikitasks#use_calendar|
         g:vikitasks#paste ...................... |g:vikitasks#paste|
         g:vikitasks#debug ...................... |g:vikitasks#debug|
+        g:vikitasks#convert_cygwin ............. |g:vikitasks#convert_cygwin|
         vikitasks#TasksRx ...................... |vikitasks#TasksRx()|
         vikitasks#Tasks ........................ |vikitasks#Tasks()|
+        vikitasks#ResetCachedInfo .............. |vikitasks#ResetCachedInfo()|
         vikitasks#MustUseCanonicFilename ....... |vikitasks#MustUseCanonicFilename()|
         vikitasks#EachSource ................... |vikitasks#EachSource()|
         vikitasks#UnRegisterFilename ........... |vikitasks#UnRegisterFilename()|
@@ -161,7 +163,7 @@ g:vikitasks#files              (default: [])
     Alternatively, add new items in ~/vimfiles/after/plugin/vikitasks.vim
 
                                                     *g:vikitasks#files_ignored*
-g:vikitasks#files_ignored      (default: [])
+g:vikitasks#files_ignored      (default: ['_archived\.[^.]\+$'])
     A list of |regexp| patterns for filenames that should not be 
     scanned.
 
@@ -234,7 +236,7 @@ g:vikitasks#use_end_date       (default: 1)
     If true, the end-date of date ranges (FROM..TO) is significant.
 
                                                     *g:vikitasks#use_unspecified_dates*
-g:vikitasks#use_unspecified_dates (default: 0)
+g:vikitasks#use_unspecified_dates (default: 1)
     Interpret entries with an unspecified date ("_") as current tasks.
 
                                                     *g:vikitasks#remove_unreadable_files*
@@ -310,6 +312,10 @@ g:vikitasks#paste              (default: {})
                                                     *g:vikitasks#debug*
 g:vikitasks#debug              (default: 0)
 
+                                                    *g:vikitasks#convert_cygwin*
+g:vikitasks#convert_cygwin     (default: has('win32unix') && executable('cygpath'))
+    If non-null, convert cygwin filenames to windows format.
+
                                                     *vikitasks#TasksRx()*
 vikitasks#TasksRx(which_tasks, ...)
 
@@ -323,6 +329,9 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
        0 ... List takes the focus
        1 ... Current buffer takes the focus
 
+                                                    *vikitasks#ResetCachedInfo()*
+vikitasks#ResetCachedInfo()
+
                                                     *vikitasks#MustUseCanonicFilename()*
 vikitasks#MustUseCanonicFilename()
 
@@ -333,7 +342,7 @@ vikitasks#EachSource(fallback, fn, args, params)
 vikitasks#UnRegisterFilename(filename)
 
                                                     *vikitasks#RegisterFilename()*
-vikitasks#RegisterFilename(dirpattern, filetype, archive)
+vikitasks#RegisterFilename(dirpattern, filetype, archive, ...)
 
                                                     *vikitasks#AddBuffer()*
 vikitasks#AddBuffer(buffer, ...)
