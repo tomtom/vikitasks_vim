@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1841
+" @Revision:    1856
 
 scriptencoding utf-8
 
@@ -21,6 +21,10 @@ let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
 
 " If true, completely ignore completed tasks.
 TLet g:vikitasks#ignore_completed_tasks = 1
+
+" If true, obey threshold information (t:YYYY-MM-DD), i.e. don't show 
+" the task before this date.
+TLet g:vikitasks#use_threshold = 1
 
 " If non-false, provide tighter integration with the vim viki plugin.
 TLet g:vikitasks#sources = {
@@ -559,7 +563,7 @@ endf
 
 
 function! s:FilterTasks(tasks, args) "{{{3
-    " TLogVAR a:args
+    " TLogVAR len(a:tasks), a:args
 
     let rx = get(a:args, 'rx', '')
     if !empty(rx)
@@ -589,6 +593,7 @@ function! s:FilterTasks(tasks, args) "{{{3
     if !get(a:args, 'all_tasks', 0)
         call filter(a:tasks, '!empty(s:GetTaskDueDate(v:val.text, 0, g:vikitasks#use_unspecified_dates, a:args))')
         " TLogVAR len(a:tasks)
+
         let constraint = get(a:args, 'constraint', '.')
         " TLogVAR constraint
         if constraint !~ '^[+-]\?\d\+'
@@ -628,6 +633,12 @@ function! s:FilterTasks(tasks, args) "{{{3
         " TLogVAR from, to
         if from != 0 || to != 0
             call filter(a:tasks, 's:Select(v:val.text, from, to, a:args)')
+        endif
+
+        let use_threshold = get(a:args, 'use_threshold', g:vikitasks#use_threshold)
+        if use_threshold
+            let today = strftime(g:vikitasks#date_fmt)
+            call filter(a:tasks, 's:IsThresholdOk(v:val.text, today)')
         endif
     endif
 endf
@@ -692,6 +703,15 @@ function! s:GetTaskDueDate(task, use_end_date, use_unspecified, args) "{{{3
         let rv = ''
     endif
     " TLogVAR a:task, m, rv
+    return rv
+endf
+
+
+function! s:IsThresholdOk(task, today) "{{{3
+    " TLogVAR a:task, a:today
+    let t = matchstr(a:task, '\<t:'. g:vikitasks#date_rx .'\>')
+    let rv = empty(t) ? 1 : t <= a:today
+    " TLogVAR t, rv
     return rv
 endf
 

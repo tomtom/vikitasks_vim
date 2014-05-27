@@ -88,6 +88,7 @@ Contents~
         g:vikitasks#files ...................... |g:vikitasks#files|
         g:vikitasks#files_ignored .............. |g:vikitasks#files_ignored|
         g:vikitasks#ignore_completed_tasks ..... |g:vikitasks#ignore_completed_tasks|
+        g:vikitasks#use_threshold .............. |g:vikitasks#use_threshold|
         g:vikitasks#sources .................... |g:vikitasks#sources|
         g:vikitasks#filetype_map ............... |g:vikitasks#filetype_map|
         g:vikitasks#default_priority ........... |g:vikitasks#default_priority|
@@ -170,6 +171,11 @@ g:vikitasks#files_ignored      (default: ['_archived\.[^.]\+$'])
                                                     *g:vikitasks#ignore_completed_tasks*
 g:vikitasks#ignore_completed_tasks (default: 1)
     If true, completely ignore completed tasks.
+
+                                                    *g:vikitasks#use_threshold*
+g:vikitasks#use_threshold      (default: 1)
+    If true, obey threshold information (t:YYYY-MM-DD), i.e. don't show 
+    the task before this date.
 
                                                     *g:vikitasks#sources*
 g:vikitasks#sources            (default: {)
