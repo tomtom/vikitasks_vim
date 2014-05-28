@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1856
+" @Revision:    1858
 
 scriptencoding utf-8
 
@@ -709,7 +709,7 @@ endf
 
 function! s:IsThresholdOk(task, today) "{{{3
     " TLogVAR a:task, a:today
-    let t = matchstr(a:task, '\<t:'. g:vikitasks#date_rx .'\>')
+    let t = matchstr(a:task, '\<t:\zs'. g:vikitasks#date_rx)
     let rv = empty(t) ? 1 : t <= a:today
     " TLogVAR t, rv
     return rv
