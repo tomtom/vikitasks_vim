@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1858
+" @Revision:    1873
 
 scriptencoding utf-8
 
@@ -25,6 +25,13 @@ TLet g:vikitasks#ignore_completed_tasks = 1
 " If true, obey threshold information (t:YYYY-MM-DD), i.e. don't show 
 " the task before this date.
 TLet g:vikitasks#use_threshold = 1
+
+" If the value is > 0 and no t: option (see see 
+" |g:vikitasks#use_threshold|) is given for a task, hide tasks whose due 
+" date is more than N days in the future.
+"
+" The value will be ignored if |g:vikitasks#use_threshold| is false.
+TLet g:vikitasks#threshold_days = 90
 
 " If non-false, provide tighter integration with the vim viki plugin.
 TLet g:vikitasks#sources = {
@@ -179,6 +186,7 @@ TLet g:vikitasks#debug = 0
 
 " If non-null, convert cygwin filenames to windows format.
 TLet g:vikitasks#convert_cygwin = has('win32unix') && executable('cygpath')
+
 
 let s:tasks_rx = {}
 
@@ -638,7 +646,12 @@ function! s:FilterTasks(tasks, args) "{{{3
         let use_threshold = get(a:args, 'use_threshold', g:vikitasks#use_threshold)
         if use_threshold
             let today = strftime(g:vikitasks#date_fmt)
-            call filter(a:tasks, 's:IsThresholdOk(v:val.text, today)')
+            if g:vikitasks#threshold_days > 0
+                let threshold_date = strftime(g:vikitasks#date_fmt, localtime() + g:vikitasks#threshold_days * g:tlib#date#dayshift)
+            else
+                let threshold_date = ''
+            endif
+            call filter(a:tasks, 's:IsThresholdOk(v:val.text, today, threshold_date)')
         endif
     endif
 endf
@@ -707,10 +720,17 @@ function! s:GetTaskDueDate(task, use_end_date, use_unspecified, args) "{{{3
 endf
 
 
-function! s:IsThresholdOk(task, today) "{{{3
+function! s:IsThresholdOk(task, today, threshold_date) "{{{3
     " TLogVAR a:task, a:today
     let t = matchstr(a:task, '\<t:\zs'. g:vikitasks#date_rx)
-    let rv = empty(t) ? 1 : t <= a:today
+    if !empty(t)
+        let rv = t <= a:today
+    elseif empty(a:threshold_date)
+        let rv = 1
+    else
+        let date = s:GetTaskDueDate(a:task, 0, 0, {})
+        let rv = empty(date) || date == '_' || date <= a:threshold_date
+    endif
     " TLogVAR t, rv
     return rv
 endf
