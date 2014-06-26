@@ -89,6 +89,7 @@ Contents~
         g:vikitasks#files_ignored .............. |g:vikitasks#files_ignored|
         g:vikitasks#ignore_completed_tasks ..... |g:vikitasks#ignore_completed_tasks|
         g:vikitasks#use_threshold .............. |g:vikitasks#use_threshold|
+        g:vikitasks#threshold_days ............. |g:vikitasks#threshold_days|
         g:vikitasks#sources .................... |g:vikitasks#sources|
         g:vikitasks#filetype_map ............... |g:vikitasks#filetype_map|
         g:vikitasks#default_priority ........... |g:vikitasks#default_priority|
@@ -176,6 +177,14 @@ g:vikitasks#ignore_completed_tasks (default: 1)
 g:vikitasks#use_threshold      (default: 1)
     If true, obey threshold information (t:YYYY-MM-DD), i.e. don't show 
     the task before this date.
+
+                                                    *g:vikitasks#threshold_days*
+g:vikitasks#threshold_days     (default: 90)
+    If the value is > 0 and no t: option (see see 
+    |g:vikitasks#use_threshold|) is given for a task, hide tasks whose due 
+    date is more than N days in the future.
+
+    The value will be ignored if |g:vikitasks#use_threshold| is false.
 
                                                     *g:vikitasks#sources*
 g:vikitasks#sources            (default: {)
