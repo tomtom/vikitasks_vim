@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1873
+" @Revision:    1878
 
 scriptencoding utf-8
 
@@ -468,15 +468,21 @@ function! s:ScanFiles(cfiles, ...) "{{{3
         let new_tasks[i].filename = cfilename
         " let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
         let these_file_defs = has_key(new_file_defs, cfilename) ? new_file_defs : file_defs
-        let file_def = these_file_defs[cfilename]
-        let filetype = file_def.filetype
-        if filetype != 'viki'
-            let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
-        endif
-        if empty(new_tasks[i].text)
-            call add(remove_tasks, i)
+        if has_key(these_file_defs, cfilename)
+            let file_def = these_file_defs[cfilename]
+            let filetype = file_def.filetype
+            if filetype != 'viki'
+                let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
+            endif
+            if empty(new_tasks[i].text)
+                call add(remove_tasks, i)
+            else
+                call remove(new_tasks[i], 'bufnr')
+            endif
         else
-            call remove(new_tasks[i], 'bufnr')
+            echohl WarningMsg
+            echom 'VikiTasks: Internal error: No filedef for' string(cfilename) has_key(new_file_defs, cfilename) has_key(file_defs, cfilename)
+            echohl NONE
         endif
     endfor
     " TLogVAR remove_tasks
