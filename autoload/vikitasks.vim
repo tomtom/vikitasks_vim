@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1878
+" @Revision:    1882
 
 scriptencoding utf-8
 
@@ -463,26 +463,28 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     for i in range(len(new_tasks))
         " TLogVAR new_tasks[i]
         let bufnr = new_tasks[i].bufnr
-        let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
-        " TLogVAR cfilename
-        let new_tasks[i].filename = cfilename
-        " let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
-        let these_file_defs = has_key(new_file_defs, cfilename) ? new_file_defs : file_defs
-        if has_key(these_file_defs, cfilename)
-            let file_def = these_file_defs[cfilename]
-            let filetype = file_def.filetype
-            if filetype != 'viki'
-                let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
-            endif
-            if empty(new_tasks[i].text)
-                call add(remove_tasks, i)
+        if bufnr > 0
+            let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
+            " TLogVAR cfilename
+            let new_tasks[i].filename = cfilename
+            " let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
+            let these_file_defs = has_key(new_file_defs, cfilename) ? new_file_defs : file_defs
+            if has_key(these_file_defs, cfilename)
+                let file_def = these_file_defs[cfilename]
+                let filetype = file_def.filetype
+                if filetype != 'viki'
+                    let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
+                endif
+                if empty(new_tasks[i].text)
+                    call add(remove_tasks, i)
+                else
+                    call remove(new_tasks[i], 'bufnr')
+                endif
             else
-                call remove(new_tasks[i], 'bufnr')
+                echohl WarningMsg
+                echom 'VikiTasks: Internal error: No filedef for' has_key(new_file_defs, cfilename) has_key(file_defs, cfilename) bufnr string(cfilename)
+                echohl NONE
             endif
-        else
-            echohl WarningMsg
-            echom 'VikiTasks: Internal error: No filedef for' string(cfilename) has_key(new_file_defs, cfilename) has_key(file_defs, cfilename)
-            echohl NONE
         endif
     endfor
     " TLogVAR remove_tasks
