@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    103
+" @Revision:    104
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -71,9 +71,9 @@ exec 'TRagDefKind tasks * /'. s:prototype.tasks_rx .'/'
 exec 'TRagDefKind sometasks * /'. s:prototype.sometasks_rx .'/'
 
 
-function! s:prototype.ConvertLine(line) dict "{{{3
-    return a:line
-endf
+" function! s:prototype.ConvertLine(line) dict "{{{3
+"     return a:line
+" endf
 
 
 function! s:prototype.GetFiles(registrar) dict "{{{3

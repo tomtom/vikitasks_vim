@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1882
+" @Revision:    1888
 
 scriptencoding utf-8
 
@@ -472,9 +472,9 @@ function! s:ScanFiles(cfiles, ...) "{{{3
             if has_key(these_file_defs, cfilename)
                 let file_def = these_file_defs[cfilename]
                 let filetype = file_def.filetype
-                if filetype != 'viki'
+                " if filetype != 'viki'
                     let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
-                endif
+                " endif
                 if empty(new_tasks[i].text)
                     call add(remove_tasks, i)
                 else
@@ -515,23 +515,31 @@ endf
 
 
 function! s:ConvertLine(file_defs, cfilename, filetype, line) "{{{3
-    if a:filetype == 'viki'
-        return a:line
-    else
+    let ftdef = vikitasks#ft#{a:filetype}#GetInstance()
+    if !empty(a:line) && has_key(ftdef, 'ConvertLine')
         let ftdef = vikitasks#ft#{a:filetype}#GetInstance()
-        let line1 = ftdef.ConvertLine(a:line)
-        if !empty(a:line) && line1 =~ vikitasks#TasksRx('tasks', ftdef)
+        let line = ftdef.ConvertLine(a:line)
+        if !empty(line) && line =~ vikitasks#TasksRx('tasks', ftdef)
             if !has_key(a:file_defs, a:cfilename)
                 throw 'VikiTasks: Internal error: No filedef for '. a:cfilename
             else
                 let mapsource = get(a:file_defs[a:cfilename], 'mapsource', {})
-                let mapsource[a:line] = line1
+                let mapsource[a:line] = line
                 let a:file_defs[a:cfilename].mapsource = mapsource
-                " TLogVAR a:filetype, a:line, line1
+                " TLogVAR a:filetype, a:line, line
             endif
         endif
-        return line1
+    else
+        let line = a:line
     endif
+    let line = s:CleanLine(line)
+    return line
+endf
+
+
+function! s:CleanLine(line) "{{{3
+    let line = substitute(a:line, '\<t:'. g:vikitasks#date_rx .'\s*', '', 'g')
+    return line
 endf
 
 
