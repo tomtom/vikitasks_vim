@@ -679,6 +679,9 @@ function! s:View(index, suspend) "{{{3
         if a:index > 1
             let w.initial_index = a:index
         endif
+        let w.format_item = 'vikitasks#FormatQFLE(v:val, s:world)'
+        let w.set_syntax = 'vikitasks#SetSyntax'
+        let w.dueline = s:DueText()
         call trag#QuickList(w, a:suspend)
     else
         exec g:vikitasks#qfl_viewer
@@ -686,6 +689,29 @@ function! s:View(index, suspend) "{{{3
     if a:suspend && bufnr != bufnr('%')
         let bufwinnr = bufwinnr(bufnr)
         exec bufwinnr 'wincmd w'
+    endif
+endf
+
+
+function! vikitasks#SetSyntax() dict "{{{3
+    runtime syntax/viki.vim
+    syn match TTagedFilesFilenameSep / | /
+    syn match TTagedFilesFilename / | [^|]*$/ contains=TTagedFilesFilenameSep
+    hi def link TTagedFilesFilenameSep Special
+    hi def link TTagedFilesFilename Directory
+endf
+
+
+function! vikitasks#FormatQFLE(qfe, world) "{{{3
+    let text = get(a:qfe, "text")
+    let filename = trag#GetFilename(a:qfe)
+    if empty(filename) || text == a:world.dueline
+        return text
+    else
+        if get(a:world, 'trag_short_filename', '')
+            let filename = pathshorten(filename)
+        endif
+        return printf("%-". (&co / 2) ."s | %s#%d", text, filename, a:qfe.lnum)
     endif
 endf
 
