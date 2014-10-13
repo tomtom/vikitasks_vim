@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1888
+" @Revision:    1936
 
 scriptencoding utf-8
 
@@ -111,9 +111,8 @@ TLet g:vikitasks#after_change_buffer_exec = ''
 " :read: TLet g:vikitasks#inputlist_params = {...}
 " :nodoc:
 TLet g:vikitasks#inputlist_params = {
-            \ 'trag_list_syntax': g:vikitasks#sources.viki ? 'viki' : '',
-            \ 'trag_list_syntax_nextgroup': '@vikiPriorityListTodo',
             \ 'trag_short_filename': 1,
+            \ 'index_next_syntax': '@vikiPriorityListTodo',
             \ 'GetBufferLines': function('vikitasks#GetBufferLines'),
             \ 'scratch': '__VikiTasks__',
             \ 'key_map': {
