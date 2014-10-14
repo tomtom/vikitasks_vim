@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1945
+" @Revision:    1950
 
 scriptencoding utf-8
 
@@ -700,7 +700,10 @@ function! vikitasks#SetSyntax() dict "{{{3
     hi def link TTagedFilesFilename Directory
     let b:vikiMarkInexistent = 0
     runtime syntax/viki.vim
-    syn match vikitasksItem /#\(T: \+.\{-}\u.\{-}:\|\d*\u\d*\)\s.*$/ contains=vikiContact,vikiTag,@vikiPriorityListTodo,@vikiText,TTagedFilesFilename
+    if has('conceal')
+        syn match vikitasksDates /\s*\(created\|t\):\d\+-\d\+-\d\+/ contained conceal
+    endif
+    syn match vikitasksItem /#\(T: \+.\{-}\u.\{-}:\|\d*\u\d*\)\s.*$/ contains=vikiContact,vikiTag,@vikiPriorityListTodo,@vikiText,TTagedFilesFilename,vikitasksDates
 endf
 
 
