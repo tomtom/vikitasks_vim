@@ -1496,8 +1496,15 @@ function! vikitasks#AgentDueDays(world, selected) "{{{3
         exec s:calendar_window 'wincmd w'
         return world
     else
+        call inputsave()
         let val = input("Number of days: ", 1)
-        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+        call inputrestore()
+        if empty(val)
+            let a:world.state = 'redisplay'
+            return a:world
+        else
+            return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+        endif
     endif
 endf
 
@@ -1524,7 +1531,12 @@ function! vikitasks#AgentDueWeeks(world, selected) "{{{3
     call inputsave()
     let val = input("Number of weeks: ", 1)
     call inputrestore()
-    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+    if empty(val)
+        let a:world.state = 'redisplay'
+        return a:world
+    else
+        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+    endif
 endf
 
 
