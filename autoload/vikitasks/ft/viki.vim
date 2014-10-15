@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    104
+" @Revision:    108
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -86,27 +86,37 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
         let iv_exclude = tlib#var#Get('vikitasks#ft#viki#intervikis_exclude', 'bg', [])
         let iv_include = tlib#var#Get('vikitasks#ft#viki#intervikis_include', 'bg', [])
         " TLogVAR iv_exclude
-        for iv in viki#GetInterVikis()
-            " TLogVAR iv
-            let iv_name = matchstr(iv, '^\u\+')
-            if index(iv_exclude, iv_name) == -1
-                        \ && (empty(iv_include) || index(iv_include, iv_name) != -1)
+        let ivikis = viki#GetInterVikis()
+        let nvikis = len(ivikis)
+        call tlib#progressbar#Init(nvikis, 'VikiTasks: Scan viki %s', 20)
+        try
+            let i = 0
+            for iv in ivikis
                 " TLogVAR iv
-                let def = viki#GetLink(1, '[['. iv .']]', 0, '')
-                " TLogVAR def
-                let file = def[1]
-                if scan_interviki == 2
-                    let filepattern = '*'. viki#InterVikiSuffix(iv)
-                    if index(g:vikitasks_scan_patterns, filepattern) != -1
-                        let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/'. filepattern], 1)
-                        " TLogVAR dirpattern
-                        call call(a:registrar, [dirpattern, 'viki', ''])
+                let i += 1
+                let iv_name = matchstr(iv, '^\u\+')
+                if index(iv_exclude, iv_name) == -1
+                            \ && (empty(iv_include) || index(iv_include, iv_name) != -1)
+                    " TLogVAR iv
+                    call tlib#progressbar#Display(i, ' '. iv)
+                    let def = viki#GetLink(1, '[['. iv .']]', 0, '')
+                    " TLogVAR def
+                    let file = def[1]
+                    if scan_interviki == 2
+                        let filepattern = '*'. viki#InterVikiSuffix(iv)
+                        if index(g:vikitasks_scan_patterns, filepattern) != -1
+                            let dirpattern = tlib#file#Join([fnamemodify(file, ':p:h'), '**/'. filepattern], 1)
+                            " TLogVAR a:registrar, dirpattern
+                            call call(a:registrar, [dirpattern, 'viki', ''])
+                        endif
+                    else
+                        call call(a:registrar, [file, 'viki', ''])
                     endif
-                else
-                    call call(a:registrar, [file, 'viki', ''])
                 endif
-            endif
-        endfor
+            endfor
+        finally
+            call tlib#progressbar#Restore()
+        endtry
     endif
 endf
 

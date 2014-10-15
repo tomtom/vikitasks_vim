@@ -434,7 +434,7 @@ endf
 function! s:ScanFiles(cfiles, ...) "{{{3
     let filetype0 = a:0 >= 1 ? a:1 : ''
     let file_defs = a:0 >= 2 ? a:2 : s:GetCachedFiles()
-    " TLogVAR a:cfiles, filetype0
+    " TLogVAR len(a:cfiles), filetype0
     call s:InitTrag()
     let qfl = trag#Grep('tasks', 1, copy(a:cfiles), filetype0)
     " TLogVAR len(qfl)
@@ -459,33 +459,40 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     " TLogVAR new_file_defs
     " TLogVAR new_tasks
     let remove_tasks = []
-    for i in range(len(new_tasks))
-        " TLogVAR new_tasks[i]
-        let bufnr = new_tasks[i].bufnr
-        if bufnr > 0
-            let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
-            " TLogVAR cfilename
-            let new_tasks[i].filename = cfilename
-            " let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
-            let these_file_defs = has_key(new_file_defs, cfilename) ? new_file_defs : file_defs
-            if has_key(these_file_defs, cfilename)
-                let file_def = these_file_defs[cfilename]
-                let filetype = file_def.filetype
-                " if filetype != 'viki'
+    let ntasks = len(new_tasks)
+    call tlib#progressbar#Init(ntasks, 'VikiTasks: Scan %s', 20)
+    try
+        for i in range(ntasks)
+            " TLogVAR new_tasks[i]
+            let bufnr = new_tasks[i].bufnr
+            if bufnr > 0
+                let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
+                call tlib#progressbar#Display(i, ' '. pathshorten(cfilename))
+                " TLogVAR cfilename
+                let new_tasks[i].filename = cfilename
+                " let filetype = empty(filetype0) ? s:GetFiletype(cfilename) : filetype0
+                let these_file_defs = has_key(new_file_defs, cfilename) ? new_file_defs : file_defs
+                if has_key(these_file_defs, cfilename)
+                    let file_def = these_file_defs[cfilename]
+                    let filetype = file_def.filetype
+                    " if filetype != 'viki'
                     let new_tasks[i].text = s:ConvertLine(these_file_defs, cfilename, filetype, new_tasks[i].text)
-                " endif
-                if empty(new_tasks[i].text)
-                    call add(remove_tasks, i)
+                    " endif
+                    if empty(new_tasks[i].text)
+                        call add(remove_tasks, i)
+                    else
+                        call remove(new_tasks[i], 'bufnr')
+                    endif
                 else
-                    call remove(new_tasks[i], 'bufnr')
+                    echohl WarningMsg
+                    echom 'VikiTasks: Internal error: No filedef for' has_key(new_file_defs, cfilename) has_key(file_defs, cfilename) bufnr string(cfilename)
+                    echohl NONE
                 endif
-            else
-                echohl WarningMsg
-                echom 'VikiTasks: Internal error: No filedef for' has_key(new_file_defs, cfilename) has_key(file_defs, cfilename) bufnr string(cfilename)
-                echohl NONE
             endif
-        endif
-    endfor
+        endfor
+    finally
+        call tlib#progressbar#Restore()
+    endtry
     " TLogVAR remove_tasks
     for i in remove_tasks
         call remove(new_tasks, i)
@@ -984,6 +991,7 @@ function! s:CollectTaskFiles(reset) "{{{3
     let taskfiles = sort(keys(s:file_defs))
     " TLogVAR filter(copy(taskfiles), 'v:val =~ ''\Ctodo.txt$''')
     " TLogVAR taskfiles
+    " TLogVAR len(taskfiles)
     return [taskfiles, s:file_defs]
 endf
 
