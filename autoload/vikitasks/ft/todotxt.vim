@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    155
+" @Revision:    158
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -92,7 +92,7 @@ function! s:prototype.ConvertLine(line) dict "{{{3
     if line !~# '^#\u'
         let line = '#'. g:vikitasks#default_priority .' '. line
     endif
-    if line !~# '\<due:\(\d\+-\d\+-\d\+\|_\)'
+    if line !~# '\<due:\(\d\+-\d\+-\d\+\|_\)' && !empty(g:vikitasks#ft#todotxt#due_default)
         let line .= ' due:'. g:vikitasks#ft#todotxt#due_default
     endif
     for [rx, subst] in [
