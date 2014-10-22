@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1952
+" @Revision:    1967
 
 scriptencoding utf-8
 
@@ -107,6 +107,10 @@ TLet g:vikitasks#after_change_line_exec = ''
 " A useful value is |:update|.
 TLet g:vikitasks#after_change_buffer_exec = ''
 
+" If true, save _all_ modified buffers via |:wall|, when leaving the 
+" tasks list.
+TLet g:vikitasks#auto_save = 0
+
 " The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
 " :read: TLet g:vikitasks#inputlist_params = {...}
 " :nodoc:
@@ -114,6 +118,7 @@ TLet g:vikitasks#inputlist_params = {
             \ 'trag_short_filename': 1,
             \ 'index_next_syntax': 'vikitasksItem',
             \ 'GetBufferLines': function('vikitasks#GetBufferLines'),
+            \ 'on_leave': ['vikitasks#OnLeave'],
             \ 'scratch': '__VikiTasks__',
             \ 'key_map': {
             \     'default': {
@@ -1637,5 +1642,13 @@ function! vikitasks#Glob2Rx(pattern) "{{{3
         let rx = '\C'. rx
     endif
     return '\V'. rx
+endf
+
+
+function! vikitasks#OnLeave(w) "{{{3
+    " TLogVAR g:vikitasks#auto_save
+    if g:vikitasks#auto_save
+        wall
+    endif
 endf
 
