@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    158
+" @Revision:    161
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -14,6 +14,10 @@ TLet g:vikitasks#ft#todotxt#ignore_rx = '[\/]\(recur\|done\)\.txt$'
 
 " If true, use t:DATE to hide entries until DATE.
 TLet g:vikitasks#ft#todotxt#use_threshold = 1   "{{{2
+
+" If true, hide lines containing a h:1 tag, which is used e.g. by the 
+" Simpletask Android app.
+TLet g:vikitasks#ft#todotxt#respect_h1 = 1
 
 " Assume this default (in terms of vikitasks) for tasks with no due 
 " date.
@@ -113,6 +117,9 @@ function! s:prototype.ConvertLine(line) dict "{{{3
             let iterations -= 1
         endwh
     endfor
+    if g:vikitasks#ft#todotxt#respect_h1 && line =~# '\<h:1\>'
+        let line = ''
+    endif
     " let line = substitute(line, '^#\u\d*\s\zs\(.\{-}\s\)\?t:\([0-9-]\+\)\ze\(\s\|$\)', '\2 \1', 'g')
     " TLogVAR line
     return line
