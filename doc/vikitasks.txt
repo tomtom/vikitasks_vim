@@ -105,6 +105,7 @@ Contents~
         g:vikitasks#remove_unreadable_files .... |g:vikitasks#remove_unreadable_files|
         g:vikitasks#after_change_line_exec ..... |g:vikitasks#after_change_line_exec|
         g:vikitasks#after_change_buffer_exec ... |g:vikitasks#after_change_buffer_exec|
+        g:vikitasks#auto_save .................. |g:vikitasks#auto_save|
         g:vikitasks#inputlist_params ........... |g:vikitasks#inputlist_params|
         g:vikitasks#mapleader .................. |g:vikitasks#mapleader|
         g:vikitasks#done_add_date .............. |g:vikitasks#done_add_date|
@@ -119,6 +120,8 @@ Contents~
         g:vikitasks#convert_cygwin ............. |g:vikitasks#convert_cygwin|
         vikitasks#TasksRx ...................... |vikitasks#TasksRx()|
         vikitasks#Tasks ........................ |vikitasks#Tasks()|
+        vikitasks#SetSyntax .................... |vikitasks#SetSyntax()|
+        vikitasks#FormatQFLE ................... |vikitasks#FormatQFLE()|
         vikitasks#ResetCachedInfo .............. |vikitasks#ResetCachedInfo()|
         vikitasks#MustUseCanonicFilename ....... |vikitasks#MustUseCanonicFilename()|
         vikitasks#EachSource ................... |vikitasks#EachSource()|
@@ -136,6 +139,7 @@ Contents~
         vikitasks#ItemChangeCategory ........... |vikitasks#ItemChangeCategory()|
         vikitasks#AgentPaste ................... |vikitasks#AgentPaste()|
         vikitasks#Glob2Rx ...................... |vikitasks#Glob2Rx()|
+        vikitasks#OnLeave ...................... |vikitasks#OnLeave()|
         g:vikitasks_startup_alarms ............. |g:vikitasks_startup_alarms|
         g:vikitasks_scan_events ................ |g:vikitasks_scan_events|
         g:vikitasks_scan_patterns .............. |g:vikitasks_scan_patterns|
@@ -268,6 +272,11 @@ g:vikitasks#after_change_buffer_exec (default: '')
     |:execute| a command (as string) after changing a buffer.
     A useful value is |:update|.
 
+                                                    *g:vikitasks#auto_save*
+g:vikitasks#auto_save          (default: 0)
+    If true, save _all_ modified buffers via |:wall|, when leaving the 
+    tasks list.
+
                                                     *g:vikitasks#inputlist_params*
 g:vikitasks#inputlist_params   (default: {...})
     The parameters for |:TRagcw| when |g:vikitasks#qfl_viewer| is empty.
@@ -344,6 +353,12 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
        0 ... List takes the focus
        1 ... Current buffer takes the focus
 
+                                                    *vikitasks#SetSyntax()*
+vikitasks#SetSyntax()
+
+                                                    *vikitasks#FormatQFLE()*
+vikitasks#FormatQFLE(qfe, world)
+
                                                     *vikitasks#ResetCachedInfo()*
 vikitasks#ResetCachedInfo()
 
@@ -404,6 +419,9 @@ vikitasks#AgentPaste(world, selected)
 
                                                     *vikitasks#Glob2Rx()*
 vikitasks#Glob2Rx(pattern)
+
+                                                    *vikitasks#OnLeave()*
+vikitasks#OnLeave(w)
 
 
 ========================================================================
@@ -531,4 +549,4 @@ g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
 
 
 
-vim:tw=78:fo=tcq2:isk=!-~,^*,^|,^":ts=8:ft=help:norl:
+vim:tw=78:fo=w2croql:isk=!-~,^*,^|,^":ts=8:ft=help:norl:
