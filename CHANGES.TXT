@@ -104,3 +104,22 @@ version: "0.06"
   MD5 checksum: f1556492bc4b63a0275c2bf6f37141fe
 version: "1.00"
 
+version: '1.01'
+  - Support for threshold dates (t:YYYY-MM-DD)
+  - IsThresholdOk(): ignore "t:" prefix
+  - g:vikitasks#threshold_days: Hide tasks with due dates N days in the future
+  - ScanFiles(): Avoid random error and display a message
+  - ScanFiles(): Display error message for unknown buffers
+  - Clean up task lines (e.g. remove "t:" threshold tags)
+  - Use index_next_syntax for customization
+  - Use set_syntax & format_item
+  - vikitasks#SetSyntax(): Define vikitasksItem syntax; set b:vikiMarkInexistent = 0
+  - vikitasks#SetSyntax(): Hide some dates
+  - Show progressbar more often
+  - AgentDueWeeks, AgentDueDays: Abort correctly when pressing <c-c>
+  - todotxt: ConvertLine(): Don't add default due date if g:vikitasks#ft#todotxt#due_default is empty
+  - g:vikitasks#auto_save: f true, save _all_ modified buffers via |:wall|, when leaving the tasks list.
+  - g:vikitasks#ft#todotxt#respect_h1: hide lines containing a h:1 tag in todo.txt files (used by SimpleTask app)
+  - Require tlib 1.06 & trag 1.02
+  MD5 checksum: b20334cce201fa22484ea6bc523f7eb4
+
