@@ -4,23 +4,23 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2014-02-05.
-" @Revision:    313
+" @Revision:    315
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
 scriptencoding utf-8
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 106
+if !exists('g:loaded_tlib') || g:loaded_tlib < 113
     runtime plugin/02tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 106
-        echoerr 'tlib >= 1.06 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 113
+        echoerr 'tlib >= 1.13 is required'
         finish
     endif
 endif
-if !exists('g:loaded_trag') || g:loaded_trag < 12
+if !exists('g:loaded_trag') || g:loaded_trag < 102
     runtime plugin/trag.vim
-    if !exists('g:loaded_trag') || g:loaded_trag < 12
-        echoerr 'trag >= 0.12 is required'
+    if !exists('g:loaded_trag') || g:loaded_trag < 102
+        echoerr 'trag >= 0.102 is required'
         finish
     endif
 endif
