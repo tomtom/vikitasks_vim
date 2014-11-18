@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1967
+" @Revision:    1979
 
 scriptencoding utf-8
 
@@ -135,6 +135,7 @@ TLet g:vikitasks#inputlist_params = {
             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
             \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
             \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
+            \             char2nr('k') : {'agent': 'vikitasks#AgentSelectCategory', 'key_name': 'k', 'help': 'Select tasks of a category'},
             \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
             \         }
             \     )
@@ -1461,6 +1462,26 @@ function! vikitasks#AgentItemChangeCategory(world, selected) "{{{3
     call inputrestore()
     if category =~ '\C^[A-Z]$'
         return trag#AgentWithSelected(a:world, a:selected, 'call vikitasks#ItemChangeCategory(0,'. string(category) .')')
+    else
+        echohl WarningMsg
+        echom 'Invalid category (must be A-Z):' category
+        echohl NONE
+        let a:world.state = 'redisplay'
+        return a:world
+    endif
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentSelectCategory(world, selected) "{{{3
+    call inputsave()
+    let category = toupper(input('New task category [A-Z]: '))
+    call inputrestore()
+    if category =~ '\C^[A-Z]$'
+        call a:world.SetFrontFilter('\^\C#'. category)
+        " call inputdialog(string(a:world.filter))
+        let a:world.state = 'display'
+        return a:world
     else
         echohl WarningMsg
         echom 'Invalid category (must be A-Z):' category
