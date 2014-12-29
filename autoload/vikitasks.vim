@@ -21,13 +21,6 @@ TLet g:vikitasks#files = []
 TLet g:vikitasks#files_ignored = ['_archived\.[^.]\+$']
 let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
 
-" If non-null, automatically add the homepages of your intervikis to 
-" |g:vikitasks#files|.
-" If the value is 2, scan all files (taking into account the interviki 
-" suffix) in the interviki's top directory.
-" Can be buffer-local.
-TLet g:vikitasks#intervikis = 0
-
 " If true, completely ignore completed tasks.
 TLet g:vikitasks#ignore_completed_tasks = 1
 
