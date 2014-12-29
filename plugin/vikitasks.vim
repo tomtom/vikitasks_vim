@@ -55,11 +55,11 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 
 " :display: :VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
-" CONSTRAINT defined which tasks should be displayed. Possible values 
-" for CONSTRAINT are:
+" CONSTRAINT constrains which tasks should be displayed. Possible values
+" are:
 "
 "   today            ... Show tasks that are due today
-"   current          ... Show pending and today's tasks
+"   current          ... Show today's tasks and pending tasks
 "   NUMBER (of days) ... Show tasks that are due within N days
 "   Nd               ... Tasks for the next N days
 "   Nw               ... Tasks for the next N weeks (i.e. 7 days)
@@ -72,12 +72,11 @@ TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 "
 " The default value for CONSTRAINT is ".".
 " 
-" If N is prepended with + (e.g. "+2w"), tasks with a deadline in the 
-" past are hidden.
+" Prepend + to N (e.g. "+2w") to hide tasks with a deadline in the past.
 "
-" If N is prepended with - (e.g. "-2w"), only tasks with a deadline in 
-" the past (in this example in the last two weeks) are shown. This 
-" implies showing all tasks as with "*".
+" Prepend - to N (e.g. "-2w") to show only tasks with a deadline in 
+" the past (in this example in the last two weeks). This implies showing 
+" all tasks, as with "*".
 "
 " If CONSTRAINT doesn't match one of the constraints described above, it 
 " is assumed to be a PATTERN -- see also |viki-tasks|.
@@ -111,14 +110,14 @@ command! -bang -nargs=* -bar VikiTasksStatic call vikitasks#Tasks(vikitasks#GetA
 " cabbr vikitasks VikiTasks
 
 " :display: :VikiTasksPaste[!] [ARGUMENTS...]
-" Paste the results of a VIKITASKSCOMMAND (default: VikiTasks) in a 
+" Paste the results of a VIKITASKSCOMMAND (default: |:VikiTasks|) in a 
 " buffer. When called with a |bang| [!], create a new buffer. See 
 " |:VikiTasks| for the allowed ARGUMENTS.
 command! -bang -nargs=* -bar VikiTasksPaste call vikitasks#Paste(empty("<bang>") ? '' : 'VikiTasksPaste', vikitasks#GetArgs(0, [<f-args>]))
 
 " :display: :[count]VikiTasksAlarms 
 " Display a list of alarms. Shows alarms due within N days.
-" If N is -1, uses |g:vikitasks#alarms| if any.
+" If N is -1, uses |g:vikitasks#alarms|, if any.
 command! -count -bang -bar VikiTasksAlarms call vikitasks#Alarm(<count>, empty('<bang>'))
 
 " :display: :VikiTasksAdd
@@ -130,7 +129,7 @@ command! VikiTasksAdd call vikitasks#AddBuffer(expand('%:p'))
 command! -count=0 -bar VikiTasksDone call vikitasks#ItemMarkDone(<count>)
 
 
-" Archive final (see |g:vikitasks#final_categories|) tasks.
+" Archive finalized tasks (see |g:vikitasks#final_categories|).
 command! -bar VikiTasksArchive call vikitasks#ItemArchiveFinal()
 
 
@@ -147,10 +146,10 @@ command! -bar VikiTasksFiles call vikitasks#ListTaskFiles()
 
 " :display: :[count]VikiTasksDueInDays [DAYS=0]
 " Mark [count] task(s) as due in N days.
-command! -bar -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemMarkDueInDays(0, 0 + <q-args>)
+command! -bar -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemsMarkDueInDays(0, 0 + <q-args>)
 
 
-" :display: :[count]VikiTasksDueInDays [WEEKS=1]
+" :display: :[count]VikiTasksDueInWeeks [WEEKS=1]
 " Mark [count] task(s) as due in N weeks.
 command! -bar -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(0, empty(<q-args>) ? 1 : 0 + <q-args>)
 

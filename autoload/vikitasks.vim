@@ -6,12 +6,14 @@
 scriptencoding utf-8
 
 
+
 " A list of glob patterns (or files) that will be searched for task 
 " lists.
 " Can be buffer-local.
 " If you add ! to 'viminfo', this variable will be automatically saved 
 " between editing sessions.
-" Alternatively, add new items in ~/vimfiles/after/plugin/vikitasks.vim
+" Alternatively, add new items in the *after-directory* in 'runtimepath'
+" (e.g.  ~/vimfiles/after/plugin/vikitasks.vim)
 TLet g:vikitasks#files = []
 
 " A list of |regexp| patterns for filenames that should not be 
@@ -153,13 +155,13 @@ TLet g:vikitasks#done_add_date = 1
 " archived tasks should be moved to.
 TLet g:vikitasks#archive_filename_fmt = '"%s_archived". g:vikiNameSuffix'
 
-" A list of strings. The header for newly created tasks archives.
+" A list of strings. The header for newly created task archives.
 TLet g:vikitasks#archive_header = ['* Archived tasks']
 
 " The date format string (see |strftime()|).
 TLet g:vikitasks#date_fmt = "%Y-%m-%d"
 
-" The date format string (see |strftime()|) for archived entries.
+" The archive header format string (see |strftime()|) for archived entries.
 TLet g:vikitasks#archive_header_fmt = "** " . g:vikitasks#date_fmt
 
 " Letters of final categories, i.e. tasks that should not be altered 
@@ -734,8 +736,8 @@ function! vikitasks#FormatQFLE(qfe, world) "{{{3
 endf
 
 
-" The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
-" The PATTERN is made case sensitive if it contains an upper-case letter 
+" If the |regexp| PATTERN seems to be a word, |\<| is prepended.
+" The PATTERN is case-sensitive if it contains an upper-case letter 
 " and if 'smartcase' is true.
 function! s:MakePattern(pattern) "{{{3
     let pattern = a:pattern
@@ -1288,7 +1290,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
 endf
 
 
-" Mark a N tasks as done, i.e. assign them to category X -- see also 
+" Mark N tasks as done, i.e. assign them to category X -- see also 
 " |g:vikitasks#final_categories|.
 function! vikitasks#ItemMarkDone(count) "{{{3
     let ftdef = s:GetBufferTasksDef()
@@ -1312,7 +1314,7 @@ function! vikitasks#ItemMarkDone(count) "{{{3
 endf
 
 
-" Archive final (see |g:vikitasks#final_categories|) tasks.
+" Archive finalized (see |g:vikitasks#final_categories|) tasks.
 function! vikitasks#ItemArchiveFinal() "{{{3
     let ftdef = s:GetBufferTasksDef()
     let archive_filename = ftdef.GetArchiveName(expand("%:p:r"))
@@ -1355,12 +1357,12 @@ function! vikitasks#ListTaskFiles() "{{{3
 endf
 
 
-" Mark a tasks as due in N days.
-function! vikitasks#ItemMarkDueInDays(count, days) "{{{3
+" Mark task(s) as due in N days.
+function! vikitasks#ItemsMarkDueInDays(count, days) "{{{3
     " TLogVAR a:count, a:days
     let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
     for lnum in range(line('.'), line('.') + a:count)
-        call vikitasks#MarkItemDueInDays(lnum, duedate)
+        call vikitasks#ItemMarkDueInDays(lnum, duedate)
     endfor
 endf
 
@@ -1391,7 +1393,7 @@ endf
 
 
 " :nodoc:
-function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
+function! vikitasks#ItemMarkDueInDays(lnum, duedate) "{{{3
     " TLogVAR bufname('%'), a:lnum, a:duedate
     let ftdef = s:GetBufferTasksDef()
     " TLogVAR ftdef
@@ -1411,10 +1413,10 @@ function! vikitasks#MarkItemDueInDays(lnum, duedate) "{{{3
 endf
 
 
-" Mark a tasks as due in N weeks.
-function! vikitasks#ItemMarkDueInWeeks(count, weeks) "{{{3
+" Mark task(s) as due in N weeks.
+function! vikitasks#ItemsMarkDueInWeeks(count, weeks) "{{{3
     " TLogVAR a:count, a:weeks
-    call vikitasks#ItemMarkDueInDays(a:count, a:weeks * 7)
+    call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7)
 endf
 
 
@@ -1545,7 +1547,7 @@ function! vikitasks#CalendarCallback(day, month, year, week, dir) "{{{3
     let duedate = printf('%4d-%02d-%02d', a:year, a:month, a:day)
     " TLogVAR duedate
     let world = trag#RunCmdOnSelected(s:calendar_callback_world, s:calendar_callback_selected,
-                \ printf('call vikitasks#MarkItemDueInDays(line("."), %s)', string(duedate)), 0)
+                \ printf('call vikitasks#ItemMarkDueInDays(line("."), %s)', string(duedate)), 0)
     " TLogVAR world.state
     call setbufvar(s:calendar_callback_buffer, 'tlib_world', world)
     exec s:calendar_callback_window 'wincmd w'
