@@ -173,14 +173,6 @@ g:vikitasks#files_ignored      (default: ['_archived\.[^.]\+$'])
     A list of |regexp| patterns for filenames that should not be 
     scanned.
 
-                                                    *g:vikitasks#intervikis*
-g:vikitasks#intervikis         (default: 0)
-    If non-null, automatically add the homepages of your intervikis to 
-    |g:vikitasks#files|.
-    If the value is 2, scan all files (taking into account the interviki 
-    suffix) in the interviki's top directory.
-    Can be buffer-local.
-
                                                     *g:vikitasks#ignore_completed_tasks*
 g:vikitasks#ignore_completed_tasks (default: 1)
     If true, completely ignore completed tasks.
