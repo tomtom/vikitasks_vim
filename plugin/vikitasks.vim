@@ -3,30 +3,31 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2013-09-25.
-" @Revision:    291
+" @Last Change: 2014-02-05.
+" @Revision:    316
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
+scriptencoding utf-8
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 106
+if !exists('g:loaded_tlib') || g:loaded_tlib < 113
     runtime plugin/02tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 106
-        echoerr 'tlib >= 1.06 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 113
+        echoerr 'tlib >= 1.13 is required'
         finish
     endif
 endif
-if !exists('g:loaded_trag') || g:loaded_trag < 11
+if !exists('g:loaded_trag') || g:loaded_trag < 102
     runtime plugin/trag.vim
-    if !exists('g:loaded_trag') || g:loaded_trag < 11
-        echoerr 'trag >= 0.11 is required'
+    if !exists('g:loaded_trag') || g:loaded_trag < 102
+        echoerr 'trag >= 0.102 is required'
         finish
     endif
 endif
 if &cp || exists("g:loaded_vikitasks")
     finish
 endif
-let g:loaded_vikitasks = 5
+let g:loaded_vikitasks = 101
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -36,10 +37,22 @@ set cpo&vim
 " If 0, don't display alarms for pending tasks.
 " If n > 0, display alarms for pending tasks or tasks with a deadline in n 
 " days.
-TLet g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
+"
+" A useful value (for your |vimrc|) is: >
+"
+"     let g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
+"
+" This will display alarms when running the first instance of gvim 
+" without arguments.
+TLet g:vikitasks_startup_alarms = 0
+
 
 " Scan a buffer on these events.
 TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
+
+" A list of filename patterns (see 'wildcards') for files that should 
+" automatically on events specified in |g:vikitasks_scan_events|.
+TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 
 " :display: :VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
 " CONSTRAINT constrains which tasks should be displayed. Possible values
@@ -90,22 +103,22 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 " <   Show all current cached tasks (today or with a deadline in the 
 "   past) in a specified list of files: >
 "         :VikiTasks current Notes*.txt
-command! -bang -nargs=* VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
+command! -bang -nargs=* -bar VikiTasks call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 0)
 
-" The same as |:VikiTasks| but the tasks list doesn't take focus.
-command! -bang -nargs=* VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
+" The same as |:VikiTasks| but the tasks list doesn't take the focus.
+command! -bang -nargs=* -bar VikiTasksStatic call vikitasks#Tasks(vikitasks#GetArgs(!empty("<bang>"), [<f-args>]), 1)
 " cabbr vikitasks VikiTasks
 
 " :display: :VikiTasksPaste[!] [ARGUMENTS...]
 " Paste the results of a VIKITASKSCOMMAND (default: |:VikiTasks|) in a 
 " buffer. When called with a |bang| [!], create a new buffer. See 
 " |:VikiTasks| for the allowed ARGUMENTS.
-command! -bang -nargs=* VikiTasksPaste call vikitasks#Paste(!empty("<bang>"), vikitasks#GetArgs(0, [<f-args>]))
+command! -bang -nargs=* -bar VikiTasksPaste call vikitasks#Paste(empty("<bang>") ? '' : 'VikiTasksPaste', vikitasks#GetArgs(0, [<f-args>]))
 
 " :display: :[count]VikiTasksAlarms 
 " Display a list of alarms. Shows alarms due within N days.
 " If N is -1, uses |g:vikitasks#alarms|, if any.
-command! -count VikiTasksAlarms call vikitasks#Alarm(<count>)
+command! -count -bang -bar VikiTasksAlarms call vikitasks#Alarm(<count>, empty('<bang>'))
 
 " :display: :VikiTasksAdd
 " Add the current buffer to |g:vikitasks#files|.
@@ -113,32 +126,32 @@ command! VikiTasksAdd call vikitasks#AddBuffer(expand('%:p'))
 
 
 " Mark a task as done (see |vikitasks#ItemMarkDone()|).
-command! -count=0 VikiTasksDone call vikitasks#ItemMarkDone(<count>)
+command! -count=0 -bar VikiTasksDone call vikitasks#ItemMarkDone(<count>)
 
 
 " Archive finalized tasks (see |g:vikitasks#final_categories|).
-command! VikiTasksArchive call vikitasks#ItemArchiveFinal()
+command! -bar VikiTasksArchive call vikitasks#ItemArchiveFinal()
 
 
 " :display: :VikiEditTasksFiles
 " Edit |g:vikitasks#files|. This allows you to remove buffers from the 
 " list.
-command! VikiEditTasksFiles call vikitasks#EditFiles()
+command! -bar VikiEditTasksFiles call vikitasks#EditFiles()
 
 
 " :display: :VikiTasksFiles
 " Edit a file monitored by vikitasks.
-command! VikiTasksFiles call vikitasks#ListTaskFiles()
+command! -bar VikiTasksFiles call vikitasks#ListTaskFiles()
 
 
 " :display: :[count]VikiTasksDueInDays [DAYS=0]
 " Mark [count] task(s) as due in N days.
-command! -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemsMarkDueInDays(<count>, 0 + <q-args>)
+command! -bar -range -nargs=? VikiTasksDueInDays <line1>,<line2>call vikitasks#ItemsMarkDueInDays(0, 0 + <q-args>)
 
 
 " :display: :[count]VikiTasksDueInWeeks [WEEKS=1]
 " Mark [count] task(s) as due in N weeks.
-command! -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemsMarkDueInWeeks(<count>, (0 + <q-args>) == 0 ? 1 : 0 + <q-args>)
+command! -bar -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#ItemMarkDueInWeeks(0, empty(<q-args>) ? 1 : 0 + <q-args>)
 
 
 augroup VikiTasks
@@ -152,9 +165,12 @@ augroup VikiTasks
         endif
     endif
     if !empty(g:vikitasks_scan_events)
-        exec 'autocmd '. g:vikitasks_scan_events .' * if exists("b:vikiEnabled") && b:vikiEnabled | call vikitasks#ScanCurrentBuffer(expand("<afile>:p")) | endif'
+        for s:pattern in g:vikitasks_scan_patterns
+            " exec 'autocmd' g:vikitasks_scan_events s:pattern 'if exists("b:vikiEnabled") && b:vikiEnabled | call vikitasks#ScanCurrentBuffer(expand("<afile>:p")) | endif'
+            exec 'autocmd' g:vikitasks_scan_events s:pattern 'call vikitasks#ScanCurrentBuffer(expand("<afile>:p"))'
+        endfor
     endif
-    unlet g:vikitasks_startup_alarms g:vikitasks_scan_events
+    unlet g:vikitasks_startup_alarms g:vikitasks_scan_events s:pattern
 augroup END
 
 

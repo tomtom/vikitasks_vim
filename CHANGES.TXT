@@ -52,3 +52,74 @@ version: "0.05"
   - g:vikitasks#use_calendar: use |:Calendar| as date picker
   MD5 checksum: 4bf05727153faee87e36a28483e12211
 
+  - Check the value of g:tlib_filename_sep instead of !&shellslash
+  - addon-info
+  - <c-c>, <localleader>tc: Change a task's category
+  - If g:vikitasks#files contains glob patterns, make sure to remove duplicates
+  - s:AddInterVikis(): move adding of dir/pattern to s:AddDirPattern()
+  - viki maps: Remove count with <c-u> from maps
+  - Adapt for tlib 1.06
+  - NEW :VikiTasksPaste command: paste vikitasks items to a (new) buffer (closes #4)
+  - Small docs tweaks
+  - Make display of pasted tasks list configurable via g:vikitasks#paste
+  - Do doc tweaks on source instead
+  - Merge branch 'master' of https://github.com/tomtom/vikitasks_vim
+  - Typo
+  - We're using N for [count], right?
+  - Consider [count]
+  MD5 checksum: 7d53532b805b741dd90d65def5b546f1
+version: "0.06"
+
+  - Help template
+  - FIX Don't call VikiTasksDueInDays & VikiTasksDueInWeeks with <count>
+  - <c-n> Paste selected items into a new window
+  - Rewrite A
+  - Remove s:files (use s:file_defs instead)
+  - Full support for todo.txt (requires trag 0.12)
+  - Correctly set today marker for last but one item
+  - g:vikitasks#filetype_map
+  - todo.txt: Improved support for changing the category/priority
+  - .ArchiveHeader(): type error
+  - FIX support for scanning intervikis
+  - :VikiTasksAlarms: FIX bang value
+  - #AfterChange hook
+  - g:vikitasks#rx_letters defaults to 'A-P'
+  - Renamed g:vikitasks#rx_letters to g:vikitasks#rx_categories
+  - g:vikitasks#alarms: Support for persistent_categories (always include tasks in these categories in the "Alarms" list)
+  - FIX Use g:vikitasks#rx_categories in todotxt.vim
+  - g:vikitasks#alarms.persistent_categories defaults to [A]
+  - g:vikitasks#cache_check_mtime: Detect files that were changed by external programs based on mtime
+  - s:GetTasks() if g:vikitasks#cache_check_mtime: Remove obsolete filename
+  - g:vikitasks#cache_check_mtime_rx (replaces g:vikitasks#cache_check_mtime)
+  - Checking g:vikitasks#cache_check_mtime_rx actually works (properly init trag)
+  - g:vikitasks_startup_alarms defaults to 0 (without user intervention don't display alarms on startup)
+  - g:vikitasks#after_change_buffer_exec: Run command after changing a buffer
+  - g:vikitasks#use_unspecified_dates default to 1
+  - scriptencoding utf-8
+  - g:vikitasks#files_ignored defaults to ['_archived\.[^.]\+$']
+  - g:vikitasks#convert_cygwin
+  - Misc improvements
+  - Load cached data only once
+  - FIX: duplicate entries
+  MD5 checksum: f1556492bc4b63a0275c2bf6f37141fe
+version: "1.00"
+
+version: '1.01'
+  - Support for threshold dates (t:YYYY-MM-DD)
+  - IsThresholdOk(): ignore "t:" prefix
+  - g:vikitasks#threshold_days: Hide tasks with due dates N days in the future
+  - ScanFiles(): Avoid random error and display a message
+  - ScanFiles(): Display error message for unknown buffers
+  - Clean up task lines (e.g. remove "t:" threshold tags)
+  - Use index_next_syntax for customization
+  - Use set_syntax & format_item
+  - vikitasks#SetSyntax(): Define vikitasksItem syntax; set b:vikiMarkInexistent = 0
+  - vikitasks#SetSyntax(): Hide some dates
+  - Show progressbar more often
+  - AgentDueWeeks, AgentDueDays: Abort correctly when pressing <c-c>
+  - todotxt: ConvertLine(): Don't add default due date if g:vikitasks#ft#todotxt#due_default is empty
+  - g:vikitasks#auto_save: f true, save _all_ modified buffers via |:wall|, when leaving the tasks list.
+  - g:vikitasks#ft#todotxt#respect_h1: hide lines containing a h:1 tag in todo.txt files (used by SimpleTask app)
+  - Require tlib 1.06 & trag 1.02
+  MD5 checksum: b20334cce201fa22484ea6bc523f7eb4
+
