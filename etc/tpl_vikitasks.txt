@@ -36,7 +36,7 @@ bar.txt: >
         #C 2009-12-24 Wish @Bernie good luck
         #D 2009-11-01 Do that
 
-Let's assume you have added both files to |g:vikitasks_files|. Switch to 
+Let's assume you have added both files to |g:vikitasks#files|. Switch to 
 the buffer foo.txt and call >
 
     :VikiTasks
@@ -60,7 +60,7 @@ If you had called >
 only the first two items would be listed.
 
 This week's tasks (i.e. the tasks that should be accomplished today or 
-within the following six days) could be listed with >
+within the following six days) can be listed with >
     
     :VikiTasks 6
 
@@ -73,8 +73,8 @@ Edit the vba file and type: >
     :so %%
 
 See :help vimball for details. If you have difficulties or use vim 7.0, 
-please make sure, you have the current version of vimball
-(vimscript #1502) installed or update your runtime.
+please make sure that you have the current version of vimball
+(vimscript #1502) installed, or update your runtime.
 
 This script requires tlib (vimscript #1863), trag (vimscript #2033), and 
 viki (vimscript #861) to be installed.
