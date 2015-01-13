@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1982
+" @Revision:    1984
 
 scriptencoding utf-8
 
@@ -884,7 +884,7 @@ function! s:SaveInfo(file_defs, tasks) "{{{3
 endf
 
 
-function vikitasks#MustUseCanonicFilename()
+function! vikitasks#MustUseCanonicFilename()
     return !has('fname_case') || g:tlib#dir#sep == '\'
 endf
 
@@ -1362,7 +1362,7 @@ function! vikitasks#ItemsMarkDueInDays(count, days) "{{{3
     " TLogVAR a:count, a:days
     let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
     for lnum in range(line('.'), line('.') + a:count)
-        call vikitasks#ItemMarkDueInDays(lnum, duedate)
+        call vikitasks#LineItemMarkDueInDays(lnum, duedate)
     endfor
 endf
 
@@ -1393,7 +1393,7 @@ endf
 
 
 " :nodoc:
-function! vikitasks#ItemMarkDueInDays(lnum, duedate) "{{{3
+function! vikitasks#LineItemMarkDueInDays(lnum, duedate) "{{{3
     " TLogVAR bufname('%'), a:lnum, a:duedate
     let ftdef = s:GetBufferTasksDef()
     " TLogVAR ftdef
@@ -1547,7 +1547,7 @@ function! vikitasks#CalendarCallback(day, month, year, week, dir) "{{{3
     let duedate = printf('%4d-%02d-%02d', a:year, a:month, a:day)
     " TLogVAR duedate
     let world = trag#RunCmdOnSelected(s:calendar_callback_world, s:calendar_callback_selected,
-                \ printf('call vikitasks#ItemMarkDueInDays(line("."), %s)', string(duedate)), 0)
+                \ printf('call vikitasks#LineItemMarkDueInDays(line("."), %s)', string(duedate)), 0)
     " TLogVAR world.state
     call setbufvar(s:calendar_callback_buffer, 'tlib_world', world)
     exec s:calendar_callback_window 'wincmd w'
