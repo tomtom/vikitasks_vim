@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2015-01-12.
-" @Revision:    317
+" @Last Change: 2015-01-19.
+" @Revision:    328
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -33,14 +33,16 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-" Show alarms on pending tasks.
-" If 0, don't display alarms for pending tasks.
-" If n > 0, display alarms for pending tasks or tasks with a deadline in n 
-" days.
+" An expression that determines whether to show alarms on pending tasks 
+" on startup.
+" If the expression evaluates to 0, don't display alarms for pending 
+" tasks.
+" If it evaluates to a value > 0, display alarms for pending tasks or 
+" tasks with a deadline in n days.
 "
 " A useful value (for your |vimrc|) is: >
 "
-"     let g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
+"     let g:vikitasks_startup_alarms = "(!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0"
 "
 " This will display alarms when running the first instance of gvim 
 " without arguments.

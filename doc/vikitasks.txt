@@ -430,14 +430,16 @@ plugin/vikitasks.vim~
 
                                                     *g:vikitasks_startup_alarms*
 g:vikitasks_startup_alarms     (default: 0)
-    Show alarms on pending tasks.
-    If 0, don't display alarms for pending tasks.
-    If n > 0, display alarms for pending tasks or tasks with a deadline in n 
-    days.
+    An expression that determines whether to show alarms on pending tasks 
+    on startup.
+    If the expression evaluates to 0, don't display alarms for pending 
+    tasks.
+    If it evaluates to a value > 0, display alarms for pending tasks or 
+    tasks with a deadline in n days.
 
     A useful value (for your |vimrc|) is: >
 
-        let g:vikitasks_startup_alarms = (!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0
+        let g:vikitasks_startup_alarms = "(!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0"
 
 <   This will display alarms when running the first instance of gvim 
     without arguments.
