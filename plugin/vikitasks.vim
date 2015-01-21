@@ -156,13 +156,10 @@ command! -bar -range -nargs=? VikiTasksDueInWeeks <line1>,<line2>call vikitasks#
 
 augroup VikiTasks
     autocmd!
-    " TLogVAR g:vikitasks_startup_alarms, has('vim_starting')
-    if g:vikitasks_startup_alarms
-        if has('vim_starting')
-            autocmd VimEnter *  call vikitasks#Alarm()
-        else
-            call vikitasks#Alarm()
-        endif
+    if has('vim_starting')
+        autocmd VimEnter *  if eval(g:vikitasks_startup_alarms) | call vikitasks#Alarm() | endif
+    elseif eval(g:vikitasks_startup_alarms)
+        call vikitasks#Alarm()
     endif
     if !empty(g:vikitasks_scan_events)
         for s:pattern in g:vikitasks_scan_patterns
@@ -170,7 +167,7 @@ augroup VikiTasks
             exec 'autocmd' g:vikitasks_scan_events s:pattern 'call vikitasks#ScanCurrentBuffer(expand("<afile>:p"))'
         endfor
     endif
-    unlet g:vikitasks_startup_alarms g:vikitasks_scan_events s:pattern
+    unlet g:vikitasks_scan_events s:pattern
 augroup END
 
 
