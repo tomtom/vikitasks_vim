@@ -437,9 +437,10 @@ g:vikitasks_startup_alarms     (default: 0)
     If it evaluates to a value > 0, display alarms for pending tasks or 
     tasks with a deadline in n days.
 
-    A useful value (for your |vimrc|) is: >
+    Possibly useful values (for your |vimrc|) are: >
 
         let g:vikitasks_startup_alarms = "(!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0"
+        let g:vikitasks_startup_alarms = has('clientserver') && v:servername == 'GVIM'
 
 <   This will display alarms when running the first instance of gvim 
     without arguments.
