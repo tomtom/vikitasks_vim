@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    1984
+" @Revision:    2015
 
 scriptencoding utf-8
 
@@ -1191,6 +1191,7 @@ function! vikitasks#ScanCurrentBuffer(...) "{{{3
         let bufnr = bufnr(filename)
         let cfilename = s:CanonicFilename(filename)
     endif
+    " echom "DBG vikitasks#ScanCurrentBuffer" filename use_buffer bufnr cfilename
     if getbufvar(bufnr, '&buftype') =~ '\<nofile\>' || (!empty(s:files_ignored) && cfilename =~ s:files_ignored) || !filereadable(cfilename) || isdirectory(cfilename) || empty(cfilename)
         return 0
     endif
@@ -1377,6 +1378,10 @@ endf
 function! s:AfterChange(type, ftdef, ...) "{{{3
     let lnum = a:0 >= 1 ? a:1 : 0
     let name = 'AfterChange'. a:type
+    " TLogVAR a:type, a:ftdef, lnum, name
+    if a:type ==# 'Buffer'
+        call s:RegisterChangedBuffer(bufnr('%'))
+    endif
     if has_key(a:ftdef, name)
         let pos = getpos('.')
         try
@@ -1668,10 +1673,30 @@ function! vikitasks#Glob2Rx(pattern) "{{{3
 endf
 
 
+function! s:RegisterChangedBuffer(bufnr) "{{{3
+    if !exists('s:changed_buffers')
+        let s:changed_buffers = {}
+    endif
+    let s:changed_buffers[a:bufnr] = 1
+endf
+
+
 function! vikitasks#OnLeave(w) "{{{3
     " TLogVAR g:vikitasks#auto_save
     if g:vikitasks#auto_save
-        wall
+        if exists('s:changed_buffers')
+            let bn = bufnr('%')
+            try
+                for b in keys(s:changed_buffers)
+                    exec 'hide buffer' b
+                    update
+                endfor
+            finally
+                exec 'hide buffer' bn
+            endtry
+            unlet s:changed_buffers
+            " wall
+        endif
     endif
 endf
 
