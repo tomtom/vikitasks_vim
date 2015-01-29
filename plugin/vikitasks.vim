@@ -4,7 +4,7 @@
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
 " @Last Change: 2015-01-19.
-" @Revision:    329
+" @Revision:    330
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -20,7 +20,7 @@ endif
 if !exists('g:loaded_trag') || g:loaded_trag < 102
     runtime plugin/trag.vim
     if !exists('g:loaded_trag') || g:loaded_trag < 102
-        echoerr 'trag >= 0.102 is required'
+        echoerr 'trag >= 1.02 is required'
         finish
     endif
 endif

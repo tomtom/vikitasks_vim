@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2015
+" @Revision:    2018
 
 scriptencoding utf-8
 
@@ -1690,6 +1690,7 @@ function! vikitasks#OnLeave(w) "{{{3
                 for b in keys(s:changed_buffers)
                     exec 'hide buffer' b
                     update
+                    call vikitasks#ScanCurrentBuffer()
                 endfor
             finally
                 exec 'hide buffer' bn
