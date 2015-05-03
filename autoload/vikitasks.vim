@@ -502,7 +502,7 @@ function! s:ScanFiles(cfiles, ...) "{{{3
         call tlib#progressbar#Restore()
     endtry
     " TLogVAR remove_tasks
-    for i in remove_tasks
+    for i in reverse(remove_tasks)
         call remove(new_tasks, i)
     endfor
     " TLogVAR len(new_file_defs), len(new_tasks)
