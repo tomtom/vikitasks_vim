@@ -71,11 +71,6 @@ exec 'TRagDefKind tasks * /'. s:prototype.tasks_rx .'/'
 exec 'TRagDefKind sometasks * /'. s:prototype.sometasks_rx .'/'
 
 
-" function! s:prototype.ConvertLine(line) dict "{{{3
-"     return a:line
-" endf
-
-
 function! s:prototype.GetFiles(registrar) dict "{{{3
     for file in tlib#var#Get('vikitasks#files', 'bg', [])
         call call(a:registrar, [file, 'viki', ''])

@@ -532,7 +532,7 @@ function! s:ConvertLine(file_defs, cfilename, filetype, line) "{{{3
     let ftdef = vikitasks#ft#{a:filetype}#GetInstance()
     if !empty(a:line) && has_key(ftdef, 'ConvertLine')
         let ftdef = vikitasks#ft#{a:filetype}#GetInstance()
-        let line = ftdef.ConvertLine(a:line)
+        let line = ftdef.ConvertLine(a:line, a:cfilename)
         if !empty(line) && line =~ vikitasks#TasksRx('tasks', ftdef)
             if !has_key(a:file_defs, a:cfilename)
                 throw 'VikiTasks: Internal error: No filedef for '. a:cfilename

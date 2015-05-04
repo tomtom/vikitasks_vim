@@ -50,7 +50,7 @@ endf
 
 
 function! s:prototype.DateRx() dict "{{{3
-    return '\<due:'. g:vikitasks#date_rx
+    return '\C\<due:'. g:vikitasks#date_rx
 endf
 
 
@@ -79,7 +79,7 @@ exec 'TRagDefKind tasks todotxt /'. s:prototype.tasks_rx .'/'
 exec 'TRagDefKind sometasks todotxt /'. s:prototype.sometasks_rx .'/'
 
 
-function! s:prototype.ConvertLine(line) dict "{{{3
+function! s:prototype.ConvertLine(line, ...) dict "{{{3
     " TLogVAR a:line
     let t_rx = '\<t:\zs'. g:vikitasks#date_rx
     if g:vikitasks#ft#todotxt#use_threshold && a:line =~ t_rx
@@ -127,13 +127,13 @@ endf
 
 
 function! s:prototype.IsA(filename) dict "{{{3
-    let pattern = s:FindPattern(a:filename)
+    let pattern = self.FindPattern(a:filename)
     " TLogVAR a:filename, pattern
     return !empty(pattern)
 endf
 
 
-function! s:FindPattern(filename) "{{{3
+function! s:prototype.FindPattern(filename) dict "{{{3
     " TLogVAR a:filename
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
         if (has('fname_case') && a:filename ==# pattern) || a:filename ==? pattern
@@ -165,7 +165,7 @@ endf
 
 
 function! s:prototype.GetArchiveName(filename) dict "{{{3
-    let pattern = s:FindPattern(a:filename)
+    let pattern = self.FindPattern(a:filename)
     let archive = get(g:vikitasks#ft#todotxt#files, pattern, 'done.txt')
     if archive !~ '[\/]'
         let archive = tlib#file#Join([fnamemodify(a:filename, ':p:h'), archive])
@@ -186,7 +186,7 @@ endf
 
 
 function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
-    let rx = '\V\<due:\zs'. g:vikitasks#date_rx
+    let rx = self.DateRx()
     " TLogVAR a:line, a:duedate, rx
     let line = substitute(a:line, rx, escape(a:duedate, '\'), 'g')
     " TLogVAR line
