@@ -38,6 +38,7 @@ TLet g:vikitasks#threshold_days = 90
 " If non-false, provide tighter integration with the vim viki plugin.
 TLet g:vikitasks#sources = {
             \ 'viki': exists('g:loaded_viki'),
+            \ 'taskpaper': 1,
             \ 'todotxt': 1
             \ }
 
