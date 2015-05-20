@@ -137,6 +137,7 @@ TLet g:vikitasks#inputlist_params = {
             \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
             \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
+            \             char2nr('m')  : {'agent': 'vikitasks#AgentDueMonths', 'key_name': 'w', 'help': 'Mark as due in N months'},
             \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
             \             char2nr('k') : {'agent': 'vikitasks#AgentSelectCategory', 'key_name': 'k', 'help': 'Select tasks of a category'},
             \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
@@ -1426,6 +1427,14 @@ function! vikitasks#ItemsMarkDueInWeeks(count, weeks) "{{{3
 endf
 
 
+" Mark task(s) as due in N months,
+" NOTE: A "month" means 30 days.
+function! vikitasks#ItemsMarkDueInMonths(count, months) "{{{3
+    " TLogVAR a:count, a:months
+    call vikitasks#ItemsMarkDueInDays(a:count, a:months * 30)
+endf
+
+
 " Change the category for the current and the next a:count tasks.
 function! vikitasks#ItemChangeCategory(count, ...) "{{{3
     if a:0 >= 1
@@ -1570,6 +1579,20 @@ function! vikitasks#AgentDueWeeks(world, selected) "{{{3
         return a:world
     else
         return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+    endif
+endf
+
+
+" :nodoc:
+function! vikitasks#AgentDueMonths(world, selected) "{{{3
+    call inputsave()
+    let val = input("Number of months: ", 1)
+    call inputrestore()
+    if empty(val)
+        let a:world.state = 'redisplay'
+        return a:world
+    else
+        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInMonths '. val)
     endif
 endf
 
