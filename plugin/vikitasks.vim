@@ -69,7 +69,7 @@ TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 "   Nm               ... Tasks for the next N months (i.e. 31 days)
 "   week             ... Tasks for the next week (i.e. 7 days)
 "   month            ... Tasks for the next month (i.e. 31 days)
-"   .                ... Show some tasks (see |g:vikitasks#rx_letters| 
+"   .                ... Show some tasks (see |g:vikitasks#rx_categories| 
 "                        and |g:vikitasks#rx_levels|)
 "   *                ... Show all tasks
 "
