@@ -37,7 +37,7 @@ TLet g:vikitasks#ft#todotxt#after_change_buffer_exec = g:vikitasks#after_change_
 
 
 if exists('g:todotxt#dir')
-    let g:vikitasks#ft#todotxt#files[tlib#file#Join([g:todotxt#dir, '*.txt'])] = 'done.txt'
+    let g:vikitasks#ft#todotxt#files[tlib#file#Join([resolve(g:todotxt#dir), '*.txt'])] = 'done.txt'
 endif
 
 

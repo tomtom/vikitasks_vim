@@ -895,7 +895,7 @@ let s:cygpath = {}
 
 function! s:CanonicFilename(filename) "{{{3
     if !vikitasks#MustUseCanonicFilename()
-        return a:filename
+        let filename = a:filename
     else
         let filename = a:filename
         if g:vikitasks#convert_cygwin && filename !~ '^\c[a-z]:'
@@ -914,8 +914,8 @@ function! s:CanonicFilename(filename) "{{{3
         if filename !~ '^\w\+://'
             let filename = substitute(filename, '//\+', '/', 'g')
         endif
-        return filename
     endif
+    return resolve(filename)
 endf
 
 
