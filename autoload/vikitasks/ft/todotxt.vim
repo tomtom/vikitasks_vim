@@ -233,3 +233,19 @@ function! vikitasks#ft#todotxt#GetInstance() "{{{3
     return s:prototype
 endf
 
+
+function! vikitasks#ft#todotxt#OpenTodoUrl(url) abort "{{{3
+    let tname = substitute(a:url, '^todo://', '', '')
+    let beg = -len(tname)
+    let files = []
+    for dir in g:vikitasks#ft#todotxt#files
+        let files1 = split(glob(dir), '\n')
+        let files1 = filter(files1, 'v:val[beg : -1] ==# tname')
+        let files += files1
+    endfor
+    let file = tlib#input#List('s', 'Pick todo file:', files)
+    if !empty(file)
+        call tlib#file#Edit(file)
+    endif
+endf
+
