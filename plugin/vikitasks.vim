@@ -3,7 +3,7 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-13.
-" @Last Change: 2015-05-12.
+" @Last Change: 2015-08-27.
 " @Revision:    330
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
@@ -57,6 +57,7 @@ TLet g:vikitasks_scan_events = 'BufWritePost,BufWinEnter'
 " automatically on events specified in |g:vikitasks_scan_events|.
 TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 
+
 " :display: :VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
 " CONSTRAINT constrains which tasks should be displayed. Possible values
 " are:
@@ -69,7 +70,7 @@ TLet g:vikitasks_scan_patterns = ['*.txt', '*.viki']
 "   Nm               ... Tasks for the next N months (i.e. 31 days)
 "   week             ... Tasks for the next week (i.e. 7 days)
 "   month            ... Tasks for the next month (i.e. 31 days)
-"   .                ... Show some tasks (see |g:vikitasks#rx_letters| 
+"   .                ... Show some tasks (see |g:vikitasks#rx_categories| 
 "                        and |g:vikitasks#rx_levels|)
 "   *                ... Show all tasks
 "

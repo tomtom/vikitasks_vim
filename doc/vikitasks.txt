@@ -136,6 +136,7 @@ Contents~
         vikitasks#ListTaskFiles ................ |vikitasks#ListTaskFiles()|
         vikitasks#ItemsMarkDueInDays ........... |vikitasks#ItemsMarkDueInDays()|
         vikitasks#ItemsMarkDueInWeeks .......... |vikitasks#ItemsMarkDueInWeeks()|
+        vikitasks#ItemsMarkDueInMonths ......... |vikitasks#ItemsMarkDueInMonths()|
         vikitasks#ItemChangeCategory ........... |vikitasks#ItemChangeCategory()|
         vikitasks#AgentPaste ................... |vikitasks#AgentPaste()|
         vikitasks#Glob2Rx ...................... |vikitasks#Glob2Rx()|
@@ -154,6 +155,7 @@ Contents~
         :VikiTasksFiles ........................ |:VikiTasksFiles|
         :VikiTasksDueInDays .................... |:VikiTasksDueInDays|
         :VikiTasksDueInWeeks ................... |:VikiTasksDueInWeeks|
+        :VikiTasksDueInMonths .................. |:VikiTasksDueInMonths|
 
 
 ========================================================================
@@ -411,6 +413,11 @@ vikitasks#ItemsMarkDueInDays(count, days)
 vikitasks#ItemsMarkDueInWeeks(count, weeks)
     Mark task(s) as due in N weeks.
 
+                                                    *vikitasks#ItemsMarkDueInMonths()*
+vikitasks#ItemsMarkDueInMonths(count, months)
+    Mark task(s) as due in N months,
+    NOTE: A "month" means 30 days.
+
                                                     *vikitasks#ItemChangeCategory()*
 vikitasks#ItemChangeCategory(count, ...)
     Change the category for the current and the next a:count tasks.
@@ -467,7 +474,7 @@ g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
       Nm               ... Tasks for the next N months (i.e. 31 days)
       week             ... Tasks for the next week (i.e. 7 days)
       month            ... Tasks for the next month (i.e. 31 days)
-      .                ... Show some tasks (see |g:vikitasks#rx_letters| 
+      .                ... Show some tasks (see |g:vikitasks#rx_categories| 
                            and |g:vikitasks#rx_levels|)
       *                ... Show all tasks
 
@@ -549,6 +556,10 @@ g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
                                                     *:VikiTasksDueInWeeks*
 :[count]VikiTasksDueInWeeks [WEEKS=1]
     Mark [count] task(s) as due in N weeks.
+
+                                                    *:VikiTasksDueInMonths*
+:[count]VikiTasksDueInMonths [MONTHS=1]
+    Mark [count] task(s) as due in N months.
 
 
 
