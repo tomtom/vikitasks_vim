@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2018
+" @Revision:    2022
 
 scriptencoding utf-8
 
@@ -279,9 +279,11 @@ function! s:GetTasks(args, use_cached) "{{{3
             let cfiles = map(copy(qfl), 's:CanonicFilename(v:val.filename)')
             let cfiles = tlib#list#Uniq(cfiles, '', 1)
             " TLogVAR filter(copy(cfiles), 'v:val =~ ''\CAcademia.txt$''')
+            " TLogVAR len(cfiles)
             if !empty(cfiles)
                 let update = {}
                 let remove = []
+                " TLogVAR g:vikitasks#cache_check_mtime_rx
                 for cfilename in cfiles
                     " TLogVAR cfilename
                     if cfilename =~ g:vikitasks#cache_check_mtime_rx
@@ -309,7 +311,9 @@ function! s:GetTasks(args, use_cached) "{{{3
                         endif
                     endif
                 endfor
+                " TLogVAR len(update)
                 if !empty(update)
+                    " TLogVAR update
                     for [filetype, cfiles] in items(update)
                         let [file_defs, tasks] = s:UpdateFiles(cfiles, filetype)
                     endfor
@@ -320,6 +324,7 @@ function! s:GetTasks(args, use_cached) "{{{3
                 endif
             endif
         endif
+        " TLogVAR len(qfl)
         return qfl
     else
         if g:vikitasks#sources.viki && s:GetBufferFiletype() != 'viki' && !viki#HomePage()
