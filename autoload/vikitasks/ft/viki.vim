@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    108
+" @Revision:    116
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -80,19 +80,17 @@ function! s:prototype.GetFiles(registrar) dict "{{{3
     if scan_interviki > 0
         let iv_exclude = tlib#var#Get('vikitasks#ft#viki#intervikis_exclude', 'bg', [])
         let iv_include = tlib#var#Get('vikitasks#ft#viki#intervikis_include', 'bg', [])
-        " TLogVAR iv_exclude
+        " TLogVAR iv_exclude, iv_include
         let ivikis = viki#GetInterVikis()
         let nvikis = len(ivikis)
         call tlib#progressbar#Init(nvikis, 'VikiTasks: Scan viki %s', 20)
         try
             let i = 0
             for iv in ivikis
-                " TLogVAR iv
                 let i += 1
                 let iv_name = matchstr(iv, '^\u\+')
-                if index(iv_exclude, iv_name) == -1
-                            \ && (empty(iv_include) || index(iv_include, iv_name) != -1)
-                    " TLogVAR iv
+                " TLogVAR iv, iv_name
+                if !empty(iv_include) ? index(iv_include, iv_name) != -1 : index(iv_exclude, iv_name) == -1
                     call tlib#progressbar#Display(i, ' '. iv)
                     let def = viki#GetLink(1, '[['. iv .']]', 0, '')
                     " TLogVAR def

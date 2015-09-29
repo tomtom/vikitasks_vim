@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2022
+" @Revision:    2032
 
 scriptencoding utf-8
 
@@ -332,16 +332,16 @@ function! s:GetTasks(args, use_cached) "{{{3
             return
         endif
         let files = get(a:args, 'files', [])
-        " TLogVAR files
+        " TLogVAR 1, files
         if empty(files)
             let [files, file_defs] = s:CollectTaskFiles(0)
             " TLogVAR filter(copy(files), 'v:val =~ ''\<Academia.txt$''')
-            " TLogVAR files
+            " TLogVAR 2, files
         else
             let file_defs = {}
         endif
         " TAssertType files, 'list'
-        " TLogVAR files
+        " TLogVAR 3, files
         call map(files, 'glob(v:val)')
         let files = split(join(files, "\n"), '\n')
         let cfiles = map(files, 's:CanonicFilename(v:val)')
@@ -617,6 +617,7 @@ function! s:FilterTasks(tasks, args) "{{{3
 
     if g:vikitasks#remove_unreadable_files
         let filenames = {}
+        " TLogVAR filter(copy(a:tasks), '!has_key(v:val, "filename")')
         call filter(a:tasks, 's:FileReadable(v:val.filename, filenames)')
     endif
 
