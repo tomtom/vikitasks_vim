@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2032
+" @Revision:    2040
 
 scriptencoding utf-8
 
@@ -19,7 +19,7 @@ TLet g:vikitasks#files = []
 " A list of |regexp| patterns for filenames that should not be 
 " scanned.
 TLet g:vikitasks#files_ignored = ['_archived\.[^.]\+$']
-let s:files_ignored = join(g:vikitasks#files_ignored, '\|')
+let s:files_ignored = '\%('. join(g:vikitasks#files_ignored, '\|') .'\)'
 
 " If true, completely ignore completed tasks.
 TLet g:vikitasks#ignore_completed_tasks = 1
@@ -276,7 +276,7 @@ function! s:GetTasks(args, use_cached) "{{{3
         if !empty(g:vikitasks#cache_check_mtime_rx)
             let file_defs = s:GetCachedFiles()
             " TLogVAR file_defs
-            let cfiles = map(copy(qfl), 's:CanonicFilename(v:val.filename)')
+            let cfiles = map(filter(copy(qfl), 'has_key(v:val, "filename")'), 's:CanonicFilename(v:val.filename)')
             let cfiles = tlib#list#Uniq(cfiles, '', 1)
             " TLogVAR filter(copy(cfiles), 'v:val =~ ''\CAcademia.txt$''')
             " TLogVAR len(cfiles)
@@ -368,7 +368,7 @@ function! s:RemoveFiles(cfiles) "{{{3
         if has_key(file_defs, cfilename)
             call remove(file_defs, cfilename)
         endif
-        let tasks = filter(tasks, 'v:val.filename != cfilename')
+        let tasks = filter(tasks, '!has_key(v:val, "filename") || v:val.filename != cfilename')
     endfor
     call s:SaveInfo(file_defs, tasks)
 endf
@@ -860,6 +860,7 @@ function! s:GetCachedFiles() "{{{3
                 call vikitasks#RegisterFilename(cfilename, s:GetFiletype(cfilename), '')
             endfor
         endif
+        call filter(s:file_defs, 'v:key !~# s:files_ignored')
     endif
     return s:file_defs
 endf
@@ -868,6 +869,7 @@ endf
 function! s:GetCachedTasks() "{{{3
     if !exists('s:tasks')
         let s:tasks = get(s:GetInfo(), 'tasks', [])
+        let s:tasks = filter(s:tasks, 'has_key(v:val, "filename")')
         " echom "DBG ntasks = ". len(s:tasks)
     endif
     return s:tasks
@@ -1036,8 +1038,10 @@ endf
 
 
 function! s:MaybeRegisterFilename(file_defs, cfilename, filetype, archive) "{{{3
+    " TLogVAR a:cfilename, a:filetype, a:archive
+    " echom 'DBG s:files_ignored' s:files_ignored
     " if a:cfilename =~ '\Ctodo.txt$' | echom "DBG MaybeRegisterFilename" a:cfilename | endif " DBG
-    if !has_key(a:file_defs, a:cfilename) && a:cfilename !~ s:files_ignored
+    if !has_key(a:file_defs, a:cfilename) && a:cfilename !~# s:files_ignored
         let a:file_defs[a:cfilename] = {'filetype': a:filetype}
         " TLogVAR a:cfilename, a:filetype, a:archive
         if !empty(a:archive)

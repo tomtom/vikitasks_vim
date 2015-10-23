@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    161
+" @Revision:    163
 
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
@@ -153,7 +153,7 @@ endf
 function! s:prototype.GetFiles(registrar) dict "{{{3
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
         for filename in split(glob(pattern), '\n')
-            " TLogVAR filename
+            TLogVAR filename, trag#HasFiletype(filename)
             " call add(files, filename)
             if !trag#HasFiletype(filename)
                 call trag#SetFiletype('todotxt', filename)
