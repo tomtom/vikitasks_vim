@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2040
+" @Revision:    2046
 
 scriptencoding utf-8
 
@@ -118,7 +118,7 @@ TLet g:vikitasks#auto_save = 0
 " :read: TLet g:vikitasks#inputlist_params = {...}
 " :nodoc:
 TLet g:vikitasks#inputlist_params = {
-            \ 'trag_short_filename': 1,
+            \ 'qfl_short_filename': 1,
             \ 'index_next_syntax': 'vikitasksItem',
             \ 'GetBufferLines': function('vikitasks#GetBufferLines'),
             \ 'on_leave': ['vikitasks#OnLeave'],
@@ -702,7 +702,7 @@ function! s:View(index, suspend) "{{{3
         if a:index > 1
             let w.initial_index = a:index
         endif
-        let w.format_item = 'vikitasks#FormatQFLE(v:val, s:world)'
+        let w.format_data = 'vikitasks#FormatQFLE'
         let w.set_syntax = 'vikitasks#SetSyntax'
         let w.dueline = s:DueText()
         call trag#QuickList(w, a:suspend)
@@ -730,13 +730,13 @@ function! vikitasks#SetSyntax() dict "{{{3
 endf
 
 
-function! vikitasks#FormatQFLE(qfe, world) "{{{3
+function! vikitasks#FormatQFLE(qfe) dict "{{{3
     let text = get(a:qfe, "text")
     let filename = trag#GetFilename(a:qfe)
-    if empty(filename) || text == a:world.dueline
+    if empty(filename) || text == self.dueline
         return text
     else
-        if get(a:world, 'trag_short_filename', '')
+        if get(self, 'trag_short_filename', '')
             let filename = pathshorten(filename)
         endif
         return printf("%-". (&co / 2) ."s | %s#%d", text, filename, a:qfe.lnum)
@@ -953,7 +953,7 @@ endf
 
 
 let s:find_params = {}
-function s:find_params.Check(val) dict
+function! s:find_params.Check(val) dict
     return !empty(a:val)
 endf
 
@@ -1608,7 +1608,7 @@ endf
 
 
 " :nodoc:
-function s:Paste(newbuffer, qfl) "{{{3
+function! s:Paste(newbuffer, qfl) "{{{3
     let mode_filename = get(g:vikitasks#paste, 'filename', 'add')
     let lines = []
     if mode_filename == 'group'
