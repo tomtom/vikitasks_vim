@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2046
+" @Revision:    2047
 
 scriptencoding utf-8
 
@@ -732,7 +732,7 @@ endf
 
 function! vikitasks#FormatQFLE(qfe) dict "{{{3
     let text = get(a:qfe, "text")
-    let filename = trag#GetFilename(a:qfe)
+    let filename = tlib#qfl#QfeFilename(a:qfe)
     if empty(filename) || text == self.dueline
         return text
     else
