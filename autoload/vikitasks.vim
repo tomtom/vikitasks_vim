@@ -1,10 +1,23 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2047
+" @Revision:    2073
 
 scriptencoding utf-8
-
+if !exists('g:loaded_tlib') || g:loaded_tlib < 116
+    runtime plugin/02tlib.vim
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 116
+        echoerr 'tlib >= 1.16 is required'
+        finish
+    endif
+endif
+if !exists('g:loaded_trag') || g:loaded_trag < 102
+    runtime plugin/trag.vim
+    if !exists('g:loaded_trag') || g:loaded_trag < 102
+        echoerr 'trag >= 1.02 is required'
+        finish
+    endif
+endif
 
 
 " A list of glob patterns (or files) that will be searched for task 
@@ -479,7 +492,7 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     try
         for i in range(ntasks)
             " TLogVAR new_tasks[i]
-            let bufnr = new_tasks[i].bufnr
+            let bufnr = get(new_tasks[i], 'bufnr', 0)
             if bufnr > 0
                 let cfilename = s:CanonicFilename(fnamemodify(bufname(bufnr), ':p'))
                 call tlib#progressbar#Display(i, ' '. pathshorten(cfilename))
@@ -928,19 +941,22 @@ endf
 
 
 function! vikitasks#EachSource(fallback, fn, args, params) "{{{3
+    " TLibTrace 'vikitasks', a:fn, a:args, a:params
     let rvs = {}
     for [source, ok] in items(g:vikitasks#sources)
         if source != a:fallback
+            " TLibTrace 'vikitasks', source
             let ftdef = vikitasks#ft#{source}#GetInstance()
             let rv = call(ftdef[a:fn], a:args, ftdef)
             let rvs[source] = rv
             if has_key(a:params, 'Check') && a:params.Check(rv)
+                " TLibTrace 'vikitasks', source, rv
                 return [source, rv]
-            else
             endif
             unlet rv
         endif
     endfor
+    " TLibTrace 'vikitasks', a:fallback
     let ftdef = vikitasks#ft#{a:fallback}#GetInstance()
     let rv = call(ftdef[a:fn], a:args, ftdef)
     let rvs[a:fallback] = rv
@@ -1372,8 +1388,8 @@ endf
 
 " Mark task(s) as due in N days.
 function! vikitasks#ItemsMarkDueInDays(count, days) "{{{3
-    " TLogVAR a:count, a:days
     let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
+    " TLibTrace 'vikitasks', a:count, a:days, duedate
     for lnum in range(line('.'), line('.') + a:count)
         call vikitasks#LineItemMarkDueInDays(lnum, duedate)
     endfor
@@ -1382,6 +1398,7 @@ endf
 
 function! s:GetBufferTasksDef() "{{{3
     let source = s:GetFiletype()
+    " TLibTrace 'vikitasks', source
     let ftdef = vikitasks#ft#{source}#GetInstance()
     return ftdef
 endf
@@ -1411,6 +1428,7 @@ endf
 
 " :nodoc:
 function! vikitasks#LineItemMarkDueInDays(lnum, duedate) "{{{3
+    " TLibTrace 'vikitasks', a:lnum, a:duedate
     " TLogVAR bufname('%'), a:lnum, a:duedate
     let ftdef = s:GetBufferTasksDef()
     " TLogVAR ftdef
@@ -1419,10 +1437,11 @@ function! vikitasks#LineItemMarkDueInDays(lnum, duedate) "{{{3
     let line = getline(a:lnum)
     " TLogVAR line, line=~rx
     " TLogVAR line =~ rx, line =~ ftdef.DateRx(), line !~ ftdef.FinalRx()
-    if line =~ rx && line =~ ftdef.DateRx() && line !~ ftdef.FinalRx()
-        " TLogVAR line
+    " TLibTrace 'vikitasks', line, rx, line=~ftdef.DateRx(), line!~ftdef.FinalRx()
+    " if line =~ rx && line =~ ftdef.DateRx() && line !~ ftdef.FinalRx()
+    if line =~ rx && line !~ ftdef.FinalRx()
         let line1 = ftdef.MarkItemDueInDays(line, a:duedate)
-        " TLogVAR line1
+        " TLibTrace 'vikitasks', line1
         call setline(a:lnum, line1)
         call s:AfterChange('Line', ftdef, a:lnum)
         call s:AfterChange('Buffer', ftdef)
@@ -1432,7 +1451,7 @@ endf
 
 " Mark task(s) as due in N weeks.
 function! vikitasks#ItemsMarkDueInWeeks(count, weeks) "{{{3
-    " TLogVAR a:count, a:weeks
+    " TLibTrace 'vikitasks', a:count, a:weeks
     call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7)
 endf
 
@@ -1440,7 +1459,7 @@ endf
 " Mark task(s) as due in N months,
 " NOTE: A "month" means 30 days.
 function! vikitasks#ItemsMarkDueInMonths(count, months) "{{{3
-    " TLogVAR a:count, a:months
+    " TLibTrace 'vikitasks', a:count, a:months
     call vikitasks#ItemsMarkDueInDays(a:count, a:months * 30)
 endf
 
@@ -1488,7 +1507,7 @@ function! vikitasks#AgentItemChangeCategory(world, selected) "{{{3
     let category = toupper(input('New task category [A-Z]: '))
     call inputrestore()
     if category =~ '\C^[A-Z]$'
-        return trag#AgentWithSelected(a:world, a:selected, 'call vikitasks#ItemChangeCategory(0,'. string(category) .')')
+        return tlib#qfl#AgentWithSelected(a:world, a:selected, 'call vikitasks#ItemChangeCategory(0,'. string(category) .')')
     else
         echohl WarningMsg
         echom 'Invalid category (must be A-Z):' category
@@ -1529,7 +1548,7 @@ endf
 
 " :nodoc:
 function! vikitasks#AgentMarkDone(world, selected) "{{{3
-    return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDone')
+    return tlib#qfl#AgentWithSelected(a:world, a:selected, 'VikiTasksDone')
 endf
 
 
@@ -1556,7 +1575,7 @@ function! vikitasks#AgentDueDays(world, selected) "{{{3
             let a:world.state = 'redisplay'
             return a:world
         else
-            return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
+            return tlib#qfl#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInDays '. val)
         endif
     endif
 endf
@@ -1588,7 +1607,7 @@ function! vikitasks#AgentDueWeeks(world, selected) "{{{3
         let a:world.state = 'redisplay'
         return a:world
     else
-        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
+        return tlib#qfl#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInWeeks '. val)
     endif
 endf
 
@@ -1602,7 +1621,7 @@ function! vikitasks#AgentDueMonths(world, selected) "{{{3
         let a:world.state = 'redisplay'
         return a:world
     else
-        return trag#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInMonths '. val)
+        return tlib#qfl#AgentWithSelected(a:world, a:selected, 'VikiTasksDueInMonths '. val)
     endif
 endf
 
@@ -1696,7 +1715,8 @@ endf
 
 
 function! vikitasks#Glob2Rx(pattern) "{{{3
-    let rx = escape(a:pattern, '\')
+    " let rx = escape(a:pattern, '\')
+    let rx = substitute(a:pattern, '[\/]', '\\[\\/]', 'g')
     let rx = substitute(rx, '\*\*', '\\.\\{-}', 'g')
     let rx = substitute(rx, '\*', '\\[^\\/]\\*', 'g')
     let rx = substitute(rx, '?', '\\.\\?', 'g')

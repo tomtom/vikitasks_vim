@@ -1,7 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    163
-
+" @Revision:    189
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
 " dictionary of glob patterns that identifies todotxt files that map 
@@ -36,7 +35,12 @@ TLet g:vikitasks#ft#todotxt#after_change_line_exec = g:vikitasks#after_change_li
 TLet g:vikitasks#ft#todotxt#after_change_buffer_exec = g:vikitasks#after_change_buffer_exec
 
 
-if exists('g:todotxt#dir')
+if exists('g:ttodo#dirs')
+    for s:dir in g:ttodo#dirs
+        let g:vikitasks#ft#todotxt#files[tlib#file#Join([resolve(s:dir), '*.txt'])] = 'done.txt'
+    endfor
+    unlet! s:dir
+elseif exists('g:todotxt#dir')
     let g:vikitasks#ft#todotxt#files[tlib#file#Join([resolve(g:todotxt#dir), '*.txt'])] = 'done.txt'
 endif
 
@@ -128,20 +132,21 @@ endf
 
 function! s:prototype.IsA(filename) dict "{{{3
     let pattern = self.FindPattern(a:filename)
-    " TLogVAR a:filename, pattern
+    TLibTrace 'vikitasks', a:filename, pattern
     return !empty(pattern)
 endf
 
 
 function! s:prototype.FindPattern(filename) dict "{{{3
-    " TLogVAR a:filename
+    TLibTrace 'vikitasks', a:filename
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
+        TLibTrace 'vikitasks', pattern, archive
         if (has('fname_case') && a:filename ==# pattern) || a:filename ==? pattern
-            " TLogVAR "ok", pattern
+            TLibTrace 'vikitasks', pattern
             return pattern
         endif
         let rx = vikitasks#Glob2Rx(pattern)
-        " TLogVAR rx
+        TLibTrace 'vikitasks', rx, a:filename=~rx
         if a:filename =~ rx
             return pattern
         endif
@@ -153,7 +158,7 @@ endf
 function! s:prototype.GetFiles(registrar) dict "{{{3
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
         for filename in split(glob(pattern), '\n')
-            TLogVAR filename, trag#HasFiletype(filename)
+            " TLogVAR filename, trag#HasFiletype(filename)
             " call add(files, filename)
             if !trag#HasFiletype(filename)
                 call trag#SetFiletype('todotxt', filename)
@@ -187,25 +192,31 @@ endf
 
 function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
     let rx = self.DateRx()
+    TLibTrace 'vikitasks', a:line, a:duedate, rx
     " TLogVAR a:line, a:duedate, rx
-    let line = substitute(a:line, rx, escape(a:duedate, '\'), 'g')
+    if a:line =~# rx
+        let line = substitute(a:line, rx, escape(a:duedate, '\'), 'g')
+    else
+        let line = a:line .' due:'. a:duedate
+    endif
     " TLogVAR line
     return line
 endf
 
 
 function! s:prototype.ItemMarkDone(line) dict "{{{3
-    let line = [a:line]
-    if g:vikitasks#done_add_date
-        call insert(line, strftime(g:vikitasks#date_fmt))
+    if a:line =~# '^x\s'
+        return a:line
+    else
+        TLibTrace 'vikitasks', a:line
+        return join(['x', strftime(g:vikitasks#date_fmt), a:line])
     endif
-    call insert(line, 'x')
-    return join(line, ' ')
 endf
 
 
 function! s:prototype.ChangeCategory(line, category) dict "{{{3
     let rx = self.CategoryRx()
+    TLibTrace 'vikitasks', a:line, a:category, rx
     if a:line =~ rx
         let line = substitute(a:line, rx, a:category, '')
     else

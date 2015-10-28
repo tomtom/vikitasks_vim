@@ -3,27 +3,12 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-15.
-" @Last Change: 2015-10-25.
-" @Revision:    331
+" @Last Change: 2015-10-28.
+" @Revision:    335
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
 scriptencoding utf-8
-
-if !exists('g:loaded_tlib') || g:loaded_tlib < 115
-    runtime plugin/02tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 115
-        echoerr 'tlib >= 1.15 is required'
-        finish
-    endif
-endif
-if !exists('g:loaded_trag') || g:loaded_trag < 102
-    runtime plugin/trag.vim
-    if !exists('g:loaded_trag') || g:loaded_trag < 102
-        echoerr 'trag >= 1.02 is required'
-        finish
-    endif
-endif
 if &cp || exists("g:loaded_vikitasks")
     finish
 endif
