@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2073
+" @Revision:    2084
 
 scriptencoding utf-8
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -241,8 +241,7 @@ function! vikitasks#TasksRx(which_tasks, ...) "{{{3
 endf
 
 
-let g:vikitasks#date_rx = '\d\+-\d\+-\d\+\>'
-let g:vikitasks#viki_date_rx = printf('\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|%s\)\(\.\.\(\(_\|%s\)\)\)\?\ze\s', g:vikitasks#date_rx, g:vikitasks#date_rx)
+let g:vikitasks#viki_date_rx = printf('\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|%s\)\(\.\.\(\(_\|%s\)\)\)\?\ze\s', g:tlib#date#date_rx, g:tlib#date#date_rx)
 
 
 " :nodoc:
@@ -572,7 +571,7 @@ endf
 
 
 function! s:CleanLine(line) "{{{3
-    let line = substitute(a:line, '\<t:'. g:vikitasks#date_rx .'\s*', '', 'g')
+    let line = substitute(a:line, '\<t:'. g:tlib#date#date_rx .'\s*', '', 'g')
     return line
 endf
 
@@ -804,7 +803,7 @@ endf
 
 function! s:IsThresholdOk(task, today, threshold_date) "{{{3
     " TLogVAR a:task, a:today
-    let t = matchstr(a:task, '\<t:\zs'. g:vikitasks#date_rx)
+    let t = matchstr(a:task, '\<t:\zs'. g:tlib#date#date_rx)
     if !empty(t)
         let rv = t <= a:today
     elseif empty(a:threshold_date)
@@ -975,7 +974,7 @@ endf
 
 
 function! s:GetFileSource(cfilename, filetype) "{{{3
-    return vikitasks#EachSource(s:TaskSource(a:filetype), 'IsA', [a:cfilename], s:find_params)
+    return vikitasks#EachSource(s:TaskSource(a:filetype), 'IsA', [a:filetype, a:cfilename], s:find_params)
 endf
 
 
@@ -988,7 +987,7 @@ endf
 
 function! s:GetFiletype(...) "{{{3
     let cfilename = a:0 >= 1 ? a:1 : s:CanonicFilename(expand('%:p'))
-    let filetype = a:0 >= 2 ? a:2 : ''
+    let filetype = a:0 >= 2 ? a:2 : getbufvar(cfilename, '&ft')
     let on_error = a:0 >= 3 ? a:3 : 0
     let [ft, ok] = s:GetFileSource(cfilename, filetype)
     if !ok
@@ -1321,8 +1320,8 @@ endf
 
 " Mark N tasks as done, i.e. assign them to category X -- see also 
 " |g:vikitasks#final_categories|.
-function! vikitasks#ItemMarkDone(count) "{{{3
-    let ftdef = s:GetBufferTasksDef()
+function! vikitasks#ItemMarkDone(count, ...) "{{{3
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     let rx = vikitasks#TasksRx('tasks', ftdef)
     " TLogVAR rx
     let modified = 0
@@ -1330,9 +1329,15 @@ function! vikitasks#ItemMarkDone(count) "{{{3
         let line = getline(lnum)
         " TLogVAR lnum, line
         if line =~ rx && line !~ ftdef.FinalRx()
-            let line = ftdef.ItemMarkDone(line)
-            " TLogVAR line
-            call setline(lnum, line)
+            let rline = ftdef.ItemMarkDone(line)
+            " TLogVAR rline
+            if type(rline) == 3
+                call setline(lnum, rline[0])
+                call append(lnum, rline[1 : -1])
+            else
+                call setline(lnum, rline)
+            endif
+            unlet! rline
             let modified = 1
             call s:AfterChange('Line', ftdef, lnum)
         endif
@@ -1344,8 +1349,8 @@ endf
 
 
 " Archive finalized (see |g:vikitasks#final_categories|) tasks.
-function! vikitasks#ItemArchiveFinal() "{{{3
-    let ftdef = s:GetBufferTasksDef()
+function! vikitasks#ItemArchiveFinal(...) "{{{3
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     let archive_filename = ftdef.GetArchiveName(expand("%:p:r"))
     if filereadable(archive_filename)
         let archived = readfile(archive_filename)
@@ -1387,11 +1392,12 @@ endf
 
 
 " Mark task(s) as due in N days.
-function! vikitasks#ItemsMarkDueInDays(count, days) "{{{3
+function! vikitasks#ItemsMarkDueInDays(count, days, ...) "{{{3
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
     " TLibTrace 'vikitasks', a:count, a:days, duedate
     for lnum in range(line('.'), line('.') + a:count)
-        call vikitasks#LineItemMarkDueInDays(lnum, duedate)
+        call vikitasks#LineItemMarkDueInDays(lnum, duedate, ftdef)
     endfor
 endf
 
@@ -1427,10 +1433,10 @@ endf
 
 
 " :nodoc:
-function! vikitasks#LineItemMarkDueInDays(lnum, duedate) "{{{3
+function! vikitasks#LineItemMarkDueInDays(lnum, duedate, ...) "{{{3
     " TLibTrace 'vikitasks', a:lnum, a:duedate
     " TLogVAR bufname('%'), a:lnum, a:duedate
-    let ftdef = s:GetBufferTasksDef()
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     " TLogVAR ftdef
     let rx = vikitasks#TasksRx('tasks', ftdef)
     " TLogVAR rx
@@ -1450,30 +1456,32 @@ endf
 
 
 " Mark task(s) as due in N weeks.
-function! vikitasks#ItemsMarkDueInWeeks(count, weeks) "{{{3
+function! vikitasks#ItemsMarkDueInWeeks(count, weeks, ...) "{{{3
     " TLibTrace 'vikitasks', a:count, a:weeks
-    call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7)
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
+    call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7, ftdef)
 endf
 
 
 " Mark task(s) as due in N months,
 " NOTE: A "month" means 30 days.
-function! vikitasks#ItemsMarkDueInMonths(count, months) "{{{3
+function! vikitasks#ItemsMarkDueInMonths(count, months, ...) "{{{3
     " TLibTrace 'vikitasks', a:count, a:months
-    call vikitasks#ItemsMarkDueInDays(a:count, a:months * 30)
+    let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
+    call vikitasks#ItemsMarkDueInDays(a:count, a:months * 30, ftdef)
 endf
 
 
 " Change the category for the current and the next a:count tasks.
 function! vikitasks#ItemChangeCategory(count, ...) "{{{3
-    if a:0 >= 1
+    if a:0 >= 1 && !empty(a:1)
         let category = a:1
     else
         call inputsave()
         let category = input('New task category [A-Z]: ')
         call inputrestore()
     endif
-    let ftdef = s:GetBufferTasksDef()
+    let ftdef = a:0 >= 2 ? a:2 : s:GetBufferTasksDef()
     let category = toupper(category)
     if category =~ '\C^[A-Z]$'
         let rx = vikitasks#TasksRx('tasks', ftdef)

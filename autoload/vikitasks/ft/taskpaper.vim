@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    161
+" @Revision:    164
 
 
 " If you use taskpaper, set this variable to a dictionary of glob 
@@ -173,11 +173,9 @@ function! s:ConvertDoneTag(pri, prefix) abort "{{{3
 endf
 
 
-" function! s:prototype.IsA(filename) dict "{{{3
-"     let pattern = self.FindPattern(a:filename)
-"     " TLogVAR a:filename, pattern
-"     return !empty(pattern)
-" endf
+function! s:prototype.IsA(filetype, filename) dict "{{{3
+    return a:filetype =~ '^taskpaper$' || matchstr(a:filename, '\.\zs\a\+$') ==# 'taskpaper'
+endf
 
 
 function! s:prototype.FindPattern(filename) dict "{{{3

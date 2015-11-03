@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    189
+" @Revision:    238
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
 " dictionary of glob patterns that identifies todotxt files that map 
@@ -34,6 +34,11 @@ TLet g:vikitasks#ft#todotxt#after_change_line_exec = g:vikitasks#after_change_li
 " See also |g:vikitasks#after_change_line_exec|.
 TLet g:vikitasks#ft#todotxt#after_change_buffer_exec = g:vikitasks#after_change_buffer_exec
 
+TLet g:vikitasks#ft#todotxt#filetypes = ['todotxt', 'todo', 'ttodo']
+
+" If true, copy items with rec:DATE tags.
+TLet g:vikitasks#ft#todotxt#copy_rec_items = 1
+
 
 if exists('g:ttodo#dirs')
     for s:dir in g:ttodo#dirs
@@ -54,7 +59,7 @@ endf
 
 
 function! s:prototype.DateRx() dict "{{{3
-    return '\C\<due:'. g:vikitasks#date_rx
+    return '\C\<due:'. g:tlib#date#date_rx
 endf
 
 
@@ -81,11 +86,13 @@ let s:prototype.tasks_rx = s:prototype.TaskLineRx(0, 0, 'A-Z', '0-9')
 
 exec 'TRagDefKind tasks todotxt /'. s:prototype.tasks_rx .'/'
 exec 'TRagDefKind sometasks todotxt /'. s:prototype.sometasks_rx .'/'
+exec 'TRagDefKind tasks ttodo /'. s:prototype.tasks_rx .'/'
+exec 'TRagDefKind sometasks ttodo /'. s:prototype.sometasks_rx .'/'
 
 
 function! s:prototype.ConvertLine(line, ...) dict "{{{3
     " TLogVAR a:line
-    let t_rx = '\<t:\zs'. g:vikitasks#date_rx
+    let t_rx = '\<t:\zs'. g:tlib#date#date_rx
     if g:vikitasks#ft#todotxt#use_threshold && a:line =~ t_rx
         let today = strftime(g:vikitasks#date_fmt)
         let threshold = matchstr(a:line, t_rx)
@@ -105,8 +112,8 @@ function! s:prototype.ConvertLine(line, ...) dict "{{{3
     endif
     for [rx, subst] in [
                 \ ['\s\zs+\(\S\+\)', ':\1'],
-                \ ['^#\u\d*\s\+\zs\('. g:vikitasks#date_rx .'\s\+\)\(.\{-}\)\s*$', '\2 created:\1'],
-                \ ['^#\u\d*\s\+\zs\(.\{-}\)\<due:\('. g:vikitasks#date_rx .'\)\s*', '\2 \1'],
+                \ ['^#\u\d*\s\+\zs\('. g:tlib#date#date_rx .'\s\+\)\(.\{-}\)\s*$', '\2 created:\1'],
+                \ ['^#\u\d*\s\+\zs\(.\{-}\)\<due:\('. g:tlib#date#date_rx .'\)\s*', '\2 \1'],
                 \ ['\s\s\+', ' '],
                 \ ]
         " \ ['^#\u\d*\s\+\(\d\+-\d\+-\d\+\s\+\)\?\zs\(.\{-}\)\<due:\(\d\+-\d\+-\d\+\)', '..\2 \1'],
@@ -130,7 +137,10 @@ function! s:prototype.ConvertLine(line, ...) dict "{{{3
 endf
 
 
-function! s:prototype.IsA(filename) dict "{{{3
+function! s:prototype.IsA(filetype, filename) dict "{{{3
+    if index(g:vikitasks#ft#todotxt#filetypes, a:filetype) != -1
+        return 1
+    endif
     let pattern = self.FindPattern(a:filename)
     TLibTrace 'vikitasks', a:filename, pattern
     return !empty(pattern)
@@ -186,7 +196,8 @@ endf
 
 function! s:prototype.ArchiveItem(line) dict "{{{3
     let date = strftime(g:vikitasks#date_fmt) .' '
-    return substitute(a:line, '^\C\s*x\s\+\zs', escape(date, '\'), '')
+    " return substitute(a:line, '^\C\s*x\zs\ze\s\+', ' archive:'. escape(date, '\'), '')
+    return a:line .' archive:'. date
 endf
 
 
@@ -195,7 +206,7 @@ function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
     TLibTrace 'vikitasks', a:line, a:duedate, rx
     " TLogVAR a:line, a:duedate, rx
     if a:line =~# rx
-        let line = substitute(a:line, rx, escape(a:duedate, '\'), 'g')
+        let line = substitute(a:line, rx, 'due:'. escape(a:duedate, '\'), 'g')
     else
         let line = a:line .' due:'. a:duedate
     endif
@@ -204,13 +215,37 @@ function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
 endf
 
 
-function! s:prototype.ItemMarkDone(line) dict "{{{3
-    if a:line =~# '^x\s'
-        return a:line
+function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
+    let donedate = strftime(g:vikitasks#date_fmt)
+    TLibTrace 'vikitasks', a:line, donedate
+    if a:line =~# '^x\s\+'. g:tlib#date#date_rx .'\%(\s\d\d:\d\d\)\?'
+        let line = substitute(a:line, '^x\s\+\zs'. g:tlib#date#date_rx, donedate, '')
+    elseif a:line =~# '^x\s'
+        let line = substitute(a:line, '^x\s\+\zs', donedate .' ', '')
     else
-        TLibTrace 'vikitasks', a:line
-        return join(['x', strftime(g:vikitasks#date_fmt), a:line])
+        let check_rec = a:0 >= 1 ? a:1 : 1
+        let rec = matchstr(a:line, '\<rec:\zs+\?\d\+[dwmy]\>')
+        if check_rec && !empty(rec)
+            let due = matchstr(a:line, '\<due:\zs'. g:tlib#date#date_rx)
+            let shift = matchstr(rec, '\d\+\a$')
+            let refdate = rec =~ '^+' && !empty(due) ? due : donedate
+            let ndue = empty(due) ? donedate : due
+            " TLogVAR rec, due, shift, refdate
+            while ndue <= refdate
+                let ndue = tlib#date#Shift(ndue, shift)
+                " TLogVAR ndue
+            endwh
+            let line = [self.MarkItemDueInDays(a:line, ndue)]
+            if g:vikitasks#ft#todotxt#copy_rec_items
+                call insert(line, self.ItemMarkDone(a:line, 0))
+            endif
+            " TLogVAR a:line, line
+        else
+            let line = join(['x', donedate, a:line])
+        endif
     endif
+    TLibTrace 'vikitasks', line
+    return line
 endf
 
 

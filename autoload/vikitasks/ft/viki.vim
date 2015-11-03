@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    118
+" @Revision:    120
 
 
 " If non-null, automatically add the homepages of your intervikis to 
@@ -178,9 +178,11 @@ function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
 endf
 
 
-function! s:prototype.IsA(filename) dict "{{{3
+function! s:prototype.IsA(filetype, filename) dict "{{{3
     " TLogVAR bufloaded(a:filename), a:filename
-    if bufloaded(a:filename)
+    if a:filetype ==# 'viki'
+        return 1
+    elseif bufloaded(a:filename)
         return !empty(getbufvar(a:filename, 'vikiEnabled'))
     else
         return 1
