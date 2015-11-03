@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2084
+" @Revision:    2086
 
 scriptencoding utf-8
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -1040,7 +1040,7 @@ endf
 function! vikitasks#RegisterFilename(dirpattern, filetype, archive, ...) "{{{3
     TVarArg 'ignore_rx'
     " TLogVAR a:dirpattern, a:filetype, a:archive, ignore_rx
-    for filename in split(glob(a:dirpattern), '\n')
+    for filename in tlib#file#Glob(a:dirpattern)
         if filereadable(filename) && !isdirectory(filename)
             let cfilename = s:CanonicFilename(filename)
             if empty(ignore_rx) || filename !~ ignore_rx
