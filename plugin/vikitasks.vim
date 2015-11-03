@@ -3,8 +3,8 @@
 " @GIT:         http://github.com/tomtom/vikitasks_vim/
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2009-12-15.
-" @Last Change: 2015-10-28.
-" @Revision:    335
+" @Last Change: 2015-11-03.
+" @Revision:    336
 " GetLatestVimScripts: 2894 0 :AutoInstall: vikitasks.vim
 " Search for task lists and display them in a list
 
@@ -12,7 +12,7 @@ scriptencoding utf-8
 if &cp || exists("g:loaded_vikitasks")
     finish
 endif
-let g:loaded_vikitasks = 101
+let g:loaded_vikitasks = 102
 
 let s:save_cpo = &cpo
 set cpo&vim
