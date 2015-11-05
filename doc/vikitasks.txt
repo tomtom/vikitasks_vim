@@ -360,7 +360,7 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
 vikitasks#SetSyntax()
 
                                                     *vikitasks#FormatQFLE()*
-vikitasks#FormatQFLE(qfe, world)
+vikitasks#FormatQFLE(qfe)
 
                                                     *vikitasks#ResetCachedInfo()*
 vikitasks#ResetCachedInfo()
@@ -393,12 +393,12 @@ vikitasks#EditFiles()
 vikitasks#Alarm(?ddays = -1, ?use_cached = 1)
 
                                                     *vikitasks#ItemMarkDone()*
-vikitasks#ItemMarkDone(count)
+vikitasks#ItemMarkDone(count, ...)
     Mark N tasks as done, i.e. assign them to category X -- see also 
     |g:vikitasks#final_categories|.
 
                                                     *vikitasks#ItemArchiveFinal()*
-vikitasks#ItemArchiveFinal()
+vikitasks#ItemArchiveFinal(...)
     Archive finalized (see |g:vikitasks#final_categories|) tasks.
 
                                                     *vikitasks#ListTaskFiles()*
@@ -406,15 +406,15 @@ vikitasks#ListTaskFiles()
     Edit a file monitored by vikitasks.
 
                                                     *vikitasks#ItemsMarkDueInDays()*
-vikitasks#ItemsMarkDueInDays(count, days)
+vikitasks#ItemsMarkDueInDays(count, days, ...)
     Mark task(s) as due in N days.
 
                                                     *vikitasks#ItemsMarkDueInWeeks()*
-vikitasks#ItemsMarkDueInWeeks(count, weeks)
+vikitasks#ItemsMarkDueInWeeks(count, weeks, ...)
     Mark task(s) as due in N weeks.
 
                                                     *vikitasks#ItemsMarkDueInMonths()*
-vikitasks#ItemsMarkDueInMonths(count, months)
+vikitasks#ItemsMarkDueInMonths(count, months, ...)
     Mark task(s) as due in N months,
     NOTE: A "month" means 30 days.
 
