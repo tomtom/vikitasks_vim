@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2086
+" @Revision:    2088
 
 scriptencoding utf-8
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -1690,9 +1690,10 @@ function! vikitasks#AgentPaste(world, selected) "{{{3
     else
         call a:world.RestoreOrigin()
         let qfl = []
+        let max = len(a:world.qfl)
         for idx in a:selected
             let idx -= 1
-            if idx >= 0
+            if idx >= 0 && idx <= max
                 let qfe = a:world.qfl[idx]
                 call add(qfl, qfe)
             endif
