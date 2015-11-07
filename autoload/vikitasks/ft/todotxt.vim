@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    238
+" @Revision:    239
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
 " dictionary of glob patterns that identifies todotxt files that map 
@@ -142,21 +142,21 @@ function! s:prototype.IsA(filetype, filename) dict "{{{3
         return 1
     endif
     let pattern = self.FindPattern(a:filename)
-    TLibTrace 'vikitasks', a:filename, pattern
+    Tlibtrace 'vikitasks', a:filename, pattern
     return !empty(pattern)
 endf
 
 
 function! s:prototype.FindPattern(filename) dict "{{{3
-    TLibTrace 'vikitasks', a:filename
+    Tlibtrace 'vikitasks', a:filename
     for [pattern, archive] in items(g:vikitasks#ft#todotxt#files)
-        TLibTrace 'vikitasks', pattern, archive
+        Tlibtrace 'vikitasks', pattern, archive
         if (has('fname_case') && a:filename ==# pattern) || a:filename ==? pattern
-            TLibTrace 'vikitasks', pattern
+            Tlibtrace 'vikitasks', pattern
             return pattern
         endif
         let rx = vikitasks#Glob2Rx(pattern)
-        TLibTrace 'vikitasks', rx, a:filename=~rx
+        Tlibtrace 'vikitasks', rx, a:filename=~rx
         if a:filename =~ rx
             return pattern
         endif
@@ -203,7 +203,7 @@ endf
 
 function! s:prototype.MarkItemDueInDays(line, duedate) dict "{{{3
     let rx = self.DateRx()
-    TLibTrace 'vikitasks', a:line, a:duedate, rx
+    Tlibtrace 'vikitasks', a:line, a:duedate, rx
     " TLogVAR a:line, a:duedate, rx
     if a:line =~# rx
         let line = substitute(a:line, rx, 'due:'. escape(a:duedate, '\'), 'g')
@@ -217,7 +217,7 @@ endf
 
 function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
     let donedate = strftime(g:vikitasks#date_fmt)
-    TLibTrace 'vikitasks', a:line, donedate
+    Tlibtrace 'vikitasks', a:line, donedate
     if a:line =~# '^x\s\+'. g:tlib#date#date_rx .'\%(\s\d\d:\d\d\)\?'
         let line = substitute(a:line, '^x\s\+\zs'. g:tlib#date#date_rx, donedate, '')
     elseif a:line =~# '^x\s'
@@ -244,14 +244,14 @@ function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
             let line = join(['x', donedate, a:line])
         endif
     endif
-    TLibTrace 'vikitasks', line
+    Tlibtrace 'vikitasks', line
     return line
 endf
 
 
 function! s:prototype.ChangeCategory(line, category) dict "{{{3
     let rx = self.CategoryRx()
-    TLibTrace 'vikitasks', a:line, a:category, rx
+    Tlibtrace 'vikitasks', a:line, a:category, rx
     if a:line =~ rx
         let line = substitute(a:line, rx, a:category, '')
     else

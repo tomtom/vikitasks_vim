@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2088
+" @Revision:    2089
 
 scriptencoding utf-8
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -940,22 +940,22 @@ endf
 
 
 function! vikitasks#EachSource(fallback, fn, args, params) "{{{3
-    " TLibTrace 'vikitasks', a:fn, a:args, a:params
+    " Tlibtrace 'vikitasks', a:fn, a:args, a:params
     let rvs = {}
     for [source, ok] in items(g:vikitasks#sources)
         if source != a:fallback
-            " TLibTrace 'vikitasks', source
+            " Tlibtrace 'vikitasks', source
             let ftdef = vikitasks#ft#{source}#GetInstance()
             let rv = call(ftdef[a:fn], a:args, ftdef)
             let rvs[source] = rv
             if has_key(a:params, 'Check') && a:params.Check(rv)
-                " TLibTrace 'vikitasks', source, rv
+                " Tlibtrace 'vikitasks', source, rv
                 return [source, rv]
             endif
             unlet rv
         endif
     endfor
-    " TLibTrace 'vikitasks', a:fallback
+    " Tlibtrace 'vikitasks', a:fallback
     let ftdef = vikitasks#ft#{a:fallback}#GetInstance()
     let rv = call(ftdef[a:fn], a:args, ftdef)
     let rvs[a:fallback] = rv
@@ -1395,7 +1395,7 @@ endf
 function! vikitasks#ItemsMarkDueInDays(count, days, ...) "{{{3
     let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     let duedate = strftime(g:vikitasks#date_fmt, localtime() + a:days * g:tlib#date#dayshift)
-    " TLibTrace 'vikitasks', a:count, a:days, duedate
+    " Tlibtrace 'vikitasks', a:count, a:days, duedate
     for lnum in range(line('.'), line('.') + a:count)
         call vikitasks#LineItemMarkDueInDays(lnum, duedate, ftdef)
     endfor
@@ -1404,7 +1404,7 @@ endf
 
 function! s:GetBufferTasksDef() "{{{3
     let source = s:GetFiletype()
-    " TLibTrace 'vikitasks', source
+    " Tlibtrace 'vikitasks', source
     let ftdef = vikitasks#ft#{source}#GetInstance()
     return ftdef
 endf
@@ -1434,7 +1434,7 @@ endf
 
 " :nodoc:
 function! vikitasks#LineItemMarkDueInDays(lnum, duedate, ...) "{{{3
-    " TLibTrace 'vikitasks', a:lnum, a:duedate
+    " Tlibtrace 'vikitasks', a:lnum, a:duedate
     " TLogVAR bufname('%'), a:lnum, a:duedate
     let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     " TLogVAR ftdef
@@ -1443,11 +1443,11 @@ function! vikitasks#LineItemMarkDueInDays(lnum, duedate, ...) "{{{3
     let line = getline(a:lnum)
     " TLogVAR line, line=~rx
     " TLogVAR line =~ rx, line =~ ftdef.DateRx(), line !~ ftdef.FinalRx()
-    " TLibTrace 'vikitasks', line, rx, line=~ftdef.DateRx(), line!~ftdef.FinalRx()
+    " Tlibtrace 'vikitasks', line, rx, line=~ftdef.DateRx(), line!~ftdef.FinalRx()
     " if line =~ rx && line =~ ftdef.DateRx() && line !~ ftdef.FinalRx()
     if line =~ rx && line !~ ftdef.FinalRx()
         let line1 = ftdef.MarkItemDueInDays(line, a:duedate)
-        " TLibTrace 'vikitasks', line1
+        " Tlibtrace 'vikitasks', line1
         call setline(a:lnum, line1)
         call s:AfterChange('Line', ftdef, a:lnum)
         call s:AfterChange('Buffer', ftdef)
@@ -1457,7 +1457,7 @@ endf
 
 " Mark task(s) as due in N weeks.
 function! vikitasks#ItemsMarkDueInWeeks(count, weeks, ...) "{{{3
-    " TLibTrace 'vikitasks', a:count, a:weeks
+    " Tlibtrace 'vikitasks', a:count, a:weeks
     let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     call vikitasks#ItemsMarkDueInDays(a:count, a:weeks * 7, ftdef)
 endf
@@ -1466,7 +1466,7 @@ endf
 " Mark task(s) as due in N months,
 " NOTE: A "month" means 30 days.
 function! vikitasks#ItemsMarkDueInMonths(count, months, ...) "{{{3
-    " TLibTrace 'vikitasks', a:count, a:months
+    " Tlibtrace 'vikitasks', a:count, a:months
     let ftdef = a:0 >= 1 ? a:1 : s:GetBufferTasksDef()
     call vikitasks#ItemsMarkDueInDays(a:count, a:months * 30, ftdef)
 endf
