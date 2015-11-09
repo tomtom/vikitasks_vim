@@ -123,3 +123,30 @@ version: '1.01'
   - Require tlib 1.06 & trag 1.02
   MD5 checksum: b20334cce201fa22484ea6bc523f7eb4
 
+version: "1.02"
+  - Fix variable name in doc
+  - Grammar tweaks
+  - Doc edits and rename three functions
+  - <f2>k: Select items in a certain category
+  - intervikis config went to vikitasks#ft#viki#intervikis
+  - intervikis config moved
+  - g:vikitasks_startup_alarms is an expression
+  - vikitasks#OnLeave(): Don't use :wall but :update on each modified buffer
+  - vikitasks#OnLeave(): Make sure to scan changed buffers on leave
+  - s:ScanFiles(): for i in reverse(remove_tasks
+  - Prepare for taskpaper support
+  - Initial support for taskpaper
+  - VikiTasksDueInMonths
+  - CLOSE #8: g:vikitasks#rx_letters -> g:vikitasks#rx_categories in docs (thanks Garonenur)
+  - ftplugin/viki: let b:vikiSpecialProtocols .= '\|todo'
+  - resolve() dir names
+  - ftplugin/todotxt: let g:vikiOpenUrlWith_todo = 'call vikitasks#ft#todotxt#OpenTodoUrl(''%{URL}'')'
+  - viki/GetFiles(): Fix iv_include/iv_exclude
+  - Adapt for tlib 1.15 etc.
+  - vikitasks#FormatQFLE: Use tlib#qfl#QfeFilename
+  - FIX #9: adapt for use of tlib 1.16; misc enhancements
+  - Use tlib#file#Glob()
+  - vikitasks#AgentPaste: check range
+  - s/TLibTrace/Tlibtrace/g
+  MD5 checksum: 0716a81d4db8946d8b81ecacc289011d
+
