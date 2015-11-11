@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    239
+" @Revision:    241
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
 " dictionary of glob patterns that identifies todotxt files that map 
@@ -218,10 +218,10 @@ endf
 function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
     let donedate = strftime(g:vikitasks#date_fmt)
     Tlibtrace 'vikitasks', a:line, donedate
-    if a:line =~# '^x\s\+'. g:tlib#date#date_rx .'\%(\s\d\d:\d\d\)\?'
-        let line = substitute(a:line, '^x\s\+\zs'. g:tlib#date#date_rx, donedate, '')
-    elseif a:line =~# '^x\s'
-        let line = substitute(a:line, '^x\s\+\zs', donedate .' ', '')
+    if a:line =~# '^\s*x\s\+'. g:tlib#date#date_rx .'\%(\s\d\d:\d\d\)\?'
+        let line = substitute(a:line, '^\s*x\s\+\zs'. g:tlib#date#date_rx, donedate, '')
+    elseif a:line =~# '^\s*x\s'
+        let line = substitute(a:line, '^\s*x\s\+\zs', donedate .' ', '')
     else
         let check_rec = a:0 >= 1 ? a:1 : 1
         let rec = matchstr(a:line, '\<rec:\zs+\?\d\+[dwmy]\>')
@@ -241,7 +241,7 @@ function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
             endif
             " TLogVAR a:line, line
         else
-            let line = join(['x', donedate, a:line])
+            let line = substitute(a:line, '^\s*\zs', tlib#rx#EscapeReplace('x '. donedate .' '), '')
         endif
     endif
     Tlibtrace 'vikitasks', line
