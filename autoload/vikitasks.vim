@@ -464,7 +464,7 @@ function! s:ScanFiles(cfiles, ...) "{{{3
     let file_defs = a:0 >= 2 ? a:2 : s:GetCachedFiles()
     " TLogVAR len(a:cfiles), filetype0
     call s:InitTrag()
-    let qfl = trag#Grep('tasks', 1, copy(a:cfiles), filetype0)
+    let qfl = trag#Grep('tasks', 1, copy(a:cfiles), filetype0, 1)
     " TLogVAR len(qfl)
     " TLogVAR qfl
     " TLogVAR filter(copy(qfl), 'v:val.text =~ "#D7"')
