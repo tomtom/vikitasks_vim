@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    2089
+" @Revision:    2092
 
 scriptencoding utf-8
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -241,7 +241,8 @@ function! vikitasks#TasksRx(which_tasks, ...) "{{{3
 endf
 
 
-let g:vikitasks#viki_date_rx = printf('\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|%s\)\(\.\.\(\(_\|%s\)\)\)\?\ze\s', g:tlib#date#date_rx, g:tlib#date#date_rx)
+let g:vikitasks#date_rx = '\d\+-\d\+-\d\+\>'
+let g:vikitasks#viki_date_rx = printf('\C^\s*#[A-Z0-9]\+\s\+\zs\(x\?\)\(_\|%s\)\(\.\.\(\(_\|%s\)\)\)\?\ze\s', g:vikitasks#date_rx, g:vikitasks#date_rx)
 
 
 " :nodoc:
@@ -571,7 +572,7 @@ endf
 
 
 function! s:CleanLine(line) "{{{3
-    let line = substitute(a:line, '\<t:'. g:tlib#date#date_rx .'\s*', '', 'g')
+    let line = substitute(a:line, '\<t:'. g:vikitasks#date_rx .'\s*', '', 'g')
     return line
 endf
 
@@ -803,7 +804,7 @@ endf
 
 function! s:IsThresholdOk(task, today, threshold_date) "{{{3
     " TLogVAR a:task, a:today
-    let t = matchstr(a:task, '\<t:\zs'. g:tlib#date#date_rx)
+    let t = matchstr(a:task, '\<t:\zs'. g:vikitasks#date_rx)
     if !empty(t)
         let rv = t <= a:today
     elseif empty(a:threshold_date)

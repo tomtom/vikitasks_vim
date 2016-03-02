@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    241
+" @Revision:    242
 
 " If you use todo.txt (http://todotxt.com), set this variable to a 
 " dictionary of glob patterns that identifies todotxt files that map 
@@ -59,7 +59,7 @@ endf
 
 
 function! s:prototype.DateRx() dict "{{{3
-    return '\C\<due:'. g:tlib#date#date_rx
+    return '\C\<due:'. g:vikitasks#date_rx
 endf
 
 
@@ -92,7 +92,7 @@ exec 'TRagDefKind sometasks ttodo /'. s:prototype.sometasks_rx .'/'
 
 function! s:prototype.ConvertLine(line, ...) dict "{{{3
     " TLogVAR a:line
-    let t_rx = '\<t:\zs'. g:tlib#date#date_rx
+    let t_rx = '\<t:\zs'. g:vikitasks#date_rx
     if g:vikitasks#ft#todotxt#use_threshold && a:line =~ t_rx
         let today = strftime(g:vikitasks#date_fmt)
         let threshold = matchstr(a:line, t_rx)
@@ -112,8 +112,8 @@ function! s:prototype.ConvertLine(line, ...) dict "{{{3
     endif
     for [rx, subst] in [
                 \ ['\s\zs+\(\S\+\)', ':\1'],
-                \ ['^#\u\d*\s\+\zs\('. g:tlib#date#date_rx .'\s\+\)\(.\{-}\)\s*$', '\2 created:\1'],
-                \ ['^#\u\d*\s\+\zs\(.\{-}\)\<due:\('. g:tlib#date#date_rx .'\)\s*', '\2 \1'],
+                \ ['^#\u\d*\s\+\zs\('. g:vikitasks#date_rx .'\s\+\)\(.\{-}\)\s*$', '\2 created:\1'],
+                \ ['^#\u\d*\s\+\zs\(.\{-}\)\<due:\('. g:vikitasks#date_rx .'\)\s*', '\2 \1'],
                 \ ['\s\s\+', ' '],
                 \ ]
         " \ ['^#\u\d*\s\+\(\d\+-\d\+-\d\+\s\+\)\?\zs\(.\{-}\)\<due:\(\d\+-\d\+-\d\+\)', '..\2 \1'],
@@ -218,15 +218,15 @@ endf
 function! s:prototype.ItemMarkDone(line, ...) dict "{{{3
     let donedate = strftime(g:vikitasks#date_fmt)
     Tlibtrace 'vikitasks', a:line, donedate
-    if a:line =~# '^\s*x\s\+'. g:tlib#date#date_rx .'\%(\s\d\d:\d\d\)\?'
-        let line = substitute(a:line, '^\s*x\s\+\zs'. g:tlib#date#date_rx, donedate, '')
+    if a:line =~# '^\s*x\s\+'. g:vikitasks#date_rx .'\%(\s\d\d:\d\d\)\?'
+        let line = substitute(a:line, '^\s*x\s\+\zs'. g:vikitasks#date_rx, donedate, '')
     elseif a:line =~# '^\s*x\s'
         let line = substitute(a:line, '^\s*x\s\+\zs', donedate .' ', '')
     else
         let check_rec = a:0 >= 1 ? a:1 : 1
         let rec = matchstr(a:line, '\<rec:\zs+\?\d\+[dwmy]\>')
         if check_rec && !empty(rec)
-            let due = matchstr(a:line, '\<due:\zs'. g:tlib#date#date_rx)
+            let due = matchstr(a:line, '\<due:\zs'. g:vikitasks#date_rx)
             let shift = matchstr(rec, '\d\+\a$')
             let refdate = rec =~ '^+' && !empty(due) ? due : donedate
             let ndue = empty(due) ? donedate : due
