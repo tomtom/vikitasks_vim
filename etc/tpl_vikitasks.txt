@@ -1,6 +1,11 @@
 *vikitasks.txt*     Search viki files for tasks and display them in a list
                     Author: Tom Link, micathom at gmail com
 
+NOTE: This plugin is not actively maintained any more. I now think it was a 
+mistake to mix text & todo/priority lists this way. My preferred solution for 
+such lists now is https://github.com/tomtom/ttodo_vim/ and other 
+todo.txt-related apps.
+
 This plugin provides a quick overview of priority/task lists maintained 
 in different viki files. Depending on your settings, you can quickly 
 search all "homepages" of intervikis or search only project-specific 

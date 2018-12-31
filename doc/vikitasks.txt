@@ -1,6 +1,11 @@
 *vikitasks.txt*     Search viki files for tasks and display them in a list
                     Author: Tom Link, micathom at gmail com
 
+NOTE: This plugin is not actively maintained any more. I now think it was a 
+mistake to mix text & todo/priority lists this way. My preferred solution for 
+such lists now is https://github.com/tomtom/ttodo_vim/ and other 
+todo.txt-related apps.
+
 This plugin provides a quick overview of priority/task lists maintained 
 in different viki files. Depending on your settings, you can quickly 
 search all "homepages" of intervikis or search only project-specific 
@@ -85,82 +90,218 @@ Also available via git: http://github.com/tomtom/vikitasks_vim/
 ========================================================================
 Contents~
 
-        g:vikitasks#files ...................... |g:vikitasks#files|
-        g:vikitasks#files_ignored .............. |g:vikitasks#files_ignored|
-        g:vikitasks#ignore_completed_tasks ..... |g:vikitasks#ignore_completed_tasks|
-        g:vikitasks#use_threshold .............. |g:vikitasks#use_threshold|
-        g:vikitasks#threshold_days ............. |g:vikitasks#threshold_days|
-        g:vikitasks#sources .................... |g:vikitasks#sources|
-        g:vikitasks#filetype_map ............... |g:vikitasks#filetype_map|
-        g:vikitasks#default_priority ........... |g:vikitasks#default_priority|
-        g:vikitasks#qfl_viewer ................. |g:vikitasks#qfl_viewer|
-        g:vikitasks#rx_categories .............. |g:vikitasks#rx_categories|
-        g:vikitasks#rx_levels .................. |g:vikitasks#rx_levels|
-        g:vikitasks#today ...................... |g:vikitasks#today|
-        g:vikitasks#cache ...................... |g:vikitasks#cache|
-        g:vikitasks#cache_check_mtime_rx ....... |g:vikitasks#cache_check_mtime_rx|
-        g:vikitasks#alarms ..................... |g:vikitasks#alarms|
-        g:vikitasks#use_end_date ............... |g:vikitasks#use_end_date|
-        g:vikitasks#use_unspecified_dates ...... |g:vikitasks#use_unspecified_dates|
-        g:vikitasks#remove_unreadable_files .... |g:vikitasks#remove_unreadable_files|
-        g:vikitasks#after_change_line_exec ..... |g:vikitasks#after_change_line_exec|
-        g:vikitasks#after_change_buffer_exec ... |g:vikitasks#after_change_buffer_exec|
-        g:vikitasks#auto_save .................. |g:vikitasks#auto_save|
-        g:vikitasks#inputlist_params ........... |g:vikitasks#inputlist_params|
-        g:vikitasks#mapleader .................. |g:vikitasks#mapleader|
-        g:vikitasks#done_add_date .............. |g:vikitasks#done_add_date|
-        g:vikitasks#archive_filename_fmt ....... |g:vikitasks#archive_filename_fmt|
-        g:vikitasks#archive_header ............. |g:vikitasks#archive_header|
-        g:vikitasks#date_fmt ................... |g:vikitasks#date_fmt|
-        g:vikitasks#archive_header_fmt ......... |g:vikitasks#archive_header_fmt|
-        g:vikitasks#final_categories ........... |g:vikitasks#final_categories|
-        g:vikitasks#use_calendar ............... |g:vikitasks#use_calendar|
-        g:vikitasks#paste ...................... |g:vikitasks#paste|
-        g:vikitasks#debug ...................... |g:vikitasks#debug|
-        g:vikitasks#convert_cygwin ............. |g:vikitasks#convert_cygwin|
-        vikitasks#TasksRx ...................... |vikitasks#TasksRx()|
-        vikitasks#Tasks ........................ |vikitasks#Tasks()|
-        vikitasks#SetSyntax .................... |vikitasks#SetSyntax()|
-        vikitasks#FormatQFLE ................... |vikitasks#FormatQFLE()|
-        vikitasks#ResetCachedInfo .............. |vikitasks#ResetCachedInfo()|
-        vikitasks#MustUseCanonicFilename ....... |vikitasks#MustUseCanonicFilename()|
-        vikitasks#EachSource ................... |vikitasks#EachSource()|
-        vikitasks#UnRegisterFilename ........... |vikitasks#UnRegisterFilename()|
-        vikitasks#RegisterFilename ............. |vikitasks#RegisterFilename()|
-        vikitasks#AddBuffer .................... |vikitasks#AddBuffer()|
-        vikitasks#RemoveBuffer ................. |vikitasks#RemoveBuffer()|
-        vikitasks#EditFiles .................... |vikitasks#EditFiles()|
-        vikitasks#GetBufferLines ............... |vikitasks#GetBufferLines()|
-        vikitasks#ItemMarkDone ................. |vikitasks#ItemMarkDone()|
-        vikitasks#ItemArchiveFinal ............. |vikitasks#ItemArchiveFinal()|
-        vikitasks#ListTaskFiles ................ |vikitasks#ListTaskFiles()|
-        vikitasks#ItemsMarkDueInDays ........... |vikitasks#ItemsMarkDueInDays()|
-        vikitasks#ItemsMarkDueInWeeks .......... |vikitasks#ItemsMarkDueInWeeks()|
-        vikitasks#ItemsMarkDueInMonths ......... |vikitasks#ItemsMarkDueInMonths()|
-        vikitasks#ItemChangeCategory ........... |vikitasks#ItemChangeCategory()|
-        vikitasks#AgentPaste ................... |vikitasks#AgentPaste()|
-        vikitasks#Glob2Rx ...................... |vikitasks#Glob2Rx()|
-        vikitasks#OnLeave ...................... |vikitasks#OnLeave()|
-        g:vikitasks_startup_alarms ............. |g:vikitasks_startup_alarms|
-        g:vikitasks_scan_events ................ |g:vikitasks_scan_events|
-        g:vikitasks_scan_patterns .............. |g:vikitasks_scan_patterns|
-        :VikiTasks ............................. |:VikiTasks|
-        :VikiTasksStatic ....................... |:VikiTasksStatic|
-        :VikiTasksPaste ........................ |:VikiTasksPaste|
-        :VikiTasksAlarms ....................... |:VikiTasksAlarms|
-        :VikiTasksAdd .......................... |:VikiTasksAdd|
-        :VikiTasksDone ......................... |:VikiTasksDone|
-        :VikiTasksArchive ...................... |:VikiTasksArchive|
-        :VikiEditTasksFiles .................... |:VikiEditTasksFiles|
-        :VikiTasksFiles ........................ |:VikiTasksFiles|
-        :VikiTasksDueInDays .................... |:VikiTasksDueInDays|
-        :VikiTasksDueInWeeks ................... |:VikiTasksDueInWeeks|
-        :VikiTasksDueInMonths .................. |:VikiTasksDueInMonths|
+        g:vikitasks_startup_alarms .......................... |g:vikitasks_startup_alarms|
+        g:vikitasks_scan_events ............................. |g:vikitasks_scan_events|
+        g:vikitasks_scan_patterns ........................... |g:vikitasks_scan_patterns|
+        :VikiTasks .......................................... |:VikiTasks|
+        :VikiTasksStatic .................................... |:VikiTasksStatic|
+        :VikiTasksPaste ..................................... |:VikiTasksPaste|
+        :VikiTasksAlarms .................................... |:VikiTasksAlarms|
+        :VikiTasksAdd ....................................... |:VikiTasksAdd|
+        :VikiTasksDone ...................................... |:VikiTasksDone|
+        :VikiTasksArchive ................................... |:VikiTasksArchive|
+        :VikiEditTasksFiles ................................. |:VikiEditTasksFiles|
+        :VikiTasksFiles ..................................... |:VikiTasksFiles|
+        :VikiTasksDueInDays ................................. |:VikiTasksDueInDays|
+        :VikiTasksDueInWeeks ................................ |:VikiTasksDueInWeeks|
+        :VikiTasksDueInMonths ............................... |:VikiTasksDueInMonths|
+        g:vikitasks#files ................................... |g:vikitasks#files|
+        g:vikitasks#files_ignored ........................... |g:vikitasks#files_ignored|
+        g:vikitasks#ignore_completed_tasks .................. |g:vikitasks#ignore_completed_tasks|
+        g:vikitasks#use_threshold ........................... |g:vikitasks#use_threshold|
+        g:vikitasks#threshold_days .......................... |g:vikitasks#threshold_days|
+        g:vikitasks#sources ................................. |g:vikitasks#sources|
+        g:vikitasks#filetype_map ............................ |g:vikitasks#filetype_map|
+        g:vikitasks#default_priority ........................ |g:vikitasks#default_priority|
+        g:vikitasks#qfl_viewer .............................. |g:vikitasks#qfl_viewer|
+        g:vikitasks#rx_categories ........................... |g:vikitasks#rx_categories|
+        g:vikitasks#rx_levels ............................... |g:vikitasks#rx_levels|
+        g:vikitasks#today ................................... |g:vikitasks#today|
+        g:vikitasks#cache ................................... |g:vikitasks#cache|
+        g:vikitasks#cache_check_mtime_rx .................... |g:vikitasks#cache_check_mtime_rx|
+        g:vikitasks#alarms .................................. |g:vikitasks#alarms|
+        g:vikitasks#use_end_date ............................ |g:vikitasks#use_end_date|
+        g:vikitasks#use_unspecified_dates ................... |g:vikitasks#use_unspecified_dates|
+        g:vikitasks#remove_unreadable_files ................. |g:vikitasks#remove_unreadable_files|
+        g:vikitasks#after_change_line_exec .................. |g:vikitasks#after_change_line_exec|
+        g:vikitasks#after_change_buffer_exec ................ |g:vikitasks#after_change_buffer_exec|
+        g:vikitasks#auto_save ............................... |g:vikitasks#auto_save|
+        g:vikitasks#inputlist_params ........................ |g:vikitasks#inputlist_params|
+        g:vikitasks#mapleader ............................... |g:vikitasks#mapleader|
+        g:vikitasks#done_add_date ........................... |g:vikitasks#done_add_date|
+        g:vikitasks#archive_filename_fmt .................... |g:vikitasks#archive_filename_fmt|
+        g:vikitasks#archive_header .......................... |g:vikitasks#archive_header|
+        g:vikitasks#date_fmt ................................ |g:vikitasks#date_fmt|
+        g:vikitasks#archive_header_fmt ...................... |g:vikitasks#archive_header_fmt|
+        g:vikitasks#final_categories ........................ |g:vikitasks#final_categories|
+        g:vikitasks#use_calendar ............................ |g:vikitasks#use_calendar|
+        g:vikitasks#paste ................................... |g:vikitasks#paste|
+        g:vikitasks#convert_cygwin .......................... |g:vikitasks#convert_cygwin|
+        vikitasks#Tasks ..................................... |vikitasks#Tasks()|
+        vikitasks#AddBuffer ................................. |vikitasks#AddBuffer()|
+        vikitasks#RemoveBuffer .............................. |vikitasks#RemoveBuffer()|
+        vikitasks#EditFiles ................................. |vikitasks#EditFiles()|
+        vikitasks#ItemMarkDone .............................. |vikitasks#ItemMarkDone()|
+        vikitasks#ItemArchiveFinal .......................... |vikitasks#ItemArchiveFinal()|
+        vikitasks#ListTaskFiles ............................. |vikitasks#ListTaskFiles()|
+        vikitasks#ItemsMarkDueInDays ........................ |vikitasks#ItemsMarkDueInDays()|
+        vikitasks#ItemsMarkDueInWeeks ....................... |vikitasks#ItemsMarkDueInWeeks()|
+        vikitasks#ItemsMarkDueInMonths ...................... |vikitasks#ItemsMarkDueInMonths()|
+        vikitasks#ItemChangeCategory ........................ |vikitasks#ItemChangeCategory()|
+        g:vikitasks#ft#taskpaper#files ...................... |g:vikitasks#ft#taskpaper#files|
+        g:vikitasks#ft#taskpaper#due_default ................ |g:vikitasks#ft#taskpaper#due_default|
+        g:vikitasks#ft#taskpaper#after_change_line_exec ..... |g:vikitasks#ft#taskpaper#after_change_line_exec|
+        g:vikitasks#ft#taskpaper#after_change_buffer_exec ... |g:vikitasks#ft#taskpaper#after_change_buffer_exec|
+        g:vikitasks#ft#todotxt#files ........................ |g:vikitasks#ft#todotxt#files|
+        g:vikitasks#ft#todotxt#use_threshold ................ |g:vikitasks#ft#todotxt#use_threshold|
+        g:vikitasks#ft#todotxt#respect_h1 ................... |g:vikitasks#ft#todotxt#respect_h1|
+        g:vikitasks#ft#todotxt#due_default .................. |g:vikitasks#ft#todotxt#due_default|
+        g:vikitasks#ft#todotxt#after_change_line_exec ....... |g:vikitasks#ft#todotxt#after_change_line_exec|
+        g:vikitasks#ft#todotxt#after_change_buffer_exec ..... |g:vikitasks#ft#todotxt#after_change_buffer_exec|
+        g:vikitasks#ft#todotxt#copy_rec_items ............... |g:vikitasks#ft#todotxt#copy_rec_items|
+        g:vikitasks#ft#viki#intervikis ...................... |g:vikitasks#ft#viki#intervikis|
+        g:vikitasks#ft#viki#intervikis_exclude .............. |g:vikitasks#ft#viki#intervikis_exclude|
+        g:vikitasks#ft#viki#intervikis_include .............. |g:vikitasks#ft#viki#intervikis_include|
+        g:vikitasks#ft#viki#after_change_line_exec .......... |g:vikitasks#ft#viki#after_change_line_exec|
+        g:vikitasks#ft#viki#after_change_buffer_exec ........ |g:vikitasks#ft#viki#after_change_buffer_exec|
+        g:vikitasks#ft#vikibase#intervikis .................. |g:vikitasks#ft#vikibase#intervikis|
+        g:vikitasks#ft#vikibase#intervikis_exclude .......... |g:vikitasks#ft#vikibase#intervikis_exclude|
+        g:vikitasks#ft#vikibase#intervikis_include .......... |g:vikitasks#ft#vikibase#intervikis_include|
+        g:vikitasks#ft#vikibase#after_change_line_exec ...... |g:vikitasks#ft#vikibase#after_change_line_exec|
+        g:vikitasks#ft#vikibase#after_change_buffer_exec .... |g:vikitasks#ft#vikibase#after_change_buffer_exec|
 
 
-========================================================================
-autoload/vikitasks.vim~
+------------------------------------------------------------------------
+                                                    *plugin/vikitasks.vim*
+                                                    *g:vikitasks_startup_alarms*
+g:vikitasks_startup_alarms     (default: 0)
+    An expression that determines whether to show alarms on pending tasks 
+    on startup.
+    If the expression evaluates to 0, don't display alarms for pending 
+    tasks.
+    If it evaluates to a value > 0, display alarms for pending tasks or 
+    tasks with a deadline in n days.
 
+    Possibly useful values (for your |vimrc|) are: >
+
+        let g:vikitasks_startup_alarms = "(!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0"
+        let g:vikitasks_startup_alarms = has('clientserver') && v:servername == 'GVIM'
+
+<   This will display alarms when running the first instance of gvim 
+    without arguments.
+
+                                                    *g:vikitasks_scan_events*
+g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
+    Scan a buffer on these events.
+
+                                                    *g:vikitasks_scan_patterns*
+g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
+    A list of filename patterns (see 'wildcards') for files that should 
+    automatically on events specified in |g:vikitasks_scan_events|.
+
+                                                    *:VikiTasks*
+:VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
+    CONSTRAINT constrains which tasks should be displayed. Possible values
+    are:
+
+      today            ... Show tasks that are due today
+      current          ... Show today's tasks and pending tasks
+      NUMBER (of days) ... Show tasks that are due within N days
+      Nd               ... Tasks for the next N days
+      Nw               ... Tasks for the next N weeks (i.e. 7 days)
+      Nm               ... Tasks for the next N months (i.e. 31 days)
+      week             ... Tasks for the next week (i.e. 7 days)
+      month            ... Tasks for the next month (i.e. 31 days)
+      .                ... Show some tasks (see |g:vikitasks#rx_categories| 
+                           and |g:vikitasks#rx_levels|)
+      *                ... Show all tasks
+
+    The default value for CONSTRAINT is ".".
+
+    Prepend + to N (e.g. "+2w") to hide tasks with a deadline in the past.
+
+    Prepend - to N (e.g. "-2w") to show only tasks with a deadline in 
+    the past (in this example in the last two weeks). This implies showing 
+    all tasks, as with "*".
+
+    If CONSTRAINT doesn't match one of the constraints described above, it 
+    is assumed to be a PATTERN -- see also |viki-tasks|.
+
+    The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
+    The PATTERN is made case sensitive if it contains an upper-case letter 
+    and if 'smartcase' is true. Only tasks matching the PATTERN will be 
+    listed. Use "." to match any task.
+
+    With the optional !, all files are rescanned. Otherwise cached 
+    information is used. Either scan all known files (|interviki|s and 
+    pages registered via |:VikiTasksAdd|) or files matching FILE_PATTERNS.
+
+    The current buffer has to be a viki buffer. If it isn't, your 
+    |g:vikiHomePage|, which must be set, is opened first.
+
+    Examples:
+      Show all cached tasks with a date: >
+            :VikiTasks
+<     Rescan files and show all tasks: >
+            :VikiTasks!
+<     Show all cached tasks for today: >
+            :VikiTasks today
+<     Show all current cached tasks (today or with a deadline in the 
+      past) in a specified list of files: >
+            :VikiTasks current Notes*.txt
+<
+
+                                                    *:VikiTasksStatic*
+:VikiTasksStatic
+    The same as |:VikiTasks| but the tasks list doesn't take the focus.
+
+                                                    *:VikiTasksPaste*
+:VikiTasksPaste[!] [ARGUMENTS...]
+    Paste the results of a VIKITASKSCOMMAND (default: |:VikiTasks|) in a 
+    buffer. When called with a |bang| [!], create a new buffer. See 
+    |:VikiTasks| for the allowed ARGUMENTS.
+
+                                                    *:VikiTasksAlarms*
+:[count]VikiTasksAlarms
+    Display a list of alarms. Shows alarms due within N days.
+    If N is -1, uses |g:vikitasks#alarms|, if any.
+
+                                                    *:VikiTasksAdd*
+:VikiTasksAdd
+    Add the current buffer to |g:vikitasks#files|.
+
+                                                    *:VikiTasksDone*
+:VikiTasksDone
+    Mark a task as done (see |vikitasks#ItemMarkDone()|).
+
+                                                    *:VikiTasksArchive*
+:VikiTasksArchive
+    Archive finalized tasks (see |g:vikitasks#final_categories|).
+
+                                                    *:VikiEditTasksFiles*
+:VikiEditTasksFiles
+    Edit |g:vikitasks#files|. This allows you to remove buffers from the 
+    list.
+
+                                                    *:VikiTasksFiles*
+:VikiTasksFiles
+    Edit a file monitored by vikitasks.
+
+                                                    *:VikiTasksDueInDays*
+:[count]VikiTasksDueInDays [DAYS=0]
+    Mark [count] task(s) as due in N days.
+
+                                                    *:VikiTasksDueInWeeks*
+:[count]VikiTasksDueInWeeks [WEEKS=1]
+    Mark [count] task(s) as due in N weeks.
+
+                                                    *:VikiTasksDueInMonths*
+:[count]VikiTasksDueInMonths [MONTHS=1]
+    Mark [count] task(s) as due in N months.
+
+
+------------------------------------------------------------------------
+                                                    *autoload/vikitasks.vim*
                                                     *g:vikitasks#files*
 g:vikitasks#files              (default: [])
     A list of glob patterns (or files) that will be searched for task 
@@ -336,15 +477,9 @@ g:vikitasks#paste              (default: {})
     A dictionary with the fields (default values are marked with "*"):
       filename: add*|group|none
 
-                                                    *g:vikitasks#debug*
-g:vikitasks#debug              (default: 0)
-
                                                     *g:vikitasks#convert_cygwin*
 g:vikitasks#convert_cygwin     (default: has('win32unix') && executable('cygpath'))
     If non-null, convert cygwin filenames to windows format.
-
-                                                    *vikitasks#TasksRx()*
-vikitasks#TasksRx(which_tasks, ...)
 
                                                     *vikitasks#Tasks()*
 vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'rx': ''}, ?suspend=0)
@@ -355,27 +490,6 @@ vikitasks#Tasks(?{'all_tasks': 0, 'cached': 1, 'files': [], 'constraint': '', 'r
       -1 ... Don't display a list
        0 ... List takes the focus
        1 ... Current buffer takes the focus
-
-                                                    *vikitasks#SetSyntax()*
-vikitasks#SetSyntax()
-
-                                                    *vikitasks#FormatQFLE()*
-vikitasks#FormatQFLE(qfe)
-
-                                                    *vikitasks#ResetCachedInfo()*
-vikitasks#ResetCachedInfo()
-
-                                                    *vikitasks#MustUseCanonicFilename()*
-vikitasks#MustUseCanonicFilename()
-
-                                                    *vikitasks#EachSource()*
-vikitasks#EachSource(fallback, fn, args, params)
-
-                                                    *vikitasks#UnRegisterFilename()*
-vikitasks#UnRegisterFilename(filename)
-
-                                                    *vikitasks#RegisterFilename()*
-vikitasks#RegisterFilename(dirpattern, filetype, archive, ...)
 
                                                     *vikitasks#AddBuffer()*
 vikitasks#AddBuffer(buffer, ...)
@@ -388,9 +502,6 @@ vikitasks#RemoveBuffer(buffer, ...)
                                                     *vikitasks#EditFiles()*
 vikitasks#EditFiles()
     Edit the list of files.
-
-                                                    *vikitasks#GetBufferLines()*
-vikitasks#Alarm(?ddays = -1, ?use_cached = 1)
 
                                                     *vikitasks#ItemMarkDone()*
 vikitasks#ItemMarkDone(count, ...)
@@ -422,144 +533,138 @@ vikitasks#ItemsMarkDueInMonths(count, months, ...)
 vikitasks#ItemChangeCategory(count, ...)
     Change the category for the current and the next a:count tasks.
 
-                                                    *vikitasks#AgentPaste()*
-vikitasks#AgentPaste(world, selected)
 
-                                                    *vikitasks#Glob2Rx()*
-vikitasks#Glob2Rx(pattern)
+------------------------------------------------------------------------
+                                                    *autoload/vikitasks/ft/taskpaper.vim*
+                                                    *g:vikitasks#ft#taskpaper#files*
+g:vikitasks#ft#taskpaper#files (default: {})
+    If you use taskpaper, set this variable to a dictionary of glob 
+    patterns that identifies taskpaper files that map onto the 
+    corresponding archive files.
 
-                                                    *vikitasks#OnLeave()*
-vikitasks#OnLeave(w)
+    Caveat: Make sure |g:vikitasks#sources.taskpaper| is true.
+
+                                                    *g:vikitasks#ft#taskpaper#due_default*
+g:vikitasks#ft#taskpaper#due_default (default: ''   "
+    Assume this default (in terms of vikitasks) for tasks with no due 
+    date.
+    Useful values:
+      '_' ... Unspecified date -> include in alarms list
+      ''  ... No date -> exclude from alarms list
+
+                                                    *g:vikitasks#ft#taskpaper#after_change_line_exec*
+g:vikitasks#ft#taskpaper#after_change_line_exec (default: g:vikitasks#after_change_line_exec)
+    |:execute| a command (as string) after changing a line.
+    See also |g:vikitasks#after_change_line_exec|.
+
+                                                    *g:vikitasks#ft#taskpaper#after_change_buffer_exec*
+g:vikitasks#ft#taskpaper#after_change_buffer_exec (default: g:vikitasks#after_change_buffer_exec)
+    |:execute| a command (as string) after changing a buffer.
+    See also |g:vikitasks#after_change_line_exec|.
 
 
-========================================================================
-plugin/vikitasks.vim~
+------------------------------------------------------------------------
+                                                    *autoload/vikitasks/ft/todotxt.vim*
+                                                    *g:vikitasks#ft#todotxt#files*
+g:vikitasks#ft#todotxt#files   (default: {})
+    If you use todo.txt (http://todotxt.com), set this variable to a 
+    dictionary of glob patterns that identifies todotxt files that map 
+    onto the corresponding archive files.
 
-                                                    *g:vikitasks_startup_alarms*
-g:vikitasks_startup_alarms     (default: 0)
-    An expression that determines whether to show alarms on pending tasks 
-    on startup.
-    If the expression evaluates to 0, don't display alarms for pending 
-    tasks.
-    If it evaluates to a value > 0, display alarms for pending tasks or 
-    tasks with a deadline in n days.
+    Caveat: Make sure |g:vikitasks#sources.todotxt| is true.
 
-    Possibly useful values (for your |vimrc|) are: >
+                                                    *g:vikitasks#ft#todotxt#use_threshold*
+g:vikitasks#ft#todotxt#use_threshold (default: 1   "
+    If true, use t:DATE to hide entries until DATE.
 
-        let g:vikitasks_startup_alarms = "(!has('clientserver') || len(split(serverlist(), '\n')) <= 1) && argc() == 0"
-        let g:vikitasks_startup_alarms = has('clientserver') && v:servername == 'GVIM'
+                                                    *g:vikitasks#ft#todotxt#respect_h1*
+g:vikitasks#ft#todotxt#respect_h1 (default: 1)
+    If true, hide lines containing a h:1 tag, which is used e.g. by the 
+    Simpletask Android app.
 
-<   This will display alarms when running the first instance of gvim 
-    without arguments.
+                                                    *g:vikitasks#ft#todotxt#due_default*
+g:vikitasks#ft#todotxt#due_default (default: ''   "
+    Assume this default (in terms of vikitasks) for tasks with no due 
+    date.
+    Useful values:
+      '_' ... Unspecified date -> include in alarms list
+      ''  ... No date -> exclude from alarms list
 
-                                                    *g:vikitasks_scan_events*
-g:vikitasks_scan_events        (default: 'BufWritePost,BufWinEnter')
-    Scan a buffer on these events.
+                                                    *g:vikitasks#ft#todotxt#after_change_line_exec*
+g:vikitasks#ft#todotxt#after_change_line_exec (default: g:vikitasks#after_change_line_exec)
+    |:execute| a command (as string) after changing a line.
+    See also |g:vikitasks#after_change_line_exec|.
 
-                                                    *g:vikitasks_scan_patterns*
-g:vikitasks_scan_patterns      (default: ['*.txt', '*.viki'])
-    A list of filename patterns (see 'wildcards') for files that should 
-    automatically on events specified in |g:vikitasks_scan_events|.
+                                                    *g:vikitasks#ft#todotxt#after_change_buffer_exec*
+g:vikitasks#ft#todotxt#after_change_buffer_exec (default: g:vikitasks#after_change_buffer_exec)
+    |:execute| a command (as string) after changing a buffer.
+    See also |g:vikitasks#after_change_line_exec|.
 
-                                                    *:VikiTasks*
-:VikiTasks[!] [CONSTRAINT] [PATTERN] [FILE_PATTERNS]
-    CONSTRAINT constrains which tasks should be displayed. Possible values
-    are:
+                                                    *g:vikitasks#ft#todotxt#copy_rec_items*
+g:vikitasks#ft#todotxt#copy_rec_items (default: 1)
+    If true, copy items with rec:DATE tags.
 
-      today            ... Show tasks that are due today
-      current          ... Show today's tasks and pending tasks
-      NUMBER (of days) ... Show tasks that are due within N days
-      Nd               ... Tasks for the next N days
-      Nw               ... Tasks for the next N weeks (i.e. 7 days)
-      Nm               ... Tasks for the next N months (i.e. 31 days)
-      week             ... Tasks for the next week (i.e. 7 days)
-      month            ... Tasks for the next month (i.e. 31 days)
-      .                ... Show some tasks (see |g:vikitasks#rx_categories| 
-                           and |g:vikitasks#rx_levels|)
-      *                ... Show all tasks
 
-    The default value for CONSTRAINT is ".".
+------------------------------------------------------------------------
+                                                    *autoload/vikitasks/ft/viki.vim*
+                                                    *g:vikitasks#ft#viki#intervikis*
+g:vikitasks#ft#viki#intervikis (default: 2)
+    If non-null, automatically add the homepages of your intervikis to 
+    |g:vikitasks#files|.
+    If the value is 2, scan all files (taking into account the interviki 
+    suffix) in the interviki's top directory.
+    Can be buffer-local.
 
-    Prepend + to N (e.g. "+2w") to hide tasks with a deadline in the past.
+                                                    *g:vikitasks#ft#viki#intervikis_exclude*
+g:vikitasks#ft#viki#intervikis_exclude (default: [])
+    A list of ignored intervikis.
+    Can be buffer-local.
 
-    Prepend - to N (e.g. "-2w") to show only tasks with a deadline in 
-    the past (in this example in the last two weeks). This implies showing 
-    all tasks, as with "*".
-
-    If CONSTRAINT doesn't match one of the constraints described above, it 
-    is assumed to be a PATTERN -- see also |viki-tasks|.
-
-    The |regexp| PATTERN is prepended with |\<| if it seems to be a word. 
-    The PATTERN is made case sensitive if it contains an upper-case letter 
-    and if 'smartcase' is true. Only tasks matching the PATTERN will be 
-    listed. Use "." to match any task.
-
-    With the optional !, all files are rescanned. Otherwise cached 
-    information is used. Either scan all known files (|interviki|s and 
-    pages registered via |:VikiTasksAdd|) or files matching FILE_PATTERNS.
-
-    The current buffer has to be a viki buffer. If it isn't, your 
-    |g:vikiHomePage|, which must be set, is opened first.
-
-    Examples:
-      Show all cached tasks with a date: >
-            :VikiTasks
-<     Rescan files and show all tasks: >
-            :VikiTasks!
-<     Show all cached tasks for today: >
-            :VikiTasks today
-<     Show all current cached tasks (today or with a deadline in the 
-      past) in a specified list of files: >
-            :VikiTasks current Notes*.txt
-<
-
-                                                    *:VikiTasksStatic*
-:VikiTasksStatic
-    The same as |:VikiTasks| but the tasks list doesn't take the focus.
-
-                                                    *:VikiTasksPaste*
-:VikiTasksPaste[!] [ARGUMENTS...]
-    Paste the results of a VIKITASKSCOMMAND (default: |:VikiTasks|) in a 
-    buffer. When called with a |bang| [!], create a new buffer. See 
-    |:VikiTasks| for the allowed ARGUMENTS.
-
-                                                    *:VikiTasksAlarms*
-:[count]VikiTasksAlarms
-    Display a list of alarms. Shows alarms due within N days.
-    If N is -1, uses |g:vikitasks#alarms|, if any.
-
-                                                    *:VikiTasksAdd*
-:VikiTasksAdd
-    Add the current buffer to |g:vikitasks#files|.
-
-                                                    *:VikiTasksDone*
-:VikiTasksDone
-    Mark a task as done (see |vikitasks#ItemMarkDone()|).
-
-                                                    *:VikiTasksArchive*
-:VikiTasksArchive
-    Archive finalized tasks (see |g:vikitasks#final_categories|).
-
-                                                    *:VikiEditTasksFiles*
-:VikiEditTasksFiles
-    Edit |g:vikitasks#files|. This allows you to remove buffers from the 
+                                                    *g:vikitasks#ft#viki#intervikis_include*
+g:vikitasks#ft#viki#intervikis_include (default: [])
+    If non-empty, scan an interviki only if the name is included in this 
     list.
 
-                                                    *:VikiTasksFiles*
-:VikiTasksFiles
-    Edit a file monitored by vikitasks.
+                                                    *g:vikitasks#ft#viki#after_change_line_exec*
+g:vikitasks#ft#viki#after_change_line_exec (default: g:vikitasks#after_change_line_exec)
+    |:execute| a command (as string) after changing a line.
+    See also |g:vikitasks#after_change_line_exec|.
 
-                                                    *:VikiTasksDueInDays*
-:[count]VikiTasksDueInDays [DAYS=0]
-    Mark [count] task(s) as due in N days.
+                                                    *g:vikitasks#ft#viki#after_change_buffer_exec*
+g:vikitasks#ft#viki#after_change_buffer_exec (default: g:vikitasks#after_change_buffer_exec)
+    |:execute| a command (as string) after changing a buffer.
+    See also |g:vikitasks#after_change_line_exec|.
 
-                                                    *:VikiTasksDueInWeeks*
-:[count]VikiTasksDueInWeeks [WEEKS=1]
-    Mark [count] task(s) as due in N weeks.
 
-                                                    *:VikiTasksDueInMonths*
-:[count]VikiTasksDueInMonths [MONTHS=1]
-    Mark [count] task(s) as due in N months.
+------------------------------------------------------------------------
+                                                    *autoload/vikitasks/ft/vikibase.vim*
+                                                    *g:vikitasks#ft#vikibase#intervikis*
+g:vikitasks#ft#vikibase#intervikis (default: 2)
+    If non-null, automatically add the homepages of your intervikis to 
+    |g:vikitasks#files|.
+    If the value is 2, scan all files (taking into account the interviki 
+    suffix) in the interviki's top directory.
+    Can be buffer-local.
+
+                                                    *g:vikitasks#ft#vikibase#intervikis_exclude*
+g:vikitasks#ft#vikibase#intervikis_exclude (default: [])
+    A list of ignored intervikis.
+    Can be buffer-local.
+
+                                                    *g:vikitasks#ft#vikibase#intervikis_include*
+g:vikitasks#ft#vikibase#intervikis_include (default: [])
+    If non-empty, scan an interviki only if the name is included in this 
+    list.
+
+                                                    *g:vikitasks#ft#vikibase#after_change_line_exec*
+g:vikitasks#ft#vikibase#after_change_line_exec (default: g:vikitasks#after_change_line_exec)
+    |:execute| a command (as string) after changing a line.
+    See also |g:vikitasks#after_change_line_exec|.
+
+                                                    *g:vikitasks#ft#vikibase#after_change_buffer_exec*
+g:vikitasks#ft#vikibase#after_change_buffer_exec (default: g:vikitasks#after_change_buffer_exec)
+    |:execute| a command (as string) after changing a buffer.
+    See also |g:vikitasks#after_change_line_exec|.
 
 
 
