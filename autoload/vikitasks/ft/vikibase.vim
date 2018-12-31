@@ -1,6 +1,6 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Revision:    149
+" @Revision:    150
 
 " If non-null, automatically add the homepages of your intervikis to 
 " |g:vikitasks#files|.
@@ -76,6 +76,7 @@ endif
 
 function! s:prototype.GetFiles(registrar) dict "{{{3
     for file in tlib#var#Get('vikitasks#files', 'bg', [])
+        Tlibtrace 'vikitasks', file
         call call(a:registrar, [file, 'vikibase', ''])
     endfor
     let scan_interviki = tlib#var#Get('vikitasks#ft#vikibase#intervikis', 'bg', 0)
